@@ -23,6 +23,24 @@
     .card, details { border:1px solid var(--border); background:var(--bg2); border-radius:8px; padding:18px; }
     .card[data-reveal] { opacity:.15; transform:translateY(10px); transition:.35s ease; }
     .card.visible { opacity:1; transform:none; }
+    .section-lede { max-width:760px; margin-top:-8px; }
+    .example-shell { display:grid; grid-template-columns:minmax(230px,320px) 1fr; gap:16px; align-items:stretch; }
+    .example-list { border:1px solid var(--border); background:var(--bg2); border-radius:8px; padding:10px; }
+    .example-button { width:100%; display:grid; grid-template-columns:30px 1fr; gap:10px; align-items:start; text-align:left; border:1px solid transparent; background:transparent; color:var(--text); border-radius:6px; padding:12px; cursor:pointer; }
+    .example-button:hover, .example-button:focus-visible, .example-button.active { border-color:var(--cyan); background:#0d1628; outline:none; }
+    .example-index { display:grid; place-items:center; width:26px; height:26px; border-radius:999px; background:#07111f; color:var(--cyan); font-size:12px; }
+    .example-button.active .example-index { background:var(--cyan); color:#04101a; }
+    .example-button strong { display:block; margin-bottom:3px; }
+    .example-button span:last-child { color:var(--muted); font-size:13px; line-height:1.4; }
+    .example-preview { border:1px solid var(--border); background:linear-gradient(180deg,#111827,#0b1220); border-radius:8px; padding:18px; min-height:360px; position:relative; overflow:hidden; }
+    .example-preview::before { content:""; position:absolute; inset:0 0 auto; height:3px; background:var(--cyan); }
+    .example-panel { display:none; animation:exampleIn .25s ease both; }
+    .example-panel.active-example { display:block; }
+    .example-kicker { color:var(--cyan); font-size:13px; margin:4px 0 8px; }
+    .example-command { margin:16px 0; }
+    .example-output { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:16px; }
+    .example-output div { border:1px solid var(--border); border-radius:8px; padding:12px; background:#070b14; }
+    .example-output span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
     .muted { color:var(--muted); }
     .badge { display:inline-block; border:1px solid var(--border); border-radius:999px; padding:5px 10px; color:var(--cyan); font-size:13px; }
     input, select { width:100%; padding:11px 12px; border-radius:6px; border:1px solid var(--border); background:#070b14; color:var(--text); margin-bottom:14px; }
@@ -30,6 +48,11 @@
     code, pre { background:#070b14; border:1px solid var(--border); border-radius:8px; color:var(--text); }
     pre { padding:16px; overflow:auto; }
     footer { border-top:1px solid var(--border); padding:28px 20px; text-align:center; color:var(--muted); }
+    @keyframes exampleIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @media (max-width:760px) {
+      .example-shell { grid-template-columns:1fr; }
+      main { padding-left:16px; padding-right:16px; }
+    }
   </style>
 </head>
 <body>
@@ -63,12 +86,47 @@ python3 scripts/build_adapters.py
     </section>
     <section id="examples">
       <h2>Examples</h2>
-      <div class="grid">
-        <div class="card" data-reveal><h3>Preview Context</h3><pre><code>./install.sh --provider claude --project --context-only --dry-run</code></pre></div>
-        <div class="card" data-reveal><h3>Install Claude Context</h3><pre><code>./install.sh --provider claude --project --context-only --force</code></pre></div>
-        <div class="card" data-reveal><h3>Run Triage</h3><pre><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre></div>
-        <div class="card" data-reveal><h3>Export LangGraph</h3><pre><code>./install.sh --runtime langgraph --project --force</code></pre></div>
-        <div class="card" data-reveal><h3>Verify Consumer Install</h3><pre><code>python3 scripts/check_consumer_install.py</code></pre></div>
+      <p class="section-lede">Switch between common rollout paths and see the exact command, artifact target, and validation signal for each one.</p>
+      <div class="example-shell" data-reveal>
+        <div class="example-list" role="tablist" aria-label="Example workflows">
+          <button class="example-button active" data-example="0" role="tab" aria-selected="true" aria-controls="example-panel-0" tabindex="0"><span class="example-index">1</span><span><strong>Preview Context</strong>Inspect root context writes first.</span></button>
+          <button class="example-button" data-example="1" role="tab" aria-selected="false" aria-controls="example-panel-1" tabindex="-1"><span class="example-index">2</span><span><strong>Install Claude</strong>Write provider context safely.</span></button>
+          <button class="example-button" data-example="2" role="tab" aria-selected="false" aria-controls="example-panel-2" tabindex="-1"><span class="example-index">3</span><span><strong>Run Triage</strong>Route a defect through workflow assets.</span></button>
+          <button class="example-button" data-example="3" role="tab" aria-selected="false" aria-controls="example-panel-3" tabindex="-1"><span class="example-index">4</span><span><strong>Export Runtime</strong>Generate LangGraph artifacts.</span></button>
+          <button class="example-button" data-example="4" role="tab" aria-selected="false" aria-controls="example-panel-4" tabindex="-1"><span class="example-index">5</span><span><strong>Verify Consumer</strong>Smoke-test install behavior.</span></button>
+        </div>
+        <div class="example-preview">
+          <article class="example-panel active-example" id="example-panel-0" data-example-panel="0" role="tabpanel">
+            <p class="example-kicker">Project context preview</p>
+            <h3>See root context targets without writing files.</h3>
+            <pre class="example-command"><code>./install.sh --provider claude --project --context-only --dry-run</code></pre>
+            <div class="example-output"><div><span>Writes</span><strong>None</strong></div><div><span>Shows</span><strong>CLAUDE.md root target</strong></div><div><span>Use before</span><strong>Overwriting repo context</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-1" data-example-panel="1" role="tabpanel" hidden>
+            <p class="example-kicker">Provider context install</p>
+            <h3>Install Claude context at the consumer repository root.</h3>
+            <pre class="example-command"><code>./install.sh --provider claude --project --context-only --force</code></pre>
+            <div class="example-output"><div><span>Root file</span><strong>CLAUDE.md</strong></div><div><span>Metadata</span><strong>.ai-assets-version</strong></div><div><span>Provider assets</span><strong>Skipped by filter</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-2" data-example-panel="2" role="tabpanel" hidden>
+            <p class="example-kicker">Workflow command</p>
+            <h3>Start triage from a real ticket and symptom.</h3>
+            <pre class="example-command"><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre>
+            <div class="example-output"><div><span>Workflow</span><strong>Nine-phase triage</strong></div><div><span>Gates</span><strong>RCA and release impact</strong></div><div><span>Output</span><strong>Evidence-backed action</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-3" data-example-panel="3" role="tabpanel" hidden>
+            <p class="example-kicker">Runtime export</p>
+            <h3>Install LangGraph graph and manifest exports.</h3>
+            <pre class="example-command"><code>./install.sh --runtime langgraph --project --force</code></pre>
+            <div class="example-output"><div><span>Target</span><strong>.langgraph/</strong></div><div><span>Graph</span><strong>triage-nine-phase.json</strong></div><div><span>Context</span><strong>Pre-dispatch manifest</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-4" data-example-panel="4" role="tabpanel" hidden>
+            <p class="example-kicker">Consumer verification</p>
+            <h3>Prove installs work in a clean temporary repository.</h3>
+            <pre class="example-command"><code>python3 scripts/check_consumer_install.py</code></pre>
+            <div class="example-output"><div><span>Checks</span><strong>Dry-run and force</strong></div><div><span>Providers</span><strong>Claude context</strong></div><div><span>Runtime</span><strong>LangGraph export</strong></div></div>
+          </article>
+        </div>
       </div>
     </section>
     <section id="providers">
@@ -123,6 +181,35 @@ python3 scripts/build_adapters.py
       }), {threshold:.12});
       document.querySelectorAll("[data-reveal]").forEach((item) => observer.observe(item));
     }
+    const exampleButtons = Array.from(document.querySelectorAll("[data-example]"));
+    const examplePanels = Array.from(document.querySelectorAll("[data-example-panel]"));
+    function activateExample(index) {
+      exampleButtons.forEach((button) => {
+        const active = Number(button.dataset.example) === index;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+        button.tabIndex = active ? 0 : -1;
+      });
+      examplePanels.forEach((panel) => {
+        const active = Number(panel.dataset.examplePanel) === index;
+        panel.hidden = !active;
+        panel.classList.toggle("active-example", active);
+      });
+    }
+    exampleButtons.forEach((button, index) => {
+      button.addEventListener("click", () => activateExample(index));
+      button.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let next = index;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % exampleButtons.length;
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + exampleButtons.length) % exampleButtons.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = exampleButtons.length - 1;
+        exampleButtons[next].focus();
+        activateExample(next);
+      });
+    });
     fetch("assets/manifest.json").then((response) => response.json()).then(render).catch(() => render(fallback));
     document.getElementById("search").addEventListener("input", (event) => {
       const q = event.target.value.toLowerCase();
