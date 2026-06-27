@@ -872,6 +872,98 @@ if __name__ == "__main__":
     main()
 ''', True)
 
+    write("scripts/check_docs_links.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import html.parser
+import sys
+from pathlib import Path
+from urllib.parse import unquote, urlparse
+
+ROOT = Path(__file__).resolve().parents[1]
+DOCS = ROOT / "docs"
+
+
+class LinkParser(html.parser.HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name in {"href", "src"} and value:
+                self.links.append(value)
+
+
+def is_external(link: str) -> bool:
+    parsed = urlparse(link)
+    return parsed.scheme in {"http", "https", "mailto", "tel"} or link.startswith("#")
+
+
+def target_exists(source: Path, link: str) -> bool:
+    parsed = urlparse(link)
+    if parsed.scheme or link.startswith("#"):
+        return True
+    raw_path = unquote(parsed.path)
+    if not raw_path:
+        return True
+    target = (source.parent / raw_path).resolve()
+    try:
+        target.relative_to(DOCS.resolve())
+    except ValueError:
+        return False
+    return target.exists()
+
+
+def html_links(path: Path) -> list[str]:
+    parser = LinkParser()
+    parser.feed(path.read_text(encoding="utf-8"))
+    return parser.links
+
+
+def markdown_links(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8")
+    links: list[str] = []
+    start = 0
+    while True:
+        marker = text.find("](", start)
+        if marker == -1:
+            break
+        end = text.find(")", marker + 2)
+        if end == -1:
+            break
+        links.append(text[marker + 2 : end])
+        start = end + 1
+    return links
+
+
+def main() -> int:
+    failures: list[str] = []
+    for path in sorted(DOCS.rglob("*")):
+        if path.suffix == ".html":
+            links = html_links(path)
+        elif path.suffix == ".md":
+            links = markdown_links(path)
+        else:
+            continue
+        for link in links:
+            if is_external(link):
+                continue
+            if not target_exists(path, link):
+                failures.append(f"{path.relative_to(ROOT)} -> {link}")
+    if failures:
+        print("Broken local docs links:")
+        for failure in failures:
+            print(failure)
+        return 1
+    print("Docs link check passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
     write("scripts/prepare_release.py", r'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -960,9 +1052,23 @@ PROVIDER=""
 PROJECT=0
 FORCE=0
 SKIP_BUILD=0
+INCLUDE_AGENTS=1
+INCLUDE_SKILLS=1
+INCLUDE_COMMANDS=1
+INCLUDE_WORKFLOWS=1
+INCLUDE_GUIDES=1
 
 usage() {
-  echo "Usage: ./install.sh --provider claude|codex|gemini|open-source|all [--project] [--force] [--skip-build]"
+  echo "Usage: ./install.sh --provider claude|codex|gemini|open-source|all [--project] [--force] [--skip-build] [filters]"
+  echo "Filters: --agents-only --skills-only --commands-only --workflows-only --no-agents --no-skills --no-commands --no-workflows --no-guides"
+}
+
+only_one() {
+  INCLUDE_AGENTS=0
+  INCLUDE_SKILLS=0
+  INCLUDE_COMMANDS=0
+  INCLUDE_WORKFLOWS=0
+  INCLUDE_GUIDES=0
 }
 
 while [ "$#" -gt 0 ]; do
@@ -971,7 +1077,26 @@ while [ "$#" -gt 0 ]; do
     --project) PROJECT=1; shift ;;
     --force) FORCE=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
-    --selective|--agents-only|--skills-only|--commands-only|--workflows-only|--no-agents|--no-skills|--no-commands|--no-workflows|--no-guides) shift ;;
+    --agents-only) only_one; INCLUDE_AGENTS=1; shift ;;
+    --skills-only) only_one; INCLUDE_SKILLS=1; shift ;;
+    --commands-only) only_one; INCLUDE_COMMANDS=1; shift ;;
+    --workflows-only) only_one; INCLUDE_WORKFLOWS=1; shift ;;
+    --no-agents) INCLUDE_AGENTS=0; shift ;;
+    --no-skills) INCLUDE_SKILLS=0; shift ;;
+    --no-commands) INCLUDE_COMMANDS=0; shift ;;
+    --no-workflows) INCLUDE_WORKFLOWS=0; shift ;;
+    --no-guides) INCLUDE_GUIDES=0; shift ;;
+    --selective)
+      if [ ! -t 0 ]; then
+        echo "--selective requires an interactive terminal"
+        exit 1
+      fi
+      printf "Install agents? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_AGENTS=0 ;; esac
+      printf "Install skills? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_SKILLS=0 ;; esac
+      printf "Install commands? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_COMMANDS=0 ;; esac
+      printf "Install workflows? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_WORKFLOWS=0 ;; esac
+      printf "Install guides/reference docs? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_GUIDES=0 ;; esac
+      shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1"; usage; exit 1 ;;
   esac
@@ -985,6 +1110,26 @@ fi
 if [ "$SKIP_BUILD" -eq 0 ]; then
   python3 scripts/build_adapters.py
 fi
+
+should_install() {
+  rel="$1"
+  case "$rel" in
+    agents/*|prompts/agents/*|manifests/agents/*)
+      [ "$INCLUDE_AGENTS" -eq 1 ] ;;
+    skills/*)
+      [ "$INCLUDE_SKILLS" -eq 1 ] ;;
+    commands/*|manifests/commands/*)
+      [ "$INCLUDE_COMMANDS" -eq 1 ] ;;
+    workflows/*)
+      [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
+    guides/*|reference/*|docs/*)
+      [ "$INCLUDE_GUIDES" -eq 1 ] ;;
+    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md)
+      [ "$INCLUDE_GUIDES" -eq 1 ] ;;
+    *)
+      return 0 ;;
+  esac
+}
 
 install_one() {
   provider="$1"
@@ -1009,7 +1154,13 @@ install_one() {
     esac
   fi
   if [ "$src" = "$target" ]; then
-    count="$(find "$src" -type f | wc -l | tr -d ' ')"
+    count=0
+    while IFS= read -r file; do
+      rel="${file#$src/}"
+      if should_install "$rel"; then
+        ((++count))
+      fi
+    done < <(find "$src" -type f | sort)
     version="$(cat VERSION)"
     printf "%s\n" "$version" > "$target/.ai-assets-version"
     echo "Prepared $count files for $provider in $target"
@@ -1019,6 +1170,9 @@ install_one() {
   count=0
   while IFS= read -r file; do
     rel="${file#$src/}"
+    if ! should_install "$rel"; then
+      continue
+    fi
     mkdir -p "$target/$(dirname "$rel")"
     if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
       echo "Skip existing $target/$rel"
@@ -1667,6 +1821,8 @@ jobs:
         run: python3 scripts/build_portal_manifest.py
       - name: Sync public reference docs
         run: python3 scripts/sync_docs_reference.py
+      - name: Check docs links
+        run: python3 scripts/check_docs_links.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
