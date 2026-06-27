@@ -501,7 +501,50 @@ def create_assets() -> None:
         name = path.split("/")[-1]
         write(f"assets/agents/{path}.md", agent_body(name, description, category, STACKS))
 
-    skill("triage-workflow", "Universal Triage Workflow", "Follow context gathering, classification, RCA, approval gate, failing test, minimal fix, validation, second approval gate, commit, and release summary.")
+    skill("triage-workflow", "Universal Triage Workflow", """Use this skill whenever an agent handles a bug, incident, failing validation, or governance finding that may require diagnosis or a fix.
+
+Follow the canonical nine-phase workflow in `assets/workflows/triage-nine-phase.md`.
+
+## Phase Checklist
+
+1. Intake
+2. Context Load
+3. Classification
+4. Evidence Collection
+5. Root Cause Analysis
+6. Gate 1: RCA and Fix Plan Approval
+7. Test-First Fix
+8. Validation
+9. Gate 2: Summary and Release Impact
+
+## Gate Rules
+
+Gate 1 is mandatory before edits. Present the RCA, evidence, fix plan, expected files, test plan, and risks. Wait for explicit approval.
+
+Gate 2 is mandatory before commit, push, PR creation, tag, or publish. Present what changed, validation results, provider impact, release impact, compatibility notes, and recommended commit or PR text.
+
+## Read-Only Triage
+
+If the user asks for diagnosis only, complete phases 1 through 6 and stop. Do not edit files, create tests, or run fix phases unless the user approves implementation.
+
+## Fix-Capable Triage
+
+If the user approves a fix, create or update a failing test or equivalent validation before implementing. Keep the fix minimal and run checks appropriate to the stack and asset type.
+
+## Provider-Neutral Rule
+
+Change canonical assets first. Rebuild provider outputs after canonical asset changes. Do not hand-edit generated `dist/` files unless debugging the adapter builder itself.
+
+## Required Output
+
+Every triage response should report:
+
+- Current phase
+- Classification
+- Evidence gathered
+- Approval gate status
+- Validation status
+- Remaining risk""")
     for stack in STACKS:
         skill(f"{stack}-patterns", f"{stack.title()} Patterns", f"Use these commands and gotchas when working on {stack} repositories for {TEAM}. Include build, test, coverage, commit, and PR conventions.")
     skill("exception-handling-audit", "Exception Handling Audit", "Audit exception handling for consistency, observability, user impact, and recovery behavior.")
@@ -532,7 +575,53 @@ def create_assets() -> None:
 
     workflow("issue-to-release", "Issue to Release Workflow", "GitHub Issue -> triage labels -> accepted scope -> PR -> validation -> changelog -> release.")
     workflow("adapter-build", "Provider Adapter Build Workflow", "Build Claude, Codex, Gemini, and open-source outputs from canonical assets.")
-    workflow("triage-nine-phase", "Nine Phase Triage Workflow", "Context, extension loading, classification, matched skills, RCA, approval, failing test, fix, validation, release summary.")
+    workflow("triage-nine-phase", "Nine Phase Triage Workflow", """Use this workflow for bug reports, incidents that may require code changes, and governance findings such as `/devhub-fix`.
+
+The workflow has exactly nine phases. Keep the phase count stable so teams can teach, audit, and compare triage runs consistently. Add detail as substeps inside phases instead of adding new top-level phases.
+
+## Phase 1 - Intake
+
+Capture the request, ticket or incident id, affected environment, symptom, expected behavior, actual behavior, user impact, and any error text.
+
+## Phase 2 - Context Load
+
+Read the repo context and provider context before inspecting code. Prefer provider-neutral context first, then provider-specific context when relevant.
+
+## Phase 3 - Classification
+
+Classify the issue as code, configuration, data, schema, infrastructure, dependency, framework or runtime, documentation or asset metadata, or unknown.
+
+## Phase 4 - Evidence Collection
+
+Gather enough evidence to support or reject a root cause. Do not implement a fix in this phase.
+
+## Phase 5 - Root Cause Analysis
+
+State the root cause as a testable claim. Separate confirmed evidence from assumptions.
+
+## Phase 6 - Gate 1: RCA and Fix Plan Approval
+
+Stop and wait for explicit human approval before changing implementation files, provider assets, generated outputs, or release metadata.
+
+## Phase 7 - Test-First Fix
+
+After approval, create or update a failing test, assertion, fixture, or validation case that demonstrates the bug. Then implement the smallest correct fix.
+
+## Phase 8 - Validation
+
+Run the relevant checks for the stack and asset type.
+
+## Phase 9 - Gate 2: Summary and Release Impact
+
+Stop and present the final validation summary before committing, pushing, opening a PR, tagging, or publishing.
+
+## Post-Triage Actions
+
+Commit, push, PR creation, release tagging, and publishing are outside the nine phases. They require explicit human confirmation even when Phase 9 passes.
+
+## Read-Only Mode
+
+For read-only triage, complete phases 1 through 6 and stop after Gate 1 with an RCA and recommended plan. Do not run phases 7 through 9 unless the user explicitly approves a fix.""")
 
 
 def create_scripts() -> None:
@@ -1278,7 +1367,7 @@ All notable changes to this project are documented here.
 
 def create_guides() -> None:
     guide_specs = {
-        "triage-demo.html": ("Triage Demo", "A clickable 9-phase triage timeline.", ["Context", "Classify", "RCA", "Gate 1", "Test", "Fix", "Validate", "Gate 2", "Release"]),
+        "triage-demo.html": ("Triage Demo", "A clickable nine-phase triage workflow with two approval gates.", ["1 Intake", "2 Context", "3 Classify", "4 Evidence", "5 RCA", "6 Gate 1", "7 Test + Fix", "8 Validate", "9 Gate 2"]),
         "compliance-demo.html": ("Compliance Demo", "Tabbed audit results for compliance commands.", ["Exception Handling", "NFR Readiness", "Agent Context"]),
         "schema-lineage-demo.html": ("Schema and Lineage Demo", "Command switcher for schema and lineage analysis.", ["Schema Drift", "Impact", "Column Trace", "DDL Impact"]),
         "ingestion-pipeline-demo.html": ("Ingestion Pipeline Demo", "Pipeline dependency explorer.", ["Proto", "Topic", "Table", "SQL", "API"]),
