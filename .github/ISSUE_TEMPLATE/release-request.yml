@@ -2,8 +2,6 @@ name: Release Request
 description: Request release inclusion or release action
 title: "[Release Request] "
 labels: [type:release, status:needs-triage]
-assignees:
-  - pallava
 body:
   - type: dropdown
     id: provider

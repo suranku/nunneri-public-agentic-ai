@@ -2,8 +2,6 @@ name: Agent Feedback
 description: Feedback about an existing agent
 title: "[Agent Feedback] "
 labels: [type:feedback, status:needs-triage]
-assignees:
-  - pallava
 body:
   - type: dropdown
     id: provider

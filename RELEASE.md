@@ -16,7 +16,7 @@ Monthly by default, with ad hoc patch releases for urgent fixes.
 
 ## Release Roles
 
-Release owner: @pallava.
+Release owner: yamini.sk@suranku.com.
 
 ## Branch Strategy
 

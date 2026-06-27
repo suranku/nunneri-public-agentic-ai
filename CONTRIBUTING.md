@@ -38,7 +38,7 @@ Accepted issues are assigned a release target and must be referenced in `CHANGEL
 
 ## Release Participation
 
-Release owner: @pallava.
+Release owner: yamini.sk@suranku.com.
 
 ## Provider Adapter Guidelines
 

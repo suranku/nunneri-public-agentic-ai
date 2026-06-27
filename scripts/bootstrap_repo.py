@@ -12,14 +12,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ORG = "Nuneri Engineering"
 PLATFORM = "Nuneri AI Assets"
-REPO_URL = "github.com/pallava/nuneri-public-ai-assets"
+REPO_URL = "github.com/Yamini-Suranku/nuneri-public-ai-assets"
 TEAM = "Nuneri Platform"
 STACKS = ["python", "javascript", "java", "go"]
 DOMAINS = ["Platform", "Applications", "Data", "Reporting"]
-CODEOWNERS = ["@pallava", "@nuneri-admins"]
+CODEOWNERS = ["yamini.sk@suranku.com"]
 JIRA_PREFIX = "NUN"
 VERSION = "0.1.0"
-RELEASE_OWNER = "@pallava"
+RELEASE_OWNER = "yamini.sk@suranku.com"
 DEFAULT_BRANCH = "main"
 COMPANION_REPO = "Not configured"
 
@@ -1387,8 +1387,6 @@ def issue_form(name: str, title: str, labels: list[str]) -> str:
 description: {title}
 title: "[{name}] "
 labels: [{label_text}, status:needs-triage]
-assignees:
-  - pallava
 body:
   - type: dropdown
     id: provider
@@ -1474,7 +1472,7 @@ def create_github() -> None:
     write(".github/ISSUE_TEMPLATE/config.yml", """blank_issues_enabled: false
 contact_links:
   - name: Discussions
-    url: https://github.com/pallava/nuneri-public-ai-assets/discussions
+    url: https://github.com/Yamini-Suranku/nuneri-public-ai-assets/discussions
     about: Ask questions before opening a structured request.
 """)
     write(".github/labels.yml", "\n".join([

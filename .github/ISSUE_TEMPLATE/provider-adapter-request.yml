@@ -2,8 +2,6 @@ name: Provider Adapter Request
 description: Request provider adapter work
 title: "[Provider Adapter Request] "
 labels: [type:provider-adapter, status:needs-triage]
-assignees:
-  - pallava
 body:
   - type: dropdown
     id: provider
