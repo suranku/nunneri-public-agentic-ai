@@ -80,12 +80,12 @@ python3 scripts/build_adapters.py
     <section id="reference">
       <h2>Reference Documents</h2>
       <div class="grid">
-        <div class="card"><h3>Executive Summaries</h3><p><a href="../guides/triage-executive-summary.md">Triage</a></p><p><a href="../guides/compliance-executive-summary.md">Compliance</a></p><p><a href="../guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="../AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="../CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="../RELEASE.md">RELEASE.md</a></p></div>
+        <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p></div>
       </div>
     </section>
   </main>
-  <footer>Nuneri AI Assets | <a href="../CONTRIBUTING.md">Contribute</a></footer>
+  <footer>Nuneri AI Assets | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
     const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,providers:4,guides:8}, agents:[], commands:[], skills:[], guides:[]};
     const card = (item) => `<div class="card" data-reveal><h3><code>${item.name}</code></h3><p>${item.description || item.category || ""}</p></div>`;
@@ -95,7 +95,7 @@ python3 scripts/build_adapters.py
       document.getElementById("command-list").innerHTML = (data.commands || []).map(card).join("");
       document.getElementById("agent-list").innerHTML = (data.agents || []).map(card).join("");
       document.getElementById("skill-list").innerHTML = (data.skills || []).map(card).join("");
-      document.getElementById("guide-list").innerHTML = (data.guides || []).filter(g => g.name.endsWith(".html")).map(g => `<div class="card" data-reveal><h3>${g.title}</h3><p>${g.description}</p><a href="../guides/${g.name}">Open guide</a></div>`).join("");
+      document.getElementById("guide-list").innerHTML = (data.guides || []).filter(g => g.name.endsWith(".html")).map(g => `<div class="card" data-reveal><h3>${g.title}</h3><p>${g.description}</p><a href="${g.href || `reference/guides/${g.name}`}">Open guide</a></div>`).join("");
       reveal();
     }
     function reveal() {

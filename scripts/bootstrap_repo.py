@@ -394,12 +394,12 @@ python3 scripts/build_adapters.py
     <section id="reference">
       <h2>Reference Documents</h2>
       <div class="grid">
-        <div class="card"><h3>Executive Summaries</h3><p><a href="../guides/triage-executive-summary.md">Triage</a></p><p><a href="../guides/compliance-executive-summary.md">Compliance</a></p><p><a href="../guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="../AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="../CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="../RELEASE.md">RELEASE.md</a></p></div>
+        <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p></div>
       </div>
     </section>
   </main>
-  <footer>{PLATFORM} | <a href="../CONTRIBUTING.md">Contribute</a></footer>
+  <footer>{PLATFORM} | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
     const fallback = {{counts:{{agents:0,commands:0,skills:0,workflows:0,providers:4,guides:8}}, agents:[], commands:[], skills:[], guides:[]}};
     const card = (item) => `<div class="card" data-reveal><h3><code>${{item.name}}</code></h3><p>${{item.description || item.category || ""}}</p></div>`;
@@ -409,7 +409,7 @@ python3 scripts/build_adapters.py
       document.getElementById("command-list").innerHTML = (data.commands || []).map(card).join("");
       document.getElementById("agent-list").innerHTML = (data.agents || []).map(card).join("");
       document.getElementById("skill-list").innerHTML = (data.skills || []).map(card).join("");
-      document.getElementById("guide-list").innerHTML = (data.guides || []).filter(g => g.name.endsWith(".html")).map(g => `<div class="card" data-reveal><h3>${{g.title}}</h3><p>${{g.description}}</p><a href="../guides/${{g.name}}">Open guide</a></div>`).join("");
+      document.getElementById("guide-list").innerHTML = (data.guides || []).filter(g => g.name.endsWith(".html")).map(g => `<div class="card" data-reveal><h3>${{g.title}}</h3><p>${{g.description}}</p><a href="${{g.href || `reference/guides/${{g.name}}`}}">Open guide</a></div>`).join("");
       reveal();
     }}
     function reveal() {{
@@ -756,7 +756,15 @@ def main() -> None:
         data = frontmatter(path)
         skills.append({"name": data.get("name", path.parent.name), "description": data.get("description", ""), "path": str(path.relative_to(ROOT))})
     workflows = items(path for path in (ROOT / "assets/workflows").glob("*.md") if path.name != "README.md")
-    guides = [{"name": path.name, "title": path.stem.replace("-", " ").title(), "description": "Interactive provider-neutral guide."} for path in sorted((ROOT / "guides").glob("*.html"))]
+    guides = [
+        {
+            "name": path.name,
+            "title": path.stem.replace("-", " ").title(),
+            "description": "Interactive provider-neutral guide.",
+            "href": f"reference/guides/{path.name}",
+        }
+        for path in sorted((ROOT / "guides").glob("*.html"))
+    ]
     manifest = {
         "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "guides": len(guides)},
         "agents": agents,
@@ -1568,12 +1576,16 @@ jobs:
         run: python3 scripts/build_adapters.py
       - name: Build portal manifest
         run: python3 scripts/build_portal_manifest.py
+      - name: Sync public reference docs
+        run: python3 scripts/sync_docs_reference.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
         run: |
           bash -n install.sh
           bash -n uninstall.sh
+      - name: Ensure generated files are committed
+        run: git diff --exit-code
 """)
     write(".github/release-drafter.yml", """name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
@@ -1592,6 +1604,23 @@ template: |
 """)
 
 
+def sync_reference_docs() -> None:
+    reference = ROOT / "docs/reference"
+    guide_reference = reference / "guides"
+    reference.mkdir(parents=True, exist_ok=True)
+    guide_reference.mkdir(parents=True, exist_ok=True)
+    for name in ("README.md", "AI_ASSETS.md", "CONTRIBUTING.md", "RELEASE.md", "CHANGELOG.md", "VERSION"):
+        shutil.copyfile(ROOT / name, reference / name)
+    for src in sorted((ROOT / "guides").glob("*.md")):
+        shutil.copyfile(src, guide_reference / src.name)
+    for src in sorted((ROOT / "guides").glob("*.html")):
+        dest = guide_reference / src.name
+        shutil.copyfile(src, dest)
+        text = dest.read_text(encoding="utf-8")
+        text = text.replace("../docs/index.html", "../../index.html")
+        dest.write_text(text, encoding="utf-8")
+
+
 def main() -> None:
     create_assets()
     create_scripts()
@@ -1599,6 +1628,7 @@ def main() -> None:
     create_docs()
     create_guides()
     create_github()
+    sync_reference_docs()
 
 
 if __name__ == "__main__":

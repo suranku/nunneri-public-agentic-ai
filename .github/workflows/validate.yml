@@ -17,9 +17,13 @@ jobs:
         run: python3 scripts/build_adapters.py
       - name: Build portal manifest
         run: python3 scripts/build_portal_manifest.py
+      - name: Sync public reference docs
+        run: python3 scripts/sync_docs_reference.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
         run: |
           bash -n install.sh
           bash -n uninstall.sh
+      - name: Ensure generated files are committed
+        run: git diff --exit-code

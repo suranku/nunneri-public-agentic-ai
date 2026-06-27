@@ -317,42 +317,50 @@
     {
       "name": "compliance-demo.html",
       "title": "Compliance Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/compliance-demo.html"
     },
     {
       "name": "contribute-demo.html",
       "title": "Contribute Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/contribute-demo.html"
     },
     {
       "name": "developer-tools-demo.html",
       "title": "Developer Tools Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/developer-tools-demo.html"
     },
     {
       "name": "ingestion-pipeline-demo.html",
       "title": "Ingestion Pipeline Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/ingestion-pipeline-demo.html"
     },
     {
       "name": "operations-demo.html",
       "title": "Operations Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/operations-demo.html"
     },
     {
       "name": "reporting-demo.html",
       "title": "Reporting Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/reporting-demo.html"
     },
     {
       "name": "schema-lineage-demo.html",
       "title": "Schema Lineage Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/schema-lineage-demo.html"
     },
     {
       "name": "triage-demo.html",
       "title": "Triage Demo",
-      "description": "Interactive provider-neutral guide."
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/triage-demo.html"
     }
   ]
 }
