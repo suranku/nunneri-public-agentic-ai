@@ -99,11 +99,11 @@
       <h2>Interactive</h2>
       <div class="progress-wrap" aria-hidden="true"><div class="progress" id="progress"></div></div>
       <div class="demo-shell">
-        <div class="timeline" role="tablist" aria-label="Developer Tools Demo steps"><button data-panel="0" class="active"><span class="step-index">1</span><span>JSON</span></button>
-<button data-panel="1" class=""><span class="step-index">2</span><span>Branch</span></button>
-<button data-panel="2" class=""><span class="step-index">3</span><span>Test</span></button>
-<button data-panel="3" class=""><span class="step-index">4</span><span>Fix</span></button>
-<button data-panel="4" class=""><span class="step-index">5</span><span>PR</span></button></div><div class="panel-stage"><div class="panel" data-content="0" >
+        <div class="timeline" role="tablist" aria-label="Developer Tools Demo steps"><button data-panel="0" role="tab" aria-selected="true" aria-controls="panel-0" tabindex="0" class="active"><span class="step-index">1</span><span>JSON</span></button>
+<button data-panel="1" role="tab" aria-selected="false" aria-controls="panel-1" tabindex="-1" class=""><span class="step-index">2</span><span>Branch</span></button>
+<button data-panel="2" role="tab" aria-selected="false" aria-controls="panel-2" tabindex="-1" class=""><span class="step-index">3</span><span>Test</span></button>
+<button data-panel="3" role="tab" aria-selected="false" aria-controls="panel-3" tabindex="-1" class=""><span class="step-index">4</span><span>Fix</span></button>
+<button data-panel="4" role="tab" aria-selected="false" aria-controls="panel-4" tabindex="-1" class=""><span class="step-index">5</span><span>PR</span></button></div><div class="panel-stage"><div class="panel" id="panel-0" data-content="0" role="tabpanel" >
   <strong>JSON</strong>
   <p>JSON produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">
@@ -112,7 +112,7 @@
     <div class="metric"><span>Gate</span><b>Continue when validated</b></div>
   </div>
 </div>
-<div class="panel" data-content="1" hidden>
+<div class="panel" id="panel-1" data-content="1" role="tabpanel" hidden>
   <strong>Branch</strong>
   <p>Branch produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">
@@ -121,7 +121,7 @@
     <div class="metric"><span>Gate</span><b>Continue when validated</b></div>
   </div>
 </div>
-<div class="panel" data-content="2" hidden>
+<div class="panel" id="panel-2" data-content="2" role="tabpanel" hidden>
   <strong>Test</strong>
   <p>Test produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">
@@ -130,7 +130,7 @@
     <div class="metric"><span>Gate</span><b>Continue when validated</b></div>
   </div>
 </div>
-<div class="panel" data-content="3" hidden>
+<div class="panel" id="panel-3" data-content="3" role="tabpanel" hidden>
   <strong>Fix</strong>
   <p>Fix produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">
@@ -139,7 +139,7 @@
     <div class="metric"><span>Gate</span><b>Approval required</b></div>
   </div>
 </div>
-<div class="panel" data-content="4" hidden>
+<div class="panel" id="panel-4" data-content="4" role="tabpanel" hidden>
   <strong>PR</strong>
   <p>PR produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">

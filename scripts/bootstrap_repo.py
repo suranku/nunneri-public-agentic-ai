@@ -2980,11 +2980,11 @@ def create_guides() -> None:
     }
     for filename, (title, subtitle, panels) in guide_specs.items():
         buttons = "\n".join(
-            f'<button data-panel="{i}" class="{"active" if i == 0 else ""}"><span class="step-index">{i + 1}</span><span>{panel}</span></button>'
+            f'<button data-panel="{i}" role="tab" aria-selected="{"true" if i == 0 else "false"}" aria-controls="panel-{i}" tabindex="{0 if i == 0 else -1}" class="{"active" if i == 0 else ""}"><span class="step-index">{i + 1}</span><span>{panel}</span></button>'
             for i, panel in enumerate(panels)
         )
         contents = "\n".join(
-            f'''<div class="panel" data-content="{i}" {"hidden" if i else ""}>
+            f'''<div class="panel" id="panel-{i}" data-content="{i}" role="tabpanel" {"hidden" if i else ""}>
   <strong>{panel}</strong>
   <p>{panel} produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
   <div class="evidence-grid">
