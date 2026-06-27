@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "docs/reference"
 GUIDE_REFERENCE = REFERENCE / "guides"
+CONTEXT_REFERENCE = REFERENCE / "context"
 
 ROOT_DOCS = [
     "README.md",
@@ -30,12 +31,16 @@ def copy_file(src: Path, dest: Path) -> None:
 def sync() -> None:
     REFERENCE.mkdir(parents=True, exist_ok=True)
     GUIDE_REFERENCE.mkdir(parents=True, exist_ok=True)
+    CONTEXT_REFERENCE.mkdir(parents=True, exist_ok=True)
 
     for name in ROOT_DOCS:
         copy_file(ROOT / name, REFERENCE / name)
 
     for source, dest in RENAMED_DOCS.items():
         copy_file(ROOT / source, REFERENCE / dest)
+
+    for src in sorted((ROOT / "assets/context").glob("*.md")):
+        copy_file(src, CONTEXT_REFERENCE / src.name)
 
     for src in sorted((ROOT / "guides").glob("*.md")):
         copy_file(src, GUIDE_REFERENCE / src.name)

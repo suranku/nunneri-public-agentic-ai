@@ -4,6 +4,7 @@
     "commands": 16,
     "skills": 8,
     "workflows": 3,
+    "context": 1,
     "providers": 4,
     "runtimes": 1,
     "guides": 8
@@ -312,6 +313,14 @@
       "description": "Nine Phase Triage Workflow",
       "category": "workflow",
       "path": "assets/workflows/triage-nine-phase.md"
+    }
+  ],
+  "context": [
+    {
+      "name": "repo-agent-instructions",
+      "description": "Standard repository agent instruction template",
+      "category": "context",
+      "path": "assets/context/repo-agent-instructions.md"
     }
   ],
   "guides": [

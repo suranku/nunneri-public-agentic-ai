@@ -35,13 +35,13 @@
 <body>
   <nav>
     <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#providers">Providers</a>
-    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
+    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
     <section id="hero" class="hero">
       <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
       <h1>Nuneri AI Assets</h1>
-      <p>Provider-agnostic AI agents, skills, commands, workflows, guides, and adapters for Nuneri Platform.</p>
+      <p>Provider-agnostic AI agents, skills, commands, workflows, repository context, guides, and adapters for Nuneri Platform.</p>
       <div id="stats" class="grid"></div>
     </section>
     <section id="problem">
@@ -51,6 +51,7 @@
         <details><summary>Before: unclear feedback paths</summary><p>After: GitHub Issues collect provider, priority, asset type, and release target.</p></details>
         <details><summary>Before: manual release notes</summary><p>After: issues and labels drive changelog and release readiness checks.</p></details>
         <details><summary>Before: duplicated prompts drift</summary><p>After: adapters are rebuilt from one source of truth.</p></details>
+        <details><summary>Before: repo instructions vary by assistant</summary><p>After: one context template renders provider-native root files and structured override manifests.</p></details>
       </div>
     </section>
     <section id="quick-start">
@@ -70,6 +71,13 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>LangGraph Runtime</h3><p>Graph and runtime manifests for stateful workflow orchestration. LangGraph is not a model provider.</p></div>
       </div>
     </section>
+    <section id="context">
+      <h2>Repository Context</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Standard Template</h3><p>One provider-neutral template generates CLAUDE.md, AGENTS.md, GEMINI.md, open-source context metadata, and LangGraph pre-dispatch context.</p></div>
+        <div class="card" data-reveal><h3>Override Registry</h3><p>Structured YAML captures known issues, DevOps overrides, library links, workflow overrides, exceptions, skill overrides, dispatch rules, and approval gates.</p></div>
+      </div>
+    </section>
     <section id="commands">
       <h2>Commands</h2>
       <input id="search" placeholder="Filter commands, agents, or skills">
@@ -82,13 +90,13 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
   <footer>Nuneri AI Assets | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
-    const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,providers:4,runtimes:1,guides:8}, agents:[], commands:[], skills:[], guides:[]};
+    const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,context:1,providers:4,runtimes:1,guides:8}, agents:[], commands:[], skills:[], guides:[]};
     const card = (item) => `<div class="card" data-reveal><h3><code>${item.name}</code></h3><p>${item.description || item.category || ""}</p></div>`;
     function render(data) {
       const counts = data.counts || fallback.counts;

@@ -11,10 +11,11 @@ INCLUDE_SKILLS=1
 INCLUDE_COMMANDS=1
 INCLUDE_WORKFLOWS=1
 INCLUDE_GUIDES=1
+INCLUDE_CONTEXT=1
 
 usage() {
   echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--skip-build] [filters]"
-  echo "Filters: --agents-only --skills-only --commands-only --workflows-only --no-agents --no-skills --no-commands --no-workflows --no-guides"
+  echo "Filters: --agents-only --skills-only --commands-only --workflows-only --context-only --no-agents --no-skills --no-commands --no-workflows --no-guides --no-context"
 }
 
 only_one() {
@@ -23,6 +24,7 @@ only_one() {
   INCLUDE_COMMANDS=0
   INCLUDE_WORKFLOWS=0
   INCLUDE_GUIDES=0
+  INCLUDE_CONTEXT=0
 }
 
 while [ "$#" -gt 0 ]; do
@@ -36,11 +38,13 @@ while [ "$#" -gt 0 ]; do
     --skills-only) only_one; INCLUDE_SKILLS=1; shift ;;
     --commands-only) only_one; INCLUDE_COMMANDS=1; shift ;;
     --workflows-only) only_one; INCLUDE_WORKFLOWS=1; shift ;;
+    --context-only) only_one; INCLUDE_CONTEXT=1; shift ;;
     --no-agents) INCLUDE_AGENTS=0; shift ;;
     --no-skills) INCLUDE_SKILLS=0; shift ;;
     --no-commands) INCLUDE_COMMANDS=0; shift ;;
     --no-workflows) INCLUDE_WORKFLOWS=0; shift ;;
     --no-guides) INCLUDE_GUIDES=0; shift ;;
+    --no-context) INCLUDE_CONTEXT=0; shift ;;
     --selective)
       if [ ! -t 0 ]; then
         echo "--selective requires an interactive terminal"
@@ -50,6 +54,7 @@ while [ "$#" -gt 0 ]; do
       printf "Install skills? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_SKILLS=0 ;; esac
       printf "Install commands? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_COMMANDS=0 ;; esac
       printf "Install workflows? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_WORKFLOWS=0 ;; esac
+      printf "Install repository context? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_CONTEXT=0 ;; esac
       printf "Install guides/reference docs? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_GUIDES=0 ;; esac
       shift ;;
     -h|--help) usage; exit 0 ;;
@@ -79,10 +84,12 @@ should_install() {
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     graphs/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
+    context/*|manifests/context/*)
+      [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
     CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
-      [ "$INCLUDE_GUIDES" -eq 1 ] ;;
+      [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     *)
       return 0 ;;
   esac
@@ -159,23 +166,34 @@ install_one() {
     echo "Prepared $count files for $provider in $target"
     return 0
   fi
-  mkdir -p "$target"
   count=0
   while IFS= read -r file; do
     rel="${file#$src/}"
     if ! should_install "$rel"; then
       continue
     fi
-    mkdir -p "$target/$(dirname "$rel")"
-    if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
-      echo "Skip existing $target/$rel"
+    dest="$target/$rel"
+    case "$rel" in
+      CLAUDE.md|AGENTS.md|GEMINI.md)
+        if [ "$PROJECT" -eq 1 ]; then
+          dest="$rel"
+        fi ;;
+    esac
+    mkdir -p "$(dirname "$dest")"
+    if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
+      echo "Skip existing $dest"
     else
-      cp "$file" "$target/$rel"
+      cp "$file" "$dest"
       ((++count))
     fi
   done < <(find "$src" -type f | sort)
   version="$(cat VERSION)"
-  printf "%s\n" "$version" > "$target/.ai-assets-version"
+  version_file="$target/.ai-assets-version"
+  if [ "$PROJECT" -eq 1 ] && [ "$INCLUDE_CONTEXT" -eq 1 ] && [ "$INCLUDE_AGENTS" -eq 0 ] && [ "$INCLUDE_SKILLS" -eq 0 ] && [ "$INCLUDE_COMMANDS" -eq 0 ] && [ "$INCLUDE_WORKFLOWS" -eq 0 ] && [ "$INCLUDE_GUIDES" -eq 0 ]; then
+    version_file=".ai-assets-version"
+  fi
+  mkdir -p "$(dirname "$version_file")"
+  printf "%s\n" "$version" > "$version_file"
   echo "Installed $count files for $provider into $target"
 }
 

@@ -10,6 +10,7 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Skills | `assets/skills/` |
 | Commands | `assets/commands/` |
 | Workflows | `assets/workflows/` |
+| Repository context | `assets/context/` |
 | Guides | `guides/` |
 | Runtime adapters | `dist/langgraph/` |
 
@@ -31,6 +32,16 @@ python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
 ./install.sh --provider all --project --force
 ```
+
+## Install Repository Context Only
+
+```bash
+./install.sh --provider claude --project --force --context-only
+./install.sh --provider codex --project --force --context-only
+./install.sh --provider gemini --project --force --context-only
+```
+
+The context template generates root files such as `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` with known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, and dispatch rules.
 
 ## Install for Claude
 

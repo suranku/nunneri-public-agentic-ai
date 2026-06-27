@@ -1,6 +1,24 @@
-# Gemini Repository Context
+---
+name: repo-agent-instructions
+description: Standard repository agent instruction template
+category: context
+providers:
+  claude:
+    enabled: true
+  codex:
+    enabled: true
+  gemini:
+    enabled: true
+  open_source:
+    enabled: true
+runtimes:
+  langgraph:
+    enabled: true
+---
 
-> Generated from `assets/context/repo-agent-instructions.md`. Edit the canonical context template, then rebuild adapters.
+# Repository Agent Instructions
+
+> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.
 
 ## Repository Identity and Ownership
 

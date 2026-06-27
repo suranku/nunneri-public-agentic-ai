@@ -8,6 +8,12 @@ Nuneri AI Assets is a provider-neutral library of AI agents, skills, commands, w
 
 Canonical assets live under `assets/`. Provider-specific files are generated into `dist/`.
 
+## Repository Context Template
+
+`assets/context/repo-agent-instructions.md` is the canonical source for repo-level agent instructions. It generates provider-native root context files and structured manifests for open-source and runtime consumers.
+
+Use it for known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, dispatch rules, approval gates, and release-impact instructions.
+
 ## Provider Adapters
 
 - Claude Code: `dist/claude`
@@ -52,6 +58,7 @@ Run:
 python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
+python3 scripts/check_context_exports.py
 python3 scripts/check_langgraph_exports.py
 ```
 

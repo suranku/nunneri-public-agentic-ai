@@ -55,6 +55,47 @@ def write(path: Path, content: str) -> None:
     path.write_text(content.strip() + "\n", encoding="utf-8")
 
 
+def structured_override_block(body: str) -> str:
+    start = body.find("```yaml\n")
+    if start == -1:
+        return ""
+    start += len("```yaml\n")
+    end = body.find("\n```", start)
+    if end == -1:
+        return ""
+    return body[start:end].strip()
+
+
+def build_context() -> None:
+    src = ROOT / "assets/context/repo-agent-instructions.md"
+    data, body = frontmatter_and_body(src)
+    provider_files = {
+        "claude": ("CLAUDE.md", "Claude Repository Context"),
+        "codex": ("AGENTS.md", "Codex Repository Context"),
+        "gemini": ("GEMINI.md", "Gemini Repository Context"),
+    }
+    for provider, (filename, title) in provider_files.items():
+        provider_body = body.replace("# Repository Agent Instructions\n\n", "", 1)
+        provider_body = provider_body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+        content = f"""# {title}
+
+> Generated from `{src.relative_to(ROOT)}`. Edit the canonical context template, then rebuild adapters.
+
+{provider_body}
+"""
+        write(ROOT / f"dist/{provider}" / filename, content)
+    payload = {
+        "name": data["name"],
+        "description": data["description"],
+        "category": data.get("category", "context"),
+        "source": str(src.relative_to(ROOT)),
+        "body": body,
+        "structured_overrides": structured_override_block(body),
+    }
+    write(ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json", json.dumps(payload, indent=2))
+    write(ROOT / "dist/langgraph/context/repo-agent-instructions.json", json.dumps({**payload, "runtime": "langgraph", "injection_stage": "pre_dispatch"}, indent=2))
+
+
 def reset_dist() -> None:
     for target_name in PROVIDERS + RUNTIMES:
         target = ROOT / "dist" / target_name
@@ -155,6 +196,7 @@ def copy_skill(src: Path) -> None:
 
 def build() -> None:
     reset_dist()
+    build_context()
     for src in sorted(path for path in (ROOT / "assets/agents").glob("**/*.md") if path.name != "README.md"):
         data, body = frontmatter_and_body(src)
         build_claude_agent(src, data, body)
@@ -178,11 +220,8 @@ def build() -> None:
         for provider in PROVIDERS:
             folder = "workflows" if provider != "open-source" else "workflows"
             write(ROOT / f"dist/{provider}/{folder}" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
-    write(ROOT / "dist/claude/CLAUDE.md", "# Claude Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/codex/AGENTS.md", "# Codex Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/gemini/GEMINI.md", "# Gemini Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets.")
-    write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider.")
+    write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets. Context metadata is available in `manifests/context/repo-agent-instructions.json`.")
+    write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider. Pre-dispatch context is available in `context/repo-agent-instructions.json`.")
     print("Built provider adapters: claude, codex, gemini, open-source; runtime adapters: langgraph")
 
 

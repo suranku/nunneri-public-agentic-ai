@@ -37,6 +37,7 @@ def main() -> None:
         data = frontmatter(path)
         skills.append({"name": data.get("name", path.parent.name), "description": data.get("description", ""), "path": str(path.relative_to(ROOT))})
     workflows = items(path for path in (ROOT / "assets/workflows").glob("*.md") if path.name != "README.md")
+    context = items(path for path in (ROOT / "assets/context").glob("*.md") if path.name != "README.md")
     guides = [
         {
             "name": path.name,
@@ -47,11 +48,12 @@ def main() -> None:
         for path in sorted((ROOT / "guides").glob("*.html"))
     ]
     manifest = {
-        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "runtimes": 1, "guides": len(guides)},
+        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "context": len(context), "providers": 4, "runtimes": 1, "guides": len(guides)},
         "agents": agents,
         "commands": commands,
         "skills": skills,
         "workflows": workflows,
+        "context": context,
         "guides": guides,
     }
     target = ROOT / "docs/assets/manifest.json"

@@ -41,6 +41,7 @@ def main() -> int:
         "assets/skills/*/SKILL.md",
         "assets/commands/**/*.md",
         "assets/workflows/**/*.md",
+        "assets/context/**/*.md",
     ]
     files: list[Path] = []
     for pattern in patterns:
@@ -52,7 +53,7 @@ def main() -> int:
             for field in REQUIRED:
                 if not data.get(field):
                     failures.append(f"{path}: missing required field {field}")
-            if path.match("assets/agents/**/*.md") or path.match("assets/commands/**/*.md"):
+            if path.match("assets/agents/**/*.md") or path.match("assets/commands/**/*.md") or path.match("assets/context/**/*.md"):
                 if not data.get("category"):
                     failures.append(f"{path}: missing required field category")
             placeholders = check_placeholders(path)

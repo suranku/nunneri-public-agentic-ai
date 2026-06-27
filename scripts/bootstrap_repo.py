@@ -361,13 +361,13 @@ def portal_html() -> str:
 <body>
   <nav>
     <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#providers">Providers</a>
-    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
+    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
     <section id="hero" class="hero">
       <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
       <h1>{PLATFORM}</h1>
-      <p>Provider-agnostic AI agents, skills, commands, workflows, guides, and adapters for {TEAM}.</p>
+      <p>Provider-agnostic AI agents, skills, commands, workflows, repository context, guides, and adapters for {TEAM}.</p>
       <div id="stats" class="grid"></div>
     </section>
     <section id="problem">
@@ -377,6 +377,7 @@ def portal_html() -> str:
         <details><summary>Before: unclear feedback paths</summary><p>After: GitHub Issues collect provider, priority, asset type, and release target.</p></details>
         <details><summary>Before: manual release notes</summary><p>After: issues and labels drive changelog and release readiness checks.</p></details>
         <details><summary>Before: duplicated prompts drift</summary><p>After: adapters are rebuilt from one source of truth.</p></details>
+        <details><summary>Before: repo instructions vary by assistant</summary><p>After: one context template renders provider-native root files and structured override manifests.</p></details>
       </div>
     </section>
     <section id="quick-start">
@@ -403,18 +404,25 @@ python3 scripts/build_adapters.py
     </section>
     <section id="agents"><h2>Agents</h2><div id="agent-list" class="grid"></div></section>
     <section id="skills"><h2>Skills</h2><div id="skill-list" class="grid"></div></section>
+    <section id="context">
+      <h2>Repository Context</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Standard Template</h3><p>One provider-neutral template generates CLAUDE.md, AGENTS.md, GEMINI.md, open-source context metadata, and LangGraph pre-dispatch context.</p></div>
+        <div class="card" data-reveal><h3>Override Registry</h3><p>Structured YAML captures known issues, DevOps overrides, library links, workflow overrides, exceptions, skill overrides, dispatch rules, and approval gates.</p></div>
+      </div>
+    </section>
     <section id="guides"><h2>Interactive Guides</h2><div id="guide-list" class="grid"></div></section>
     <section id="reference">
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
   <footer>{PLATFORM} | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
-    const fallback = {{counts:{{agents:0,commands:0,skills:0,workflows:0,providers:4,runtimes:1,guides:8}}, agents:[], commands:[], skills:[], guides:[]}};
+    const fallback = {{counts:{{agents:0,commands:0,skills:0,workflows:0,context:1,providers:4,runtimes:1,guides:8}}, agents:[], commands:[], skills:[], guides:[]}};
     const card = (item) => `<div class="card" data-reveal><h3><code>${{item.name}}</code></h3><p>${{item.description || item.category || ""}}</p></div>`;
     function render(data) {{
       const counts = data.counts || fallback.counts;
@@ -479,7 +487,7 @@ issue -> canonical asset -> provider adapter -> validation -> release
 def create_assets() -> None:
     dirs = [
         "assets/agents/triage", "assets/agents/analysis", "assets/agents/compliance", "assets/agents/operations", "assets/agents/reporting",
-        "assets/skills", "assets/commands/triage", "assets/commands/analysis", "assets/commands/compliance", "assets/commands/operations", "assets/commands/reporting",
+        "assets/skills", "assets/context", "assets/commands/triage", "assets/commands/analysis", "assets/commands/compliance", "assets/commands/operations", "assets/commands/reporting",
         "assets/workflows", "adapters/claude/agents", "adapters/claude/skills", "adapters/claude/commands",
         "adapters/codex/skills", "adapters/codex/prompts", "adapters/codex/workflows",
         "adapters/gemini/prompts", "adapters/gemini/workflows", "adapters/gemini/context",
@@ -491,6 +499,121 @@ def create_assets() -> None:
     for directory in dirs:
         (ROOT / directory).mkdir(parents=True, exist_ok=True)
         readme(f"{directory}/README.md", directory)
+
+    write("assets/context/repo-agent-instructions.md", f"""---
+name: repo-agent-instructions
+description: Standard repository agent instruction template
+category: context
+providers:
+  claude:
+    enabled: true
+  codex:
+    enabled: true
+  gemini:
+    enabled: true
+  open_source:
+    enabled: true
+runtimes:
+  langgraph:
+    enabled: true
+---
+
+# Repository Agent Instructions
+
+> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.
+
+## Repository Identity and Ownership
+
+- Repository: set the repository name here.
+- Owner: set the owning team or maintainer here.
+- Primary domain: describe the business or platform area.
+- Primary contacts: link team channel, issue tracker, on-call page, or ownership doc.
+
+## Golden Setup, Build, and Test Commands
+
+- Setup: document the standard dependency installation command.
+- Build: document the standard build command.
+- Test: document the standard unit and integration test commands.
+- Validation: document required lint, static analysis, schema, security, or release checks.
+- Local services: list required local services, ports, credentials, and safe defaults.
+
+## Common Library and Source-Code Links
+
+- Add links to shared libraries, generated clients, framework extensions, schemas, and platform contracts.
+- Prefer repository-relative paths for local code and canonical URLs for external source of truth.
+- Include ownership or escalation notes when a shared dependency is outside this repository.
+
+## Known Issues and Recurring Failure Modes
+
+- Record known flaky tests, framework quirks, migration hazards, data issues, and operational failure modes.
+- Include detection signals, safe workarounds, and links to tracking issues.
+- Do not treat a known issue as permission to ignore a failing check unless an explicit override says so.
+
+## DevOps and Environment Overrides
+
+- List environment-specific rules for CI, deployment, secrets, feature flags, queues, topics, databases, and cloud resources.
+- Call out commands that are forbidden, require approval, or must run only in sandboxed environments.
+- Include rollback, cleanup, and operational safety notes for changes that affect runtime infrastructure.
+
+## Agentic Workflow Overrides
+
+- State repo-specific workflow changes that should be applied before dispatching an agent or command.
+- Keep global workflow gates intact unless the override explicitly strengthens them.
+- Repo overrides must not weaken human approval gates for code changes, publishing, production access, or release-impacting operations.
+
+## Exception Handling and Escalation Rules
+
+- Define exceptions to normal workflow, including emergency fixes, read-only investigations, production incidents, and compliance holds.
+- Each exception should describe trigger conditions, allowed actions, required evidence, approver, and expiration or review policy.
+- If an exception conflicts with provider-neutral governance, stop and ask for human approval.
+
+## Skill Invocation Overrides
+
+- Map repo-specific file patterns, services, languages, or commands to preferred skills.
+- Use overrides to add context before a skill runs, not to bypass the skill's safety rules.
+- When multiple skills match, prefer the most specific repo override, then the canonical command or workflow default.
+
+## Agent Dispatch Rules Before Task Routing
+
+- Load this repository instruction file before selecting a specialized agent.
+- Apply known issues, DevOps overrides, exceptions, and skill overrides before dispatch.
+- If a task matches a restricted area, stop at the appropriate approval gate before changing files or running side-effectful commands.
+
+## Approval Gates and Release-Impact Rules
+
+- Require explicit human approval before implementation changes, production-affecting commands, release tagging, publishing, or pushing.
+- Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
+- For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
+
+## Structured Override Registry
+
+```yaml
+repo_agent_instructions:
+  version: 1
+  known_issues: []
+  devops_overrides: []
+  library_sources: []
+  workflow_overrides: []
+  exceptions: []
+  skill_overrides: []
+  dispatch_overrides: []
+  approval_gates:
+    - name: implementation_changes
+      required: true
+      applies_to:
+        - code_changes
+        - generated_outputs
+        - release_metadata
+    - name: production_or_release_actions
+      required: true
+      applies_to:
+        - production_access
+        - push
+        - pull_request
+        - release_tag
+        - publish
+```
+""")
 
     for stack in STACKS:
         write(f"assets/agents/triage/{stack}-triage-specialist.md", agent_body(f"{stack}-triage-specialist", f"Full 9-phase bug triage workflow for {stack}", "triage", [stack]))
@@ -682,6 +805,7 @@ def main() -> int:
         "assets/skills/*/SKILL.md",
         "assets/commands/**/*.md",
         "assets/workflows/**/*.md",
+        "assets/context/**/*.md",
     ]
     files: list[Path] = []
     for pattern in patterns:
@@ -693,7 +817,7 @@ def main() -> int:
             for field in REQUIRED:
                 if not data.get(field):
                     failures.append(f"{path}: missing required field {field}")
-            if path.match("assets/agents/**/*.md") or path.match("assets/commands/**/*.md"):
+            if path.match("assets/agents/**/*.md") or path.match("assets/commands/**/*.md") or path.match("assets/context/**/*.md"):
                 if not data.get("category"):
                     failures.append(f"{path}: missing required field category")
             placeholders = check_placeholders(path)
@@ -771,6 +895,47 @@ def frontmatter_and_body(path: Path) -> tuple[dict[str, str], str]:
 def write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content.strip() + "\n", encoding="utf-8")
+
+
+def structured_override_block(body: str) -> str:
+    start = body.find("```yaml\n")
+    if start == -1:
+        return ""
+    start += len("```yaml\n")
+    end = body.find("\n```", start)
+    if end == -1:
+        return ""
+    return body[start:end].strip()
+
+
+def build_context() -> None:
+    src = ROOT / "assets/context/repo-agent-instructions.md"
+    data, body = frontmatter_and_body(src)
+    provider_files = {
+        "claude": ("CLAUDE.md", "Claude Repository Context"),
+        "codex": ("AGENTS.md", "Codex Repository Context"),
+        "gemini": ("GEMINI.md", "Gemini Repository Context"),
+    }
+    for provider, (filename, title) in provider_files.items():
+        provider_body = body.replace("# Repository Agent Instructions\n\n", "", 1)
+        provider_body = provider_body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+        content = f"""# {title}
+
+> Generated from `{src.relative_to(ROOT)}`. Edit the canonical context template, then rebuild adapters.
+
+{provider_body}
+"""
+        write(ROOT / f"dist/{provider}" / filename, content)
+    payload = {
+        "name": data["name"],
+        "description": data["description"],
+        "category": data.get("category", "context"),
+        "source": str(src.relative_to(ROOT)),
+        "body": body,
+        "structured_overrides": structured_override_block(body),
+    }
+    write(ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json", json.dumps(payload, indent=2))
+    write(ROOT / "dist/langgraph/context/repo-agent-instructions.json", json.dumps({**payload, "runtime": "langgraph", "injection_stage": "pre_dispatch"}, indent=2))
 
 
 def reset_dist() -> None:
@@ -873,6 +1038,7 @@ def copy_skill(src: Path) -> None:
 
 def build() -> None:
     reset_dist()
+    build_context()
     for src in sorted(path for path in (ROOT / "assets/agents").glob("**/*.md") if path.name != "README.md"):
         data, body = frontmatter_and_body(src)
         build_claude_agent(src, data, body)
@@ -896,11 +1062,8 @@ def build() -> None:
         for provider in PROVIDERS:
             folder = "workflows" if provider != "open-source" else "workflows"
             write(ROOT / f"dist/{provider}/{folder}" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
-    write(ROOT / "dist/claude/CLAUDE.md", "# Claude Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/codex/AGENTS.md", "# Codex Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/gemini/GEMINI.md", "# Gemini Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
-    write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets.")
-    write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider.")
+    write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets. Context metadata is available in `manifests/context/repo-agent-instructions.json`.")
+    write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider. Pre-dispatch context is available in `context/repo-agent-instructions.json`.")
     print("Built provider adapters: claude, codex, gemini, open-source; runtime adapters: langgraph")
 
 
@@ -947,6 +1110,7 @@ def main() -> None:
         data = frontmatter(path)
         skills.append({"name": data.get("name", path.parent.name), "description": data.get("description", ""), "path": str(path.relative_to(ROOT))})
     workflows = items(path for path in (ROOT / "assets/workflows").glob("*.md") if path.name != "README.md")
+    context = items(path for path in (ROOT / "assets/context").glob("*.md") if path.name != "README.md")
     guides = [
         {
             "name": path.name,
@@ -957,11 +1121,12 @@ def main() -> None:
         for path in sorted((ROOT / "guides").glob("*.html"))
     ]
     manifest = {
-        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "runtimes": 1, "guides": len(guides)},
+        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "context": len(context), "providers": 4, "runtimes": 1, "guides": len(guides)},
         "agents": agents,
         "commands": commands,
         "skills": skills,
         "workflows": workflows,
+        "context": context,
         "guides": guides,
     }
     target = ROOT / "docs/assets/manifest.json"
@@ -972,6 +1137,67 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+''', True)
+
+    write("scripts/sync_docs_reference.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+REFERENCE = ROOT / "docs/reference"
+GUIDE_REFERENCE = REFERENCE / "guides"
+CONTEXT_REFERENCE = REFERENCE / "context"
+
+ROOT_DOCS = [
+    "README.md",
+    "AI_ASSETS.md",
+    "CONTRIBUTING.md",
+    "RELEASE.md",
+    "CHANGELOG.md",
+    "VERSION",
+]
+
+RENAMED_DOCS = {
+    "LANGGRAPH_RUNTIME.md": "langgraph-runtime.md",
+}
+
+
+def copy_file(src: Path, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(src, dest)
+
+
+def sync() -> None:
+    REFERENCE.mkdir(parents=True, exist_ok=True)
+    GUIDE_REFERENCE.mkdir(parents=True, exist_ok=True)
+    CONTEXT_REFERENCE.mkdir(parents=True, exist_ok=True)
+
+    for name in ROOT_DOCS:
+        copy_file(ROOT / name, REFERENCE / name)
+
+    for source, dest in RENAMED_DOCS.items():
+        copy_file(ROOT / source, REFERENCE / dest)
+
+    for src in sorted((ROOT / "assets/context").glob("*.md")):
+        copy_file(src, CONTEXT_REFERENCE / src.name)
+
+    for src in sorted((ROOT / "guides").glob("*.md")):
+        copy_file(src, GUIDE_REFERENCE / src.name)
+
+    for src in sorted((ROOT / "guides").glob("*.html")):
+        dest = GUIDE_REFERENCE / src.name
+        copy_file(src, dest)
+        text = dest.read_text(encoding="utf-8")
+        text = text.replace("../docs/index.html", "../../index.html")
+        dest.write_text(text, encoding="utf-8")
+
+    print(f"Synced public reference docs into {REFERENCE}")
+
+
+if __name__ == "__main__":
+    sync()
 ''', True)
 
     write("scripts/check_docs_links.py", r'''#!/usr/bin/env python3
@@ -1059,6 +1285,111 @@ def main() -> int:
             print(failure)
         return 1
     print("Docs link check passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
+    write("scripts/check_context_exports.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+TEMPLATE = ROOT / "assets/context/repo-agent-instructions.md"
+PROVIDER_FILES = [
+    ROOT / "dist/claude/CLAUDE.md",
+    ROOT / "dist/codex/AGENTS.md",
+    ROOT / "dist/gemini/GEMINI.md",
+]
+REQUIRED_SECTIONS = [
+    "## Repository Identity and Ownership",
+    "## Golden Setup, Build, and Test Commands",
+    "## Common Library and Source-Code Links",
+    "## Known Issues and Recurring Failure Modes",
+    "## DevOps and Environment Overrides",
+    "## Agentic Workflow Overrides",
+    "## Exception Handling and Escalation Rules",
+    "## Skill Invocation Overrides",
+    "## Agent Dispatch Rules Before Task Routing",
+    "## Approval Gates and Release-Impact Rules",
+    "## Structured Override Registry",
+]
+REQUIRED_KEYS = [
+    "known_issues:",
+    "devops_overrides:",
+    "library_sources:",
+    "workflow_overrides:",
+    "exceptions:",
+    "skill_overrides:",
+    "dispatch_overrides:",
+    "approval_gates:",
+]
+
+
+def structured_yaml(text: str) -> str:
+    start = text.find("```yaml\n")
+    if start == -1:
+        return ""
+    start += len("```yaml\n")
+    end = text.find("\n```", start)
+    if end == -1:
+        return ""
+    return text[start:end]
+
+
+def main() -> int:
+    failures: list[str] = []
+    if not TEMPLATE.exists():
+        failures.append("assets/context/repo-agent-instructions.md is missing")
+    else:
+        text = TEMPLATE.read_text(encoding="utf-8")
+        for section in REQUIRED_SECTIONS:
+            if section not in text:
+                failures.append(f"{TEMPLATE}: missing section {section}")
+        yaml = structured_yaml(text)
+        if not yaml:
+            failures.append(f"{TEMPLATE}: missing structured YAML override block")
+        for key in REQUIRED_KEYS:
+            if key not in yaml:
+                failures.append(f"{TEMPLATE}: missing YAML key {key}")
+    for path in PROVIDER_FILES:
+        if not path.exists():
+            failures.append(f"{path}: missing generated provider context")
+            continue
+        text = path.read_text(encoding="utf-8")
+        for section in REQUIRED_SECTIONS:
+            if section not in text:
+                failures.append(f"{path}: missing section {section}")
+        if not structured_yaml(text):
+            failures.append(f"{path}: missing structured YAML override block")
+    open_source = ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json"
+    langgraph = ROOT / "dist/langgraph/context/repo-agent-instructions.json"
+    for path in (open_source, langgraph):
+        if not path.exists():
+            failures.append(f"{path}: missing generated context manifest")
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not data.get("structured_overrides"):
+            failures.append(f"{path}: missing structured_overrides")
+    if langgraph.exists():
+        data = json.loads(langgraph.read_text(encoding="utf-8"))
+        if data.get("injection_stage") != "pre_dispatch":
+            failures.append(f"{langgraph}: injection_stage must be pre_dispatch")
+    installer = ROOT / "install.sh"
+    install_text = installer.read_text(encoding="utf-8")
+    for snippet in ("--context-only", "--no-context", 'dest="$rel"', 'version_file=".ai-assets-version"'):
+        if snippet not in install_text:
+            failures.append(f"{installer}: missing context install contract snippet {snippet}")
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+    print("Context export checks passed")
     return 0
 
 
@@ -1234,10 +1565,11 @@ INCLUDE_SKILLS=1
 INCLUDE_COMMANDS=1
 INCLUDE_WORKFLOWS=1
 INCLUDE_GUIDES=1
+INCLUDE_CONTEXT=1
 
 usage() {
   echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--skip-build] [filters]"
-  echo "Filters: --agents-only --skills-only --commands-only --workflows-only --no-agents --no-skills --no-commands --no-workflows --no-guides"
+  echo "Filters: --agents-only --skills-only --commands-only --workflows-only --context-only --no-agents --no-skills --no-commands --no-workflows --no-guides --no-context"
 }
 
 only_one() {
@@ -1246,6 +1578,7 @@ only_one() {
   INCLUDE_COMMANDS=0
   INCLUDE_WORKFLOWS=0
   INCLUDE_GUIDES=0
+  INCLUDE_CONTEXT=0
 }
 
 while [ "$#" -gt 0 ]; do
@@ -1259,11 +1592,13 @@ while [ "$#" -gt 0 ]; do
     --skills-only) only_one; INCLUDE_SKILLS=1; shift ;;
     --commands-only) only_one; INCLUDE_COMMANDS=1; shift ;;
     --workflows-only) only_one; INCLUDE_WORKFLOWS=1; shift ;;
+    --context-only) only_one; INCLUDE_CONTEXT=1; shift ;;
     --no-agents) INCLUDE_AGENTS=0; shift ;;
     --no-skills) INCLUDE_SKILLS=0; shift ;;
     --no-commands) INCLUDE_COMMANDS=0; shift ;;
     --no-workflows) INCLUDE_WORKFLOWS=0; shift ;;
     --no-guides) INCLUDE_GUIDES=0; shift ;;
+    --no-context) INCLUDE_CONTEXT=0; shift ;;
     --selective)
       if [ ! -t 0 ]; then
         echo "--selective requires an interactive terminal"
@@ -1273,6 +1608,7 @@ while [ "$#" -gt 0 ]; do
       printf "Install skills? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_SKILLS=0 ;; esac
       printf "Install commands? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_COMMANDS=0 ;; esac
       printf "Install workflows? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_WORKFLOWS=0 ;; esac
+      printf "Install repository context? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_CONTEXT=0 ;; esac
       printf "Install guides/reference docs? [Y/n] "; read answer; case "$answer" in n|N|no|NO) INCLUDE_GUIDES=0 ;; esac
       shift ;;
     -h|--help) usage; exit 0 ;;
@@ -1302,10 +1638,12 @@ should_install() {
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     graphs/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
+    context/*|manifests/context/*)
+      [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
     CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
-      [ "$INCLUDE_GUIDES" -eq 1 ] ;;
+      [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     *)
       return 0 ;;
   esac
@@ -1382,23 +1720,34 @@ install_one() {
     echo "Prepared $count files for $provider in $target"
     return 0
   fi
-  mkdir -p "$target"
   count=0
   while IFS= read -r file; do
     rel="${file#$src/}"
     if ! should_install "$rel"; then
       continue
     fi
-    mkdir -p "$target/$(dirname "$rel")"
-    if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
-      echo "Skip existing $target/$rel"
+    dest="$target/$rel"
+    case "$rel" in
+      CLAUDE.md|AGENTS.md|GEMINI.md)
+        if [ "$PROJECT" -eq 1 ]; then
+          dest="$rel"
+        fi ;;
+    esac
+    mkdir -p "$(dirname "$dest")"
+    if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
+      echo "Skip existing $dest"
     else
-      cp "$file" "$target/$rel"
+      cp "$file" "$dest"
       ((++count))
     fi
   done < <(find "$src" -type f | sort)
   version="$(cat VERSION)"
-  printf "%s\n" "$version" > "$target/.ai-assets-version"
+  version_file="$target/.ai-assets-version"
+  if [ "$PROJECT" -eq 1 ] && [ "$INCLUDE_CONTEXT" -eq 1 ] && [ "$INCLUDE_AGENTS" -eq 0 ] && [ "$INCLUDE_SKILLS" -eq 0 ] && [ "$INCLUDE_COMMANDS" -eq 0 ] && [ "$INCLUDE_WORKFLOWS" -eq 0 ] && [ "$INCLUDE_GUIDES" -eq 0 ]; then
+    version_file=".ai-assets-version"
+  fi
+  mkdir -p "$(dirname "$version_file")"
+  printf "%s\n" "$version" > "$version_file"
   echo "Installed $count files for $provider into $target"
 }
 
@@ -1486,6 +1835,12 @@ def create_docs() -> None:
 
 Canonical assets live under `assets/`. Provider-specific files are generated into `dist/`.
 
+## Repository Context Template
+
+`assets/context/repo-agent-instructions.md` is the canonical source for repo-level agent instructions. It generates provider-native root context files and structured manifests for open-source and runtime consumers.
+
+Use it for known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, dispatch rules, approval gates, and release-impact instructions.
+
 ## Provider Adapters
 
 - Claude Code: `dist/claude`
@@ -1530,6 +1885,7 @@ Run:
 python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
+python3 scripts/check_context_exports.py
 python3 scripts/check_langgraph_exports.py
 ```
 
@@ -1550,6 +1906,7 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Skills | `assets/skills/` |
 | Commands | `assets/commands/` |
 | Workflows | `assets/workflows/` |
+| Repository context | `assets/context/` |
 | Guides | `guides/` |
 | Runtime adapters | `dist/langgraph/` |
 
@@ -1571,6 +1928,16 @@ python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
 ./install.sh --provider all --project --force
 ```
+
+## Install Repository Context Only
+
+```bash
+./install.sh --provider claude --project --force --context-only
+./install.sh --provider codex --project --force --context-only
+./install.sh --provider gemini --project --force --context-only
+```
+
+The context template generates root files such as `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` with known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, and dispatch rules.
 
 ## Install for Claude
 
@@ -2135,6 +2502,8 @@ jobs:
         run: python3 scripts/sync_docs_reference.py
       - name: Check docs links
         run: python3 scripts/check_docs_links.py
+      - name: Check context exports
+        run: python3 scripts/check_context_exports.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
       - name: Check release readiness
@@ -2166,11 +2535,15 @@ template: |
 def sync_reference_docs() -> None:
     reference = ROOT / "docs/reference"
     guide_reference = reference / "guides"
+    context_reference = reference / "context"
     reference.mkdir(parents=True, exist_ok=True)
     guide_reference.mkdir(parents=True, exist_ok=True)
+    context_reference.mkdir(parents=True, exist_ok=True)
     for name in ("README.md", "AI_ASSETS.md", "CONTRIBUTING.md", "RELEASE.md", "CHANGELOG.md", "VERSION"):
         shutil.copyfile(ROOT / name, reference / name)
     shutil.copyfile(ROOT / "LANGGRAPH_RUNTIME.md", reference / "langgraph-runtime.md")
+    for src in sorted((ROOT / "assets/context").glob("*.md")):
+        shutil.copyfile(src, context_reference / src.name)
     for src in sorted((ROOT / "guides").glob("*.md")):
         shutil.copyfile(src, guide_reference / src.name)
     for src in sorted((ROOT / "guides").glob("*.html")):
