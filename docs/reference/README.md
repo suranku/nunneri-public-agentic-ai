@@ -36,14 +36,17 @@ python3 scripts/build_portal_manifest.py
 ## Install Repository Context Only
 
 ```bash
-./install.sh --provider claude --project --force --context-only
-./install.sh --provider codex --project --force --context-only
-./install.sh --provider gemini --project --force --context-only
+./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider claude --project --context-only --force
+./install.sh --provider codex --project --context-only --force
+./install.sh --provider gemini --project --context-only --force
 ```
 
 The context template generates root files such as `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` with known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, and dispatch rules.
 
 Provider-specific instructions can be defined in the same template. During generation, Claude receives only the Claude override section, Codex receives only the Codex section, and Gemini receives only the Gemini section.
+
+For project installs, provider context files are installed at the repository root. Provider assets such as agents, skills, commands, and workflows still install under `.claude/`, `.codex/`, or `.gemini/`.
 
 ## Install for Claude
 

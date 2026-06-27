@@ -97,7 +97,7 @@ def main() -> int:
             failures.append(f"{langgraph}: injection_stage must be pre_dispatch")
     installer = ROOT / "install.sh"
     install_text = installer.read_text(encoding="utf-8")
-    for snippet in ("--context-only", "--no-context", 'dest="$rel"', 'version_file=".ai-assets-version"'):
+    for snippet in ("--context-only", "--no-context", "--dry-run", "Dry run: skipping adapter build and writing no files", 'dest="$rel"', 'version_file=".ai-assets-version"', "Would install", "root context files=", "provider directory files="):
         if snippet not in install_text:
             failures.append(f"{installer}: missing context install contract snippet {snippet}")
     if failures:

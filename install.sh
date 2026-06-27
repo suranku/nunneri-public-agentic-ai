@@ -6,6 +6,7 @@ RUNTIME=""
 PROJECT=0
 FORCE=0
 SKIP_BUILD=0
+DRY_RUN=0
 INCLUDE_AGENTS=1
 INCLUDE_SKILLS=1
 INCLUDE_COMMANDS=1
@@ -14,7 +15,7 @@ INCLUDE_GUIDES=1
 INCLUDE_CONTEXT=1
 
 usage() {
-  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--skip-build] [filters]"
+  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--dry-run] [--skip-build] [filters]"
   echo "Filters: --agents-only --skills-only --commands-only --workflows-only --context-only --no-agents --no-skills --no-commands --no-workflows --no-guides --no-context"
 }
 
@@ -33,6 +34,7 @@ while [ "$#" -gt 0 ]; do
     --runtime) RUNTIME="$2"; shift 2 ;;
     --project) PROJECT=1; shift ;;
     --force) FORCE=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
     --agents-only) only_one; INCLUDE_AGENTS=1; shift ;;
     --skills-only) only_one; INCLUDE_SKILLS=1; shift ;;
@@ -67,9 +69,45 @@ if [ -z "$PROVIDER" ] && [ -z "$RUNTIME" ]; then
   exit 1
 fi
 
-if [ "$SKIP_BUILD" -eq 0 ]; then
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "Dry run: skipping adapter build and writing no files"
+elif [ "$SKIP_BUILD" -eq 0 ]; then
   python3 scripts/build_adapters.py
 fi
+
+write_version() {
+  version_file="$1"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "Would write version metadata to $version_file"
+    return 0
+  fi
+  mkdir -p "$(dirname "$version_file")"
+  version="$(cat VERSION)"
+  printf "%s\n" "$version" > "$version_file"
+}
+
+copy_or_report() {
+  src_file="$1"
+  dest_file="$2"
+  label="$3"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    echo "Would install $dest_file ($label)"
+    return 0
+  fi
+  mkdir -p "$(dirname "$dest_file")"
+  if [ -e "$dest_file" ] && [ "$FORCE" -ne 1 ]; then
+    echo "Skip existing $dest_file ($label; use --force to overwrite)"
+    return 1
+  fi
+  cp "$src_file" "$dest_file"
+  case "$label" in
+    root-context) echo "Installed $dest_file into project root" ;;
+    provider) echo "Installed $dest_file into provider directory" ;;
+    runtime) echo "Installed $dest_file into runtime directory" ;;
+    *) echo "Installed $dest_file" ;;
+  esac
+  return 0
+}
 
 should_install() {
   rel="$1"
@@ -111,24 +149,22 @@ install_runtime() {
       langgraph) target=".langgraph" ;;
     esac
   fi
-  mkdir -p "$target"
   count=0
+  skipped=0
   while IFS= read -r file; do
     rel="${file#$src/}"
     if ! should_install "$rel"; then
       continue
     fi
-    mkdir -p "$target/$(dirname "$rel")"
-    if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
-      echo "Skip existing $target/$rel"
-    else
-      cp "$file" "$target/$rel"
+    dest="$target/$rel"
+    if copy_or_report "$file" "$dest" "runtime"; then
       ((++count))
+    else
+      ((++skipped))
     fi
   done < <(find "$src" -type f | sort)
-  version="$(cat VERSION)"
-  printf "%s\n" "$version" > "$target/.ai-assets-version"
-  echo "Installed $count files for $runtime runtime into $target"
+  write_version "$target/.ai-assets-version"
+  echo "Summary for $runtime runtime: runtime directory files=$count skipped=$skipped version_metadata=1 target=$target dry_run=$DRY_RUN"
 }
 
 install_one() {
@@ -161,40 +197,43 @@ install_one() {
         ((++count))
       fi
     done < <(find "$src" -type f | sort)
-    version="$(cat VERSION)"
-    printf "%s\n" "$version" > "$target/.ai-assets-version"
-    echo "Prepared $count files for $provider in $target"
+    write_version "$target/.ai-assets-version"
+    echo "Summary for $provider: prepared_files=$count version_metadata=1 target=$target dry_run=$DRY_RUN"
     return 0
   fi
-  count=0
+  provider_count=0
+  root_context_count=0
+  skipped=0
   while IFS= read -r file; do
     rel="${file#$src/}"
     if ! should_install "$rel"; then
       continue
     fi
     dest="$target/$rel"
+    label="provider"
     case "$rel" in
       CLAUDE.md|AGENTS.md|GEMINI.md)
         if [ "$PROJECT" -eq 1 ]; then
           dest="$rel"
+          label="root-context"
         fi ;;
     esac
-    mkdir -p "$(dirname "$dest")"
-    if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
-      echo "Skip existing $dest"
+    if copy_or_report "$file" "$dest" "$label"; then
+      if [ "$label" = "root-context" ]; then
+        ((++root_context_count))
+      else
+        ((++provider_count))
+      fi
     else
-      cp "$file" "$dest"
-      ((++count))
+      ((++skipped))
     fi
   done < <(find "$src" -type f | sort)
-  version="$(cat VERSION)"
   version_file="$target/.ai-assets-version"
   if [ "$PROJECT" -eq 1 ] && [ "$INCLUDE_CONTEXT" -eq 1 ] && [ "$INCLUDE_AGENTS" -eq 0 ] && [ "$INCLUDE_SKILLS" -eq 0 ] && [ "$INCLUDE_COMMANDS" -eq 0 ] && [ "$INCLUDE_WORKFLOWS" -eq 0 ] && [ "$INCLUDE_GUIDES" -eq 0 ]; then
     version_file=".ai-assets-version"
   fi
-  mkdir -p "$(dirname "$version_file")"
-  printf "%s\n" "$version" > "$version_file"
-  echo "Installed $count files for $provider into $target"
+  write_version "$version_file"
+  echo "Summary for $provider: root context files=$root_context_count provider directory files=$provider_count skipped=$skipped version_metadata=1 target=$target dry_run=$DRY_RUN"
 }
 
 if [ "$PROVIDER" = "all" ]; then
