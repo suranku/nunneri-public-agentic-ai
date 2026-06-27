@@ -23,5 +23,5 @@ issue -> canonical asset -> provider adapter -> validation -> release
 ## Real Examples
 
 ```text
-/report-lineage sample-input --provider claude
+/report-lineage revenue-dashboard --provider claude
 ```

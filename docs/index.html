@@ -34,7 +34,7 @@
 </head>
 <body>
   <nav>
-    <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#providers">Providers</a>
+    <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#examples">Examples</a><a href="#providers">Providers</a>
     <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
@@ -60,6 +60,15 @@
 cd nuneri-public-ai-assets
 python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force</code></pre>
+    </section>
+    <section id="examples">
+      <h2>Examples</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Preview Context</h3><pre><code>./install.sh --provider claude --project --context-only --dry-run</code></pre></div>
+        <div class="card" data-reveal><h3>Install Claude Context</h3><pre><code>./install.sh --provider claude --project --context-only --force</code></pre></div>
+        <div class="card" data-reveal><h3>Run Triage</h3><pre><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre></div>
+        <div class="card" data-reveal><h3>Export LangGraph</h3><pre><code>./install.sh --runtime langgraph --project --force</code></pre></div>
+      </div>
     </section>
     <section id="providers">
       <h2>Providers</h2>

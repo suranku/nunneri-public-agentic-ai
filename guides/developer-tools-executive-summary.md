@@ -24,6 +24,6 @@ issue -> canonical asset -> provider adapter -> validation -> release
 ## Real Examples
 
 ```text
-/devhub-fix sample-input --provider claude
-/generate-agent-context sample-input --provider claude
+/devhub-fix '{"finding":"missing correlation id","repo":"payments-api"}' --provider gemini
+/generate-agent-context . --provider codex
 ```

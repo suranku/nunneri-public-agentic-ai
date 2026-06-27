@@ -48,6 +48,28 @@ Provider-specific instructions can be defined in the same template. During gener
 
 For project installs, provider context files are installed at the repository root. Provider assets such as agents, skills, commands, and workflows still install under `.claude/`, `.codex/`, or `.gemini/`.
 
+Example dry run:
+
+```text
+$ ./install.sh --provider claude --project --context-only --dry-run
+Dry run: skipping adapter build and writing no files
+Would install CLAUDE.md (root-context)
+Would write version metadata to .ai-assets-version
+Summary for claude: root context files=1 provider directory files=0 skipped=0 version_metadata=1 target=.claude dry_run=1
+```
+
+Example provider-specific override:
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
+
 ## Install for Claude
 
 ```bash

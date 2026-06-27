@@ -25,7 +25,7 @@ issue -> canonical asset -> provider adapter -> validation -> release
 ## Real Examples
 
 ```text
-/ingestion-check sample-input --provider claude
-/pipeline-health sample-input --provider claude
-/release-lookup sample-input --provider claude
+/ingestion-check orders-topic --provider claude
+/pipeline-health prod orders-ingestion --provider codex
+/release-lookup payments-api v1.8.0 --provider gemini
 ```

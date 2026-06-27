@@ -49,6 +49,58 @@ Claude uses `CLAUDE.md`, Codex uses `AGENTS.md`, and Gemini uses `GEMINI.md`.
 
 During project installs, provider context files are written to the repository root. Provider-specific assets still install under `.claude/`, `.codex/`, or `.gemini/`.
 
+Example dry run:
+
+```text
+$ ./install.sh --provider claude --project --context-only --dry-run
+Dry run: skipping adapter build and writing no files
+Would install CLAUDE.md (root-context)
+Would write version metadata to .ai-assets-version
+Summary for claude: root context files=1 provider directory files=0 skipped=0 version_metadata=1 target=.claude dry_run=1
+```
+
+Example full Claude project install:
+
+```text
+$ ./install.sh --provider claude --project --force --skip-build
+Installed CLAUDE.md into project root
+Installed .claude/agents/go-triage-specialist.md into provider directory
+Installed .claude/commands/triage.md into provider directory
+Summary for claude: root context files=1 provider directory files=52 skipped=0 version_metadata=1 target=.claude dry_run=0
+```
+
+## Provider-Specific Override Example
+
+Put shared rules in the neutral sections of `assets/context/repo-agent-instructions.md`. Put assistant-specific trigger phrases in the matching provider section.
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
+
+Generated result:
+
+```text
+dist/claude/CLAUDE.md   includes only the Claude Code override
+dist/codex/AGENTS.md    includes only the Codex override
+dist/gemini/GEMINI.md   includes only the Gemini override
+```
+
+## LangGraph Export Example
+
+```bash
+python3 scripts/build_adapters.py
+./install.sh --runtime langgraph --project --dry-run
+./install.sh --runtime langgraph --project --force
+```
+
+The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
+
 ## Repos with Context Files
 
 | Stack | Repos |

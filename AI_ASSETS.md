@@ -16,6 +16,18 @@ Use it for known issues, DevOps overrides, common library links, workflow overri
 
 Provider-specific behavior belongs in the template's provider override section. The generator renders only the matching override into `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` so provider-only trigger phrases do not leak across assistants.
 
+Example:
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
+
 ## Provider Adapters
 
 - Claude Code: `dist/claude`

@@ -25,7 +25,7 @@ issue -> canonical asset -> provider adapter -> validation -> release
 ## Real Examples
 
 ```text
-/exception-handling sample-input --provider claude
-/nfr-readiness sample-input --provider claude
-/check-logging sample-input --provider claude
+/exception-handling services/checkout --provider claude
+/nfr-readiness services/reporting --provider codex
+/check-logging src/payments --provider claude
 ```

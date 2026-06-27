@@ -360,7 +360,7 @@ def portal_html() -> str:
 </head>
 <body>
   <nav>
-    <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#providers">Providers</a>
+    <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#examples">Examples</a><a href="#providers">Providers</a>
     <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
@@ -386,6 +386,15 @@ def portal_html() -> str:
 cd nuneri-public-ai-assets
 python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force</code></pre>
+    </section>
+    <section id="examples">
+      <h2>Examples</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Preview Context</h3><pre><code>./install.sh --provider claude --project --context-only --dry-run</code></pre></div>
+        <div class="card" data-reveal><h3>Install Claude Context</h3><pre><code>./install.sh --provider claude --project --context-only --force</code></pre></div>
+        <div class="card" data-reveal><h3>Run Triage</h3><pre><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre></div>
+        <div class="card" data-reveal><h3>Export LangGraph</h3><pre><code>./install.sh --runtime langgraph --project --force</code></pre></div>
+      </div>
     </section>
     <section id="providers">
       <h2>Providers</h2>
@@ -451,9 +460,27 @@ python3 scripts/build_adapters.py
 </html>"""
 
 
+EXAMPLE_INVOCATIONS = {
+    "check-logging": '/check-logging src/payments --provider claude',
+    "column-trace": '/column-trace customer_id reports/revenue.sql --provider gemini',
+    "devhub-fix": '/devhub-fix \'{"finding":"missing correlation id","repo":"payments-api"}\' --provider gemini',
+    "exception-handling": '/exception-handling services/checkout --provider claude',
+    "generate-agent-context": '/generate-agent-context . --provider codex',
+    "impact-analysis": '/impact-analysis orders.customer_id --provider codex',
+    "ingestion-check": '/ingestion-check orders-topic --provider claude',
+    "nfr-readiness": '/nfr-readiness services/reporting --provider codex',
+    "pipeline-health": '/pipeline-health prod orders-ingestion --provider codex',
+    "release-lookup": '/release-lookup payments-api v1.8.0 --provider gemini',
+    "report-lineage": '/report-lineage revenue-dashboard --provider claude',
+    "schema-drift": '/schema-drift ddl/orders.sql --provider claude',
+    "prodops-triage": '/prodops-triage INC-204 prod "Kafka consumer lag exceeded threshold" --provider codex',
+    "triage": '/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude',
+}
+
+
 def executive_summary(title: str, commands: list[str]) -> str:
     rows = "\n".join(f"| `/{cmd}` | Runs the {cmd} workflow | Use when the request maps to {cmd} |" for cmd in commands)
-    examples = "\n".join(f"/{cmd} sample-input --provider claude" for cmd in commands[:3])
+    examples = "\n".join(EXAMPLE_INVOCATIONS.get(cmd, f"/{cmd} sample-input --provider claude") for cmd in commands[:3])
     return f"""> **One-liner:** {title} gives teams a provider-neutral way to use AI assets across Claude, Codex, Gemini, and open-source runtimes.
 
 ## The Problem Before
@@ -1945,6 +1972,20 @@ Canonical assets live under `assets/`. Provider-specific files are generated int
 
 Use it for known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, dispatch rules, approval gates, and release-impact instructions.
 
+Provider-specific behavior belongs in the template's provider override section. The generator renders only the matching override into `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` so provider-only trigger phrases do not leak across assistants.
+
+Example:
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
+
 ## Provider Adapters
 
 - Claude Code: `dist/claude`
@@ -2047,6 +2088,28 @@ The context template generates root files such as `CLAUDE.md`, `AGENTS.md`, and 
 Provider-specific instructions can be defined in the same template. During generation, Claude receives only the Claude override section, Codex receives only the Codex section, and Gemini receives only the Gemini section.
 
 For project installs, provider context files are installed at the repository root. Provider assets such as agents, skills, commands, and workflows still install under `.claude/`, `.codex/`, or `.gemini/`.
+
+Example dry run:
+
+```text
+$ ./install.sh --provider claude --project --context-only --dry-run
+Dry run: skipping adapter build and writing no files
+Would install CLAUDE.md (root-context)
+Would write version metadata to .ai-assets-version
+Summary for claude: root context files=1 provider directory files=0 skipped=0 version_metadata=1 target=.claude dry_run=1
+```
+
+Example provider-specific override:
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
 
 ## Install for Claude
 
@@ -2385,6 +2448,58 @@ Canonical behavior belongs in `AI_ASSETS.md` and `assets/`.
 Claude uses `CLAUDE.md`, Codex uses `AGENTS.md`, and Gemini uses `GEMINI.md`.
 
 During project installs, provider context files are written to the repository root. Provider-specific assets still install under `.claude/`, `.codex/`, or `.gemini/`.
+
+Example dry run:
+
+```text
+$ ./install.sh --provider claude --project --context-only --dry-run
+Dry run: skipping adapter build and writing no files
+Would install CLAUDE.md (root-context)
+Would write version metadata to .ai-assets-version
+Summary for claude: root context files=1 provider directory files=0 skipped=0 version_metadata=1 target=.claude dry_run=1
+```
+
+Example full Claude project install:
+
+```text
+$ ./install.sh --provider claude --project --force --skip-build
+Installed CLAUDE.md into project root
+Installed .claude/agents/go-triage-specialist.md into provider directory
+Installed .claude/commands/triage.md into provider directory
+Summary for claude: root context files=1 provider directory files=52 skipped=0 version_metadata=1 target=.claude dry_run=0
+```
+
+## Provider-Specific Override Example
+
+Put shared rules in the neutral sections of `assets/context/repo-agent-instructions.md`. Put assistant-specific trigger phrases in the matching provider section.
+
+```markdown
+### Claude Code
+
+- Treat "agent team" as a Claude-only request to coordinate specialist subagents.
+
+### Codex
+
+- Do not interpret "agent team" as a dispatch command. Ask which repo task should be planned or implemented.
+```
+
+Generated result:
+
+```text
+dist/claude/CLAUDE.md   includes only the Claude Code override
+dist/codex/AGENTS.md    includes only the Codex override
+dist/gemini/GEMINI.md   includes only the Gemini override
+```
+
+## LangGraph Export Example
+
+```bash
+python3 scripts/build_adapters.py
+./install.sh --runtime langgraph --project --dry-run
+./install.sh --runtime langgraph --project --force
+```
+
+The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
 
 ## Repos with Context Files
 

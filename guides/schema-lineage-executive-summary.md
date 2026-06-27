@@ -25,7 +25,7 @@ issue -> canonical asset -> provider adapter -> validation -> release
 ## Real Examples
 
 ```text
-/schema-drift sample-input --provider claude
-/impact-analysis sample-input --provider claude
-/column-trace sample-input --provider claude
+/schema-drift ddl/orders.sql --provider claude
+/impact-analysis orders.customer_id --provider codex
+/column-trace customer_id reports/revenue.sql --provider gemini
 ```
