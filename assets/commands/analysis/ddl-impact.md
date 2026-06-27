@@ -17,6 +17,9 @@ providers:
     invocation: ddl-impact
   open_source:
     manifest_id: ddl-impact
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /ddl-impact

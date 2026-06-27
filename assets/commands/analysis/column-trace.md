@@ -17,6 +17,9 @@ providers:
     invocation: column-trace
   open_source:
     manifest_id: column-trace
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /column-trace

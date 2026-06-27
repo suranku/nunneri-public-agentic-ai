@@ -1,0 +1,15 @@
+{
+  "name": "adapter-build",
+  "description": "Provider Adapter Build Workflow",
+  "runtime": "langgraph",
+  "source": "assets/workflows/adapter-build.md",
+  "nodes": [
+    {
+      "id": "adapter_build",
+      "label": "Provider Adapter Build Workflow",
+      "type": "workflow"
+    }
+  ],
+  "edges": [],
+  "body": "# Provider Adapter Build Workflow\n\nBuild Claude, Codex, Gemini, and open-source outputs from canonical assets."
+}

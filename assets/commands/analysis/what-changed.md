@@ -17,6 +17,9 @@ providers:
     invocation: what-changed
   open_source:
     manifest_id: what-changed
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /what-changed

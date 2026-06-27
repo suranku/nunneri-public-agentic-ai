@@ -17,6 +17,10 @@ ROOT_DOCS = [
     "VERSION",
 ]
 
+RENAMED_DOCS = {
+    "LANGGRAPH_RUNTIME.md": "langgraph-runtime.md",
+}
+
 
 def copy_file(src: Path, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -29,6 +33,9 @@ def sync() -> None:
 
     for name in ROOT_DOCS:
         copy_file(ROOT / name, REFERENCE / name)
+
+    for source, dest in RENAMED_DOCS.items():
+        copy_file(ROOT / source, REFERENCE / dest)
 
     for src in sorted((ROOT / "guides").glob("*.md")):
         copy_file(src, GUIDE_REFERENCE / src.name)

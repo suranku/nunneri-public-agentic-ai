@@ -15,6 +15,12 @@ Canonical assets live under `assets/`. Provider-specific files are generated int
 - Gemini: `dist/gemini`
 - Open-source frameworks: `dist/open-source`
 
+## Runtime Adapters
+
+- LangGraph: `dist/langgraph`
+
+LangGraph is an orchestration runtime export, not a model provider.
+
 ## Commands
 
 Run `python3 scripts/validate.py`, `python3 scripts/build_adapters.py`, and `python3 scripts/build_portal_manifest.py` before release.
@@ -46,6 +52,7 @@ Run:
 python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
+python3 scripts/check_langgraph_exports.py
 ```
 
 ## NFR Compliance Overrides

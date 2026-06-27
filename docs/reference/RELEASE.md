@@ -2,12 +2,12 @@
 
 ## Release Philosophy
 
-Ship stable provider-neutral assets and generated provider adapters together.
+Ship stable provider-neutral assets, generated provider adapters, and runtime exports together.
 
 ## Semantic Versioning
 
 - Patch: documentation fixes, prompt wording changes, non-breaking adapter fixes
-- Minor: new agents, skills, commands, workflows, or provider adapters
+- Minor: new agents, skills, commands, workflows, provider adapters, or runtime adapters
 - Major: breaking frontmatter, installer, invocation, or adapter contract changes
 
 ## Release Cadence
@@ -34,9 +34,9 @@ Update `VERSION` and `CHANGELOG.md` before tagging.
 
 Every release-targeted issue must be represented in `CHANGELOG.md`.
 
-## Provider Adapter Compatibility
+## Adapter Compatibility
 
-Claude, Codex, Gemini, and open-source outputs must build from the same canonical assets.
+Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the same canonical assets.
 
 ## Release Checklist
 

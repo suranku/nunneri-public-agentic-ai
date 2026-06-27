@@ -1,6 +1,7 @@
 .claude/
 .codex/
 .gemini/
+.langgraph/
 dist/open-source/.ai-assets-version
 __pycache__/
 .DS_Store

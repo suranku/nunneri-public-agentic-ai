@@ -39,7 +39,7 @@
   </nav>
   <main>
     <section id="hero" class="hero">
-      <span class="badge">Claude | Codex | Gemini | open-source</span>
+      <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
       <h1>Nuneri AI Assets</h1>
       <p>Provider-agnostic AI agents, skills, commands, workflows, guides, and adapters for Nuneri Platform.</p>
       <div id="stats" class="grid"></div>
@@ -67,6 +67,7 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>Codex</h3><p>Codex-ready skills, workflows, prompts, and AGENTS.md.</p></div>
         <div class="card" data-reveal><h3>Gemini</h3><p>Gemini prompts, workflows, command mappings, and GEMINI.md.</p></div>
         <div class="card" data-reveal><h3>Open Source</h3><p>Portable manifests, prompts, and workflow definitions.</p></div>
+        <div class="card" data-reveal><h3>LangGraph Runtime</h3><p>Graph and runtime manifests for stateful workflow orchestration. LangGraph is not a model provider.</p></div>
       </div>
     </section>
     <section id="commands">
@@ -81,13 +82,13 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
   <footer>Nuneri AI Assets | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
-    const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,providers:4,guides:8}, agents:[], commands:[], skills:[], guides:[]};
+    const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,providers:4,runtimes:1,guides:8}, agents:[], commands:[], skills:[], guides:[]};
     const card = (item) => `<div class="card" data-reveal><h3><code>${item.name}</code></h3><p>${item.description || item.category || ""}</p></div>`;
     function render(data) {
       const counts = data.counts || fallback.counts;

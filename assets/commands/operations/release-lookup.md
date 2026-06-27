@@ -17,6 +17,9 @@ providers:
     invocation: release-lookup
   open_source:
     manifest_id: release-lookup
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /release-lookup

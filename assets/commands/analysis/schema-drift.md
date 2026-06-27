@@ -17,6 +17,9 @@ providers:
     invocation: schema-drift
   open_source:
     manifest_id: schema-drift
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /schema-drift

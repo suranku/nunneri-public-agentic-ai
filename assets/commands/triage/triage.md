@@ -18,6 +18,9 @@ providers:
     invocation: triage
   open_source:
     manifest_id: triage
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /triage

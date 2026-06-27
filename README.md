@@ -11,6 +11,7 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Commands | `assets/commands/` |
 | Workflows | `assets/workflows/` |
 | Guides | `guides/` |
+| Runtime adapters | `dist/langgraph/` |
 
 ## Supported Providers
 
@@ -18,6 +19,10 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 - OpenAI Codex
 - Google Gemini / Gemini CLI
 - Open-source agent frameworks
+
+## Supported Runtimes
+
+- LangGraph runtime export for stateful workflow orchestration
 
 ## Quick Start
 
@@ -49,6 +54,13 @@ python3 scripts/build_portal_manifest.py
 
 ```bash
 ./install.sh --provider open-source --force
+```
+
+## Export for LangGraph
+
+```bash
+python3 scripts/build_adapters.py
+./install.sh --runtime langgraph --project --force
 ```
 
 ## Command Reference

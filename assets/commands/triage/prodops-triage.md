@@ -19,6 +19,9 @@ providers:
     invocation: prodops-triage
   open_source:
     manifest_id: prodops-triage
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /prodops-triage

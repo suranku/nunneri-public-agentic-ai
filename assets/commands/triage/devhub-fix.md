@@ -17,6 +17,9 @@ providers:
     invocation: devhub-fix
   open_source:
     manifest_id: devhub-fix
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /devhub-fix

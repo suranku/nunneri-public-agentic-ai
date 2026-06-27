@@ -24,6 +24,9 @@ providers:
       - search
       - shell
       - edit
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # changelog-analyst

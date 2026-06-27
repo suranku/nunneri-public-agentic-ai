@@ -66,6 +66,9 @@ providers:
       - search
       - shell
       - edit
+runtimes:
+  langgraph:
+    enabled: true
 ---"""
 
 
@@ -139,6 +142,9 @@ providers:
     invocation: {name}
   open_source:
     manifest_id: {name}
+runtimes:
+  langgraph:
+    enabled: true
 ---"""
 
 
@@ -198,6 +204,9 @@ providers:
     enabled: true
   open_source:
     enabled: true
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # {title}
@@ -219,6 +228,9 @@ providers:
   gemini:
     enabled: true
   open_source:
+    enabled: true
+runtimes:
+  langgraph:
     enabled: true
 ---
 
@@ -353,7 +365,7 @@ def portal_html() -> str:
   </nav>
   <main>
     <section id="hero" class="hero">
-      <span class="badge">Claude | Codex | Gemini | open-source</span>
+      <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
       <h1>{PLATFORM}</h1>
       <p>Provider-agnostic AI agents, skills, commands, workflows, guides, and adapters for {TEAM}.</p>
       <div id="stats" class="grid"></div>
@@ -381,6 +393,7 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>Codex</h3><p>Codex-ready skills, workflows, prompts, and AGENTS.md.</p></div>
         <div class="card" data-reveal><h3>Gemini</h3><p>Gemini prompts, workflows, command mappings, and GEMINI.md.</p></div>
         <div class="card" data-reveal><h3>Open Source</h3><p>Portable manifests, prompts, and workflow definitions.</p></div>
+        <div class="card" data-reveal><h3>LangGraph Runtime</h3><p>Graph and runtime manifests for stateful workflow orchestration. LangGraph is not a model provider.</p></div>
       </div>
     </section>
     <section id="commands">
@@ -395,13 +408,13 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
   <footer>{PLATFORM} | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
   <script>
-    const fallback = {{counts:{{agents:0,commands:0,skills:0,workflows:0,providers:4,guides:8}}, agents:[], commands:[], skills:[], guides:[]}};
+    const fallback = {{counts:{{agents:0,commands:0,skills:0,workflows:0,providers:4,runtimes:1,guides:8}}, agents:[], commands:[], skills:[], guides:[]}};
     const card = (item) => `<div class="card" data-reveal><h3><code>${{item.name}}</code></h3><p>${{item.description || item.category || ""}}</p></div>`;
     function render(data) {{
       const counts = data.counts || fallback.counts;
@@ -470,8 +483,9 @@ def create_assets() -> None:
         "assets/workflows", "adapters/claude/agents", "adapters/claude/skills", "adapters/claude/commands",
         "adapters/codex/skills", "adapters/codex/prompts", "adapters/codex/workflows",
         "adapters/gemini/prompts", "adapters/gemini/workflows", "adapters/gemini/context",
+        "adapters/langgraph",
         "adapters/open-source/manifests", "adapters/open-source/prompts", "adapters/open-source/workflows",
-        "guides", "docs/assets", "scripts", "dist/claude", "dist/codex", "dist/gemini", "dist/open-source",
+        "guides", "docs/assets", "scripts", "dist/claude", "dist/codex", "dist/gemini", "dist/langgraph", "dist/open-source",
         ".github/ISSUE_TEMPLATE", ".github/workflows",
     ]
     for directory in dirs:
@@ -711,6 +725,36 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROVIDERS = ("claude", "codex", "gemini", "open-source")
+RUNTIMES = ("langgraph",)
+
+TRIAGE_NINE_PHASE_GRAPH = {
+    "name": "triage-nine-phase",
+    "description": "Nine Phase Triage Workflow",
+    "runtime": "langgraph",
+    "source": "assets/workflows/triage-nine-phase.md",
+    "nodes": [
+        {"id": "intake", "label": "Intake", "phase": 1, "type": "work"},
+        {"id": "context_load", "label": "Context Load", "phase": 2, "type": "work"},
+        {"id": "classification", "label": "Classification", "phase": 3, "type": "work"},
+        {"id": "evidence_collection", "label": "Evidence Collection", "phase": 4, "type": "work"},
+        {"id": "root_cause_analysis", "label": "Root Cause Analysis", "phase": 5, "type": "work"},
+        {"id": "gate_1", "label": "Gate 1: RCA and Fix Plan Approval", "phase": 6, "type": "human_approval", "approval_checkpoint": True},
+        {"id": "test_first_fix", "label": "Test-First Fix", "phase": 7, "type": "work"},
+        {"id": "validation", "label": "Validation", "phase": 8, "type": "work"},
+        {"id": "gate_2", "label": "Gate 2: Summary and Release Impact", "phase": 9, "type": "human_approval", "approval_checkpoint": True},
+    ],
+    "edges": [
+        {"from": "intake", "to": "context_load"},
+        {"from": "context_load", "to": "classification"},
+        {"from": "classification", "to": "evidence_collection"},
+        {"from": "evidence_collection", "to": "root_cause_analysis"},
+        {"from": "root_cause_analysis", "to": "gate_1"},
+        {"from": "gate_1", "to": "test_first_fix", "condition": "approved"},
+        {"from": "test_first_fix", "to": "validation"},
+        {"from": "validation", "to": "gate_2"},
+    ],
+    "post_triage_actions": ["commit", "push", "pull_request", "release_tag", "publish"],
+}
 
 
 def frontmatter_and_body(path: Path) -> tuple[dict[str, str], str]:
@@ -730,8 +774,8 @@ def write(path: Path, content: str) -> None:
 
 
 def reset_dist() -> None:
-    for provider in PROVIDERS:
-        target = ROOT / "dist" / provider
+    for target_name in PROVIDERS + RUNTIMES:
+        target = ROOT / "dist" / target_name
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True, exist_ok=True)
@@ -769,6 +813,55 @@ def build_command(src: Path, data: dict[str, str], body: str) -> None:
             write(ROOT / f"dist/{provider}/{target_dir}" / f"{data['name']}{suffix}", f"> Generated from `{src.relative_to(ROOT)}`.\n\n{body}")
 
 
+def build_langgraph_agent(src: Path, data: dict[str, str], body: str) -> None:
+    payload = {
+        "name": data["name"],
+        "description": data["description"],
+        "category": data.get("category"),
+        "runtime": "langgraph",
+        "source": str(src.relative_to(ROOT)),
+        "node": {
+            "id": data["name"].replace("-", "_"),
+            "type": "agent",
+            "body": body,
+        },
+    }
+    write(ROOT / "dist/langgraph/manifests/agents" / f"{data['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_langgraph_command(src: Path, data: dict[str, str], body: str) -> None:
+    payload = {
+        "name": data["name"],
+        "description": data["description"],
+        "category": data.get("category", "command"),
+        "runtime": "langgraph",
+        "source": str(src.relative_to(ROOT)),
+        "entrypoint": {
+            "id": data["name"].replace("-", "_"),
+            "type": "command",
+            "body": body,
+        },
+    }
+    write(ROOT / "dist/langgraph/manifests/commands" / f"{data['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_langgraph_workflow(src: Path, data: dict[str, str], body: str) -> None:
+    if data["name"] == "triage-nine-phase":
+        payload = TRIAGE_NINE_PHASE_GRAPH
+        payload = {**payload, "body": body}
+    else:
+        payload = {
+            "name": data["name"],
+            "description": data["description"],
+            "runtime": "langgraph",
+            "source": str(src.relative_to(ROOT)),
+            "nodes": [{"id": data["name"].replace("-", "_"), "label": data["description"], "type": "workflow"}],
+            "edges": [],
+            "body": body,
+        }
+    write(ROOT / "dist/langgraph/graphs" / f"{data['name']}.json", json.dumps(payload, indent=2))
+
+
 def copy_skill(src: Path) -> None:
     relative = src.parent.name
     for provider in PROVIDERS:
@@ -786,12 +879,20 @@ def build() -> None:
         for provider in ("codex", "gemini"):
             write(ROOT / f"dist/{provider}/prompts/agents" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{body}")
         write(ROOT / "dist/open-source/manifests/agents" / f"{data['name']}.json", json.dumps({"name": data["name"], "description": data["description"], "category": data.get("category"), "source": str(src.relative_to(ROOT)), "body": body}, indent=2))
+        build_langgraph_agent(src, data, body)
     for src in sorted(path for path in (ROOT / "assets/commands").glob("**/*.md") if path.name != "README.md"):
         data, body = frontmatter_and_body(src)
         build_command(src, data, body)
+        build_langgraph_command(src, data, body)
     for src in sorted((ROOT / "assets/skills").glob("*/SKILL.md")):
         copy_skill(src)
     for src in sorted((ROOT / "assets/workflows").glob("*.md")):
+        if src.name == "README.md":
+            for provider in PROVIDERS:
+                write(ROOT / f"dist/{provider}/workflows" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
+            continue
+        data, body = frontmatter_and_body(src)
+        build_langgraph_workflow(src, data, body)
         for provider in PROVIDERS:
             folder = "workflows" if provider != "open-source" else "workflows"
             write(ROOT / f"dist/{provider}/{folder}" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
@@ -799,7 +900,8 @@ def build() -> None:
     write(ROOT / "dist/codex/AGENTS.md", "# Codex Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
     write(ROOT / "dist/gemini/GEMINI.md", "# Gemini Context\n\nGenerated from provider-neutral assets. Use `AI_ASSETS.md` for canonical rules.")
     write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets.")
-    print("Built provider adapters: claude, codex, gemini, open-source")
+    write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider.")
+    print("Built provider adapters: claude, codex, gemini, open-source; runtime adapters: langgraph")
 
 
 if __name__ == "__main__":
@@ -855,7 +957,7 @@ def main() -> None:
         for path in sorted((ROOT / "guides").glob("*.html"))
     ]
     manifest = {
-        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "guides": len(guides)},
+        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "runtimes": 1, "guides": len(guides)},
         "agents": agents,
         "commands": commands,
         "skills": skills,
@@ -964,6 +1066,80 @@ if __name__ == "__main__":
     sys.exit(main())
 ''', True)
 
+    write("scripts/check_langgraph_exports.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+TRIAGE_GRAPH = ROOT / "dist/langgraph/graphs/triage-nine-phase.json"
+
+
+def main() -> int:
+    failures: list[str] = []
+
+    if not (ROOT / "dist/langgraph").is_dir():
+        failures.append("dist/langgraph is missing")
+
+    if not TRIAGE_GRAPH.exists():
+        failures.append("dist/langgraph/graphs/triage-nine-phase.json is missing")
+    else:
+        graph = json.loads(TRIAGE_GRAPH.read_text(encoding="utf-8"))
+        nodes = graph.get("nodes", [])
+        edges = graph.get("edges", [])
+        approval_nodes = [node for node in nodes if node.get("approval_checkpoint") is True]
+
+        if len(nodes) != 9:
+            failures.append(f"triage-nine-phase must export exactly 9 nodes, found {len(nodes)}")
+
+        expected_ids = [
+            "intake",
+            "context_load",
+            "classification",
+            "evidence_collection",
+            "root_cause_analysis",
+            "gate_1",
+            "test_first_fix",
+            "validation",
+            "gate_2",
+        ]
+        actual_ids = [node.get("id") for node in nodes]
+        if actual_ids != expected_ids:
+            failures.append(f"triage-nine-phase node order mismatch: {actual_ids}")
+
+        approval_ids = sorted(node.get("id") for node in approval_nodes)
+        if approval_ids != ["gate_1", "gate_2"]:
+            failures.append(f"approval checkpoints must be gate_1 and gate_2, found {approval_ids}")
+
+        expected_edges = [
+            ("intake", "context_load"),
+            ("context_load", "classification"),
+            ("classification", "evidence_collection"),
+            ("evidence_collection", "root_cause_analysis"),
+            ("root_cause_analysis", "gate_1"),
+            ("gate_1", "test_first_fix"),
+            ("test_first_fix", "validation"),
+            ("validation", "gate_2"),
+        ]
+        actual_edges = [(edge.get("from"), edge.get("to")) for edge in edges]
+        if actual_edges != expected_edges:
+            failures.append(f"triage-nine-phase edge order mismatch: {actual_edges}")
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+
+    print("LangGraph export checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
     write("scripts/prepare_release.py", r'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -1049,6 +1225,7 @@ def create_installers() -> None:
 set -euo pipefail
 
 PROVIDER=""
+RUNTIME=""
 PROJECT=0
 FORCE=0
 SKIP_BUILD=0
@@ -1059,7 +1236,7 @@ INCLUDE_WORKFLOWS=1
 INCLUDE_GUIDES=1
 
 usage() {
-  echo "Usage: ./install.sh --provider claude|codex|gemini|open-source|all [--project] [--force] [--skip-build] [filters]"
+  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--skip-build] [filters]"
   echo "Filters: --agents-only --skills-only --commands-only --workflows-only --no-agents --no-skills --no-commands --no-workflows --no-guides"
 }
 
@@ -1074,6 +1251,7 @@ only_one() {
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --provider) PROVIDER="$2"; shift 2 ;;
+    --runtime) RUNTIME="$2"; shift 2 ;;
     --project) PROJECT=1; shift ;;
     --force) FORCE=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
@@ -1102,7 +1280,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -z "$PROVIDER" ]; then
+if [ -z "$PROVIDER" ] && [ -z "$RUNTIME" ]; then
   usage
   exit 1
 fi
@@ -1122,13 +1300,51 @@ should_install() {
       [ "$INCLUDE_COMMANDS" -eq 1 ] ;;
     workflows/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
+    graphs/*)
+      [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
-    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md)
+    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
     *)
       return 0 ;;
   esac
+}
+
+install_runtime() {
+  runtime="$1"
+  src="dist/$runtime"
+  if [ ! -d "$src" ]; then
+    echo "Missing $src"
+    exit 1
+  fi
+  case "$runtime" in
+    langgraph) target="$HOME/.langgraph" ;;
+    *) echo "Unsupported runtime: $runtime"; exit 1 ;;
+  esac
+  if [ "$PROJECT" -eq 1 ]; then
+    case "$runtime" in
+      langgraph) target=".langgraph" ;;
+    esac
+  fi
+  mkdir -p "$target"
+  count=0
+  while IFS= read -r file; do
+    rel="${file#$src/}"
+    if ! should_install "$rel"; then
+      continue
+    fi
+    mkdir -p "$target/$(dirname "$rel")"
+    if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
+      echo "Skip existing $target/$rel"
+    else
+      cp "$file" "$target/$rel"
+      ((++count))
+    fi
+  done < <(find "$src" -type f | sort)
+  version="$(cat VERSION)"
+  printf "%s\n" "$version" > "$target/.ai-assets-version"
+  echo "Installed $count files for $runtime runtime into $target"
 }
 
 install_one() {
@@ -1191,8 +1407,14 @@ if [ "$PROVIDER" = "all" ]; then
   install_one codex
   install_one gemini
   install_one open-source
-else
+elif [ -n "$PROVIDER" ]; then
   install_one "$PROVIDER"
+fi
+
+if [ "$RUNTIME" = "all" ]; then
+  install_runtime langgraph
+elif [ -n "$RUNTIME" ]; then
+  install_runtime "$RUNTIME"
 fi
 ''', True)
 
@@ -1271,6 +1493,12 @@ Canonical assets live under `assets/`. Provider-specific files are generated int
 - Gemini: `dist/gemini`
 - Open-source frameworks: `dist/open-source`
 
+## Runtime Adapters
+
+- LangGraph: `dist/langgraph`
+
+LangGraph is an orchestration runtime export, not a model provider.
+
 ## Commands
 
 Run `python3 scripts/validate.py`, `python3 scripts/build_adapters.py`, and `python3 scripts/build_portal_manifest.py` before release.
@@ -1302,6 +1530,7 @@ Run:
 python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
+python3 scripts/check_langgraph_exports.py
 ```
 
 ## NFR Compliance Overrides
@@ -1322,6 +1551,7 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Commands | `assets/commands/` |
 | Workflows | `assets/workflows/` |
 | Guides | `guides/` |
+| Runtime adapters | `dist/langgraph/` |
 
 ## Supported Providers
 
@@ -1329,6 +1559,10 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 - OpenAI Codex
 - Google Gemini / Gemini CLI
 - Open-source agent frameworks
+
+## Supported Runtimes
+
+- LangGraph runtime export for stateful workflow orchestration
 
 ## Quick Start
 
@@ -1362,6 +1596,13 @@ python3 scripts/build_portal_manifest.py
 ./install.sh --provider open-source --force
 ```
 
+## Export for LangGraph
+
+```bash
+python3 scripts/build_adapters.py
+./install.sh --runtime langgraph --project --force
+```
+
 ## Command Reference
 
 See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
@@ -1369,6 +1610,76 @@ See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
 ## Contributing
 
 Use GitHub Issues first. See `CONTRIBUTING.md`.
+""")
+
+    write("LANGGRAPH_RUNTIME.md", """# LangGraph Runtime Adapter
+
+LangGraph support is provided as a runtime adapter, not as a model provider.
+
+Claude, Codex, and Gemini are provider adapters because they map prompts, skills, commands, and context into model-specific coding assistant surfaces. LangGraph is different: it is an orchestration runtime for stateful agent workflows. This repository exports graph metadata that can be consumed by a future LangGraph application without requiring LangGraph as a dependency in this repo.
+
+## Generated Outputs
+
+Run:
+
+```bash
+python3 scripts/build_adapters.py
+```
+
+Generated LangGraph files are written to:
+
+```text
+dist/langgraph/
+  LANGGRAPH.md
+  manifests/
+    agents/
+    commands/
+  graphs/
+```
+
+## Triage Graph Contract
+
+`dist/langgraph/graphs/triage-nine-phase.json` exports the canonical nine-phase triage workflow.
+
+Required nodes:
+
+```text
+intake
+context_load
+classification
+evidence_collection
+root_cause_analysis
+gate_1
+test_first_fix
+validation
+gate_2
+```
+
+`gate_1` and `gate_2` are marked as human approval checkpoints.
+
+## Installation
+
+Install generated runtime exports into a project-local `.langgraph/` directory:
+
+```bash
+./install.sh --runtime langgraph --project --force
+```
+
+Install only graph workflows:
+
+```bash
+./install.sh --runtime langgraph --project --force --workflows-only
+```
+
+## Validation
+
+Run:
+
+```bash
+python3 scripts/check_langgraph_exports.py
+```
+
+This verifies that the LangGraph export exists, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.
 """)
 
     write("CONTRIBUTING.md", f"""# Contributing
@@ -1432,12 +1743,12 @@ Note: GitHub issue templates only become visible after `.github/ISSUE_TEMPLATE/`
 
 ## Release Philosophy
 
-Ship stable provider-neutral assets and generated provider adapters together.
+Ship stable provider-neutral assets, generated provider adapters, and runtime exports together.
 
 ## Semantic Versioning
 
 - Patch: documentation fixes, prompt wording changes, non-breaking adapter fixes
-- Minor: new agents, skills, commands, workflows, or provider adapters
+- Minor: new agents, skills, commands, workflows, provider adapters, or runtime adapters
 - Major: breaking frontmatter, installer, invocation, or adapter contract changes
 
 ## Release Cadence
@@ -1464,9 +1775,9 @@ Update `VERSION` and `CHANGELOG.md` before tagging.
 
 Every release-targeted issue must be represented in `CHANGELOG.md`.
 
-## Provider Adapter Compatibility
+## Adapter Compatibility
 
-Claude, Codex, Gemini, and open-source outputs must build from the same canonical assets.
+Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the same canonical assets.
 
 ## Release Checklist
 
@@ -1516,6 +1827,7 @@ All notable changes to this project are documented here.
     write("adapters/claude/CLAUDE.md", "# Claude Adapter\n\nGenerated Claude outputs are built into `dist/claude/`.")
     write("adapters/codex/AGENTS.md", "# Codex Adapter\n\nGenerated Codex outputs are built into `dist/codex/`.")
     write("adapters/gemini/GEMINI.md", "# Gemini Adapter\n\nGenerated Gemini outputs are built into `dist/gemini/`.")
+    write("adapters/langgraph/README.md", "# LangGraph Runtime Adapter\n\nLangGraph is treated as an orchestration runtime, not as a model provider.\n\nGenerated runtime files are written to `dist/langgraph/` by `scripts/build_adapters.py`.")
     write("adapters/open-source/AGENT_MANIFEST.md", "# Open Source Adapter\n\nGenerated open-source manifests are built into `dist/open-source/`.")
 
 
@@ -1823,6 +2135,8 @@ jobs:
         run: python3 scripts/sync_docs_reference.py
       - name: Check docs links
         run: python3 scripts/check_docs_links.py
+      - name: Check LangGraph exports
+        run: python3 scripts/check_langgraph_exports.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
@@ -1856,6 +2170,7 @@ def sync_reference_docs() -> None:
     guide_reference.mkdir(parents=True, exist_ok=True)
     for name in ("README.md", "AI_ASSETS.md", "CONTRIBUTING.md", "RELEASE.md", "CHANGELOG.md", "VERSION"):
         shutil.copyfile(ROOT / name, reference / name)
+    shutil.copyfile(ROOT / "LANGGRAPH_RUNTIME.md", reference / "langgraph-runtime.md")
     for src in sorted((ROOT / "guides").glob("*.md")):
         shutil.copyfile(src, guide_reference / src.name)
     for src in sorted((ROOT / "guides").glob("*.html")):

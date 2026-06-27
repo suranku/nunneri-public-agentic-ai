@@ -21,6 +21,9 @@ providers:
       - search
       - shell
       - edit
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # javascript-eh-specialist

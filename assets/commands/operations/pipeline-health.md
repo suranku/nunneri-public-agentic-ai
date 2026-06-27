@@ -17,6 +17,9 @@ providers:
     invocation: pipeline-health
   open_source:
     manifest_id: pipeline-health
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /pipeline-health

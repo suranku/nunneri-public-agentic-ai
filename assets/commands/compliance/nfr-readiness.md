@@ -17,6 +17,9 @@ providers:
     invocation: nfr-readiness
   open_source:
     manifest_id: nfr-readiness
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /nfr-readiness

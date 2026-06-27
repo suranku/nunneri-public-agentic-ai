@@ -17,6 +17,9 @@ providers:
     invocation: ingestion-check
   open_source:
     manifest_id: ingestion-check
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /ingestion-check

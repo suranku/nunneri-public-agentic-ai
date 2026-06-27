@@ -2,6 +2,7 @@
 set -euo pipefail
 
 PROVIDER=""
+RUNTIME=""
 PROJECT=0
 FORCE=0
 SKIP_BUILD=0
@@ -12,7 +13,7 @@ INCLUDE_WORKFLOWS=1
 INCLUDE_GUIDES=1
 
 usage() {
-  echo "Usage: ./install.sh --provider claude|codex|gemini|open-source|all [--project] [--force] [--skip-build] [filters]"
+  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--skip-build] [filters]"
   echo "Filters: --agents-only --skills-only --commands-only --workflows-only --no-agents --no-skills --no-commands --no-workflows --no-guides"
 }
 
@@ -27,6 +28,7 @@ only_one() {
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --provider) PROVIDER="$2"; shift 2 ;;
+    --runtime) RUNTIME="$2"; shift 2 ;;
     --project) PROJECT=1; shift ;;
     --force) FORCE=1; shift ;;
     --skip-build) SKIP_BUILD=1; shift ;;
@@ -55,7 +57,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -z "$PROVIDER" ]; then
+if [ -z "$PROVIDER" ] && [ -z "$RUNTIME" ]; then
   usage
   exit 1
 fi
@@ -75,13 +77,51 @@ should_install() {
       [ "$INCLUDE_COMMANDS" -eq 1 ] ;;
     workflows/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
+    graphs/*)
+      [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
-    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md)
+    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
     *)
       return 0 ;;
   esac
+}
+
+install_runtime() {
+  runtime="$1"
+  src="dist/$runtime"
+  if [ ! -d "$src" ]; then
+    echo "Missing $src"
+    exit 1
+  fi
+  case "$runtime" in
+    langgraph) target="$HOME/.langgraph" ;;
+    *) echo "Unsupported runtime: $runtime"; exit 1 ;;
+  esac
+  if [ "$PROJECT" -eq 1 ]; then
+    case "$runtime" in
+      langgraph) target=".langgraph" ;;
+    esac
+  fi
+  mkdir -p "$target"
+  count=0
+  while IFS= read -r file; do
+    rel="${file#$src/}"
+    if ! should_install "$rel"; then
+      continue
+    fi
+    mkdir -p "$target/$(dirname "$rel")"
+    if [ -e "$target/$rel" ] && [ "$FORCE" -ne 1 ]; then
+      echo "Skip existing $target/$rel"
+    else
+      cp "$file" "$target/$rel"
+      ((++count))
+    fi
+  done < <(find "$src" -type f | sort)
+  version="$(cat VERSION)"
+  printf "%s\n" "$version" > "$target/.ai-assets-version"
+  echo "Installed $count files for $runtime runtime into $target"
 }
 
 install_one() {
@@ -144,6 +184,12 @@ if [ "$PROVIDER" = "all" ]; then
   install_one codex
   install_one gemini
   install_one open-source
-else
+elif [ -n "$PROVIDER" ]; then
   install_one "$PROVIDER"
+fi
+
+if [ "$RUNTIME" = "all" ]; then
+  install_runtime langgraph
+elif [ -n "$RUNTIME" ]; then
+  install_runtime "$RUNTIME"
 fi

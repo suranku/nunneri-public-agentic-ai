@@ -1,0 +1,15 @@
+{
+  "name": "issue-to-release",
+  "description": "Issue to Release Workflow",
+  "runtime": "langgraph",
+  "source": "assets/workflows/issue-to-release.md",
+  "nodes": [
+    {
+      "id": "issue_to_release",
+      "label": "Issue to Release Workflow",
+      "type": "workflow"
+    }
+  ],
+  "edges": [],
+  "body": "# Issue to Release Workflow\n\nGitHub Issue -> triage labels -> accepted scope -> PR -> validation -> changelog -> release."
+}

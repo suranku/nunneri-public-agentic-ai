@@ -17,6 +17,9 @@ providers:
     invocation: generate-agent-context
   open_source:
     manifest_id: generate-agent-context
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /generate-agent-context

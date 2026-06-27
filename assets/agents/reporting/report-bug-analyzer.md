@@ -24,6 +24,9 @@ providers:
       - search
       - shell
       - edit
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # report-bug-analyzer

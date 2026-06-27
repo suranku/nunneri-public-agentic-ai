@@ -47,7 +47,7 @@ def main() -> None:
         for path in sorted((ROOT / "guides").glob("*.html"))
     ]
     manifest = {
-        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "guides": len(guides)},
+        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "providers": 4, "runtimes": 1, "guides": len(guides)},
         "agents": agents,
         "commands": commands,
         "skills": skills,

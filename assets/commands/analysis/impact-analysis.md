@@ -18,6 +18,9 @@ providers:
     invocation: impact-analysis
   open_source:
     manifest_id: impact-analysis
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /impact-analysis

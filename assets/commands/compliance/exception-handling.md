@@ -17,6 +17,9 @@ providers:
     invocation: exception-handling
   open_source:
     manifest_id: exception-handling
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /exception-handling

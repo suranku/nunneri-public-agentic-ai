@@ -11,6 +11,9 @@ providers:
     enabled: true
   open_source:
     enabled: true
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # Universal Triage Workflow

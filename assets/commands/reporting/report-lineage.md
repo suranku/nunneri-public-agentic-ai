@@ -17,6 +17,9 @@ providers:
     invocation: report-lineage
   open_source:
     manifest_id: report-lineage
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /report-lineage

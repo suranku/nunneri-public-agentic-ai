@@ -17,6 +17,9 @@ providers:
     invocation: check-logging
   open_source:
     manifest_id: check-logging
+runtimes:
+  langgraph:
+    enabled: true
 ---
 
 # /check-logging
