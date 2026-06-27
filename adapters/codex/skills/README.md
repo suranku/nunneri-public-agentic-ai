@@ -1,3 +1,3 @@
 # adapters/codex/skills
 
-This directory is part of the Nuneri AI Assets repository.
+This directory is part of the Nunneri AI Assets repository.

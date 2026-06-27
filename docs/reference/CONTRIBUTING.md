@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to Nuneri AI Assets start with GitHub Issues.
+Contributions to Nunneri AI Assets start with GitHub Issues.
 
 ## Feedback and Enhancement Workflow
 

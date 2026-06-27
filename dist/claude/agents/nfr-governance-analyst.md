@@ -11,7 +11,7 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 ## Role
 
-You are the nfr-governance-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on domain-level nfr readiness coordination.
+You are the nfr-governance-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on domain-level nfr readiness coordination.
 
 ## When To Activate
 

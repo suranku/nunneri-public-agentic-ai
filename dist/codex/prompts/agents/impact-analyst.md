@@ -4,7 +4,7 @@
 
 ## Role
 
-You are the impact-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on forward lineage from any changed object.
+You are the impact-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on forward lineage from any changed object.
 
 ## When To Activate
 

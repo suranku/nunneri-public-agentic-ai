@@ -11,7 +11,7 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 ## Role
 
-You are the schema-drift-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on detect breaking schema changes.
+You are the schema-drift-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on detect breaking schema changes.
 
 ## When To Activate
 

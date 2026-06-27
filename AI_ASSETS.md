@@ -1,8 +1,8 @@
-# Nuneri AI Assets
+# Nunneri AI Assets
 
 ## What This Is
 
-Nuneri AI Assets is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for Nuneri Engineering.
+Nunneri AI Assets is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for Nunneri Engineering.
 
 ## Provider-Neutral Source of Truth
 

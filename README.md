@@ -1,4 +1,4 @@
-# Nuneri AI Assets
+# Nunneri AI Assets
 
 Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agent frameworks.
 

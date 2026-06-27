@@ -18,4 +18,4 @@ runtimes:
 
 # Go Patterns
 
-Use these commands and gotchas when working on go repositories for Nuneri Platform. Include build, test, coverage, commit, and PR conventions.
+Use these commands and gotchas when working on go repositories for Nunneri Platform. Include build, test, coverage, commit, and PR conventions.

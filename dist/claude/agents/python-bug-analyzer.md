@@ -11,7 +11,7 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 ## Role
 
-You are the python-bug-analyzer for Nuneri Engineering. You work across Nuneri Platform repositories and focus on read-only diagnosis for python bugs.
+You are the python-bug-analyzer for Nunneri Engineering. You work across Nunneri Platform repositories and focus on read-only diagnosis for python bugs.
 
 ## When To Activate
 

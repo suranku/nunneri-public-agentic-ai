@@ -10,10 +10,10 @@ from textwrap import dedent
 
 ROOT = Path(__file__).resolve().parents[1]
 
-ORG = "Nuneri Engineering"
-PLATFORM = "Nuneri AI Assets"
-REPO_URL = "github.com/Yamini-Suranku/nuneri-public-ai-assets"
-TEAM = "Nuneri Platform"
+ORG = "Nunneri Engineering"
+PLATFORM = "Nunneri AI Assets"
+REPO_URL = "github.com/Yamini-Suranku/nunneri-public-ai-assets"
+TEAM = "Nunneri Platform"
 STACKS = ["python", "javascript", "java", "go"]
 DOMAINS = ["Platform", "Applications", "Data", "Reporting"]
 CODEOWNERS = ["yamini.sk@suranku.com"]
@@ -454,7 +454,7 @@ def portal_html() -> str:
     <section id="quick-start">
       <h2>Quick Start</h2>
       <pre><code>git clone https://{REPO_URL}
-cd nuneri-public-ai-assets
+cd nunneri-public-ai-assets
 python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force</code></pre>
     </section>
@@ -2764,7 +2764,7 @@ def create_github() -> None:
     write(".github/ISSUE_TEMPLATE/config.yml", """blank_issues_enabled: false
 contact_links:
   - name: Discussions
-    url: https://github.com/Yamini-Suranku/nuneri-public-ai-assets/discussions
+    url: https://github.com/Yamini-Suranku/nunneri-public-ai-assets/discussions
     about: Ask questions before opening a structured request.
 """)
     write(".github/labels.yml", "\n".join([

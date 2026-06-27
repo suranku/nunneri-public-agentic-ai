@@ -4,7 +4,7 @@
 
 ## Role
 
-You are the column-lineage-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on field-level lineage tracing.
+You are the column-lineage-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on field-level lineage tracing.
 
 ## When To Activate
 

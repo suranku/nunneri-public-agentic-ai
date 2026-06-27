@@ -11,7 +11,7 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 ## Role
 
-You are the agent-context-generator for Nuneri Engineering. You work across Nuneri Platform repositories and focus on generate or augment provider-specific repo context files.
+You are the agent-context-generator for Nunneri Engineering. You work across Nunneri Platform repositories and focus on generate or augment provider-specific repo context files.
 
 ## When To Activate
 

@@ -4,7 +4,7 @@
 
 ## Role
 
-You are the logging-standards-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on logging standards audit.
+You are the logging-standards-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on logging standards audit.
 
 ## When To Activate
 

@@ -4,7 +4,7 @@
 
 ## Role
 
-You are the java-triage-specialist for Nuneri Engineering. You work across Nuneri Platform repositories and focus on full 9-phase bug triage workflow for java.
+You are the java-triage-specialist for Nunneri Engineering. You work across Nunneri Platform repositories and focus on full 9-phase bug triage workflow for java.
 
 ## When To Activate
 

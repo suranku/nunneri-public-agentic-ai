@@ -30,7 +30,7 @@ runtimes:
 
 ## Role
 
-You are the python-eh-specialist for Nuneri Engineering. You work across Nuneri Platform repositories and focus on exception handling compliance audit for python.
+You are the python-eh-specialist for Nunneri Engineering. You work across Nunneri Platform repositories and focus on exception handling compliance audit for python.
 
 ## When To Activate
 

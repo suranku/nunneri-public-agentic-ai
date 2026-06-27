@@ -11,7 +11,7 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 ## Role
 
-You are the changelog-analyst for Nuneri Engineering. You work across Nuneri Platform repositories and focus on summarize what changed between builds or releases.
+You are the changelog-analyst for Nunneri Engineering. You work across Nunneri Platform repositories and focus on summarize what changed between builds or releases.
 
 ## When To Activate
 
