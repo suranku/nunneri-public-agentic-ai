@@ -20,15 +20,19 @@ Release owner: yamini.sk@suranku.com.
 
 ## Branch Strategy
 
-- Default branch: `main`
-- Feature: `feature/<issue-number>-short-description`
-- Fix: `fix/<issue-number>-short-description`
-- Release: `release/vX.Y.Z`
-- Tags: `vX.Y.Z`
+- `main`: default integration branch for feature and fix PRs. It must always pass validation.
+- `feature/<issue-number>-short-description`: new assets, docs, installer changes, workflows, examples, and non-release enhancements.
+- `fix/<issue-number>-short-description`: bug fixes and small corrections.
+- `release/vX.Y.Z`: short-lived stabilization branch cut from `main` for internal releases.
+- `vX.Y.Z`: release tag created from a commit contained in `release/vX.Y.Z`.
+
+Do not use `develop` or `master` for this repository. The asset package is small enough that `main` plus short-lived release branches keeps the release process clear without adding another permanent integration branch.
 
 ## Versioning Rules
 
 Update `VERSION` and `CHANGELOG.md` before tagging.
+
+The GitHub release workflow requires the tag version to match `VERSION`. For example, tag `v0.1.0` requires `VERSION` to contain `0.1.0`.
 
 ## Changelog Rules
 
@@ -41,13 +45,56 @@ Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the sa
 ## Release Checklist
 
 1. Confirm planned issues are accepted and linked to merged PRs.
-2. Run validation and adapter builds.
-3. Run project-level installs.
-4. Update `CHANGELOG.md`.
-5. Run `scripts/prepare_release.py`.
-6. Create release commit.
-7. Ask before tagging.
-8. Ask before pushing tags or creating GitHub releases.
+2. Cut `release/vX.Y.Z` from `main`.
+3. Update `VERSION` and `CHANGELOG.md`.
+4. Run validation, adapter builds, docs sync, consumer install checks, and package checks.
+5. Create a release PR from `release/vX.Y.Z` back to `main`.
+6. After approval, tag the release branch with `vX.Y.Z`.
+7. Push the release branch and tag.
+8. Confirm GitHub Actions publishes the internal prerelease with dist archives.
+9. Merge release branch changes back to `main` if the branch contains release-only commits.
+
+## Internal Dist Release Flow
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+```
+
+Update `VERSION` and `CHANGELOG.md`, then run:
+
+```bash
+python3 scripts/validate.py
+python3 scripts/build_adapters.py
+python3 scripts/build_portal_manifest.py
+python3 scripts/sync_docs_reference.py
+python3 scripts/check_docs_links.py
+python3 scripts/check_context_exports.py
+python3 scripts/check_langgraph_exports.py
+python3 scripts/check_consumer_install.py
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+python3 scripts/check_release_ready.py --local-only
+```
+
+After review and approval:
+
+```bash
+git tag v0.1.0
+git push origin release/v0.1.0
+git push origin v0.1.0
+```
+
+The `Internal Dist Release` workflow publishes a GitHub prerelease with:
+
+```text
+nunneri-ai-assets-0.1.0.zip
+nunneri-ai-assets-0.1.0.tar.gz
+nunneri-ai-assets-0.1.0.sha256
+```
+
+Manual workflow dispatch is also supported for internal release reruns, but the requested version must match `VERSION`.
 
 ## Rollback Strategy
 

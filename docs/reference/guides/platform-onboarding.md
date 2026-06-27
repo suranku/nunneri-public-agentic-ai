@@ -158,3 +158,22 @@ Open an issue first and wait for acceptance before implementation.
 ## Release Cadence and Versioning
 
 See `RELEASE.md`.
+
+## Internal Dist Release Branches
+
+Use `main` as the default integration branch and cut `release/vX.Y.Z` branches for internal release stabilization. Do not introduce `develop` or `master` for this repo.
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+```
+
+Before tagging, run the release package checks:
+
+```bash
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+```
+
+Tags must match `VERSION` exactly. Tag `v0.1.0` requires `VERSION` to contain `0.1.0`.

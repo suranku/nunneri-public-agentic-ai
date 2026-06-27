@@ -111,6 +111,21 @@ python3 scripts/check_consumer_install.py
 
 The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
 
+## Internal Releases
+
+Internal dist releases use short-lived `release/vX.Y.Z` branches and `vX.Y.Z` tags. The GitHub release workflow publishes prerelease archives from tags that match `VERSION`.
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+git tag v0.1.0
+```
+
+See `RELEASE.md` for the full branch strategy and release checklist.
+
 ## Command Reference
 
 See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.

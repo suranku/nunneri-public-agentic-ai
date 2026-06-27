@@ -3,5 +3,6 @@
 .gemini/
 .langgraph/
 dist/open-source/.ai-assets-version
+dist/releases/
 __pycache__/
 .DS_Store

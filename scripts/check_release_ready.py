@@ -17,8 +17,11 @@ def main() -> int:
         "VERSION",
         ".github/PULL_REQUEST_TEMPLATE.md",
         ".github/labels.yml",
+        ".github/workflows/release.yml",
         "examples/consumer-repo/README.md",
         "scripts/check_consumer_install.py",
+        "scripts/package_release.py",
+        "scripts/check_release_package.py",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     if missing:

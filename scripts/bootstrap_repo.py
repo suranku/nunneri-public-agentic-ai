@@ -933,6 +933,23 @@ For read-only triage, complete phases 1 through 6 and stop after Gate 1 with an 
 
 
 def create_scripts() -> None:
+    write("scripts/README.md", """# scripts
+
+This directory is part of the Nunneri AI Assets repository.
+
+## Release Packaging
+
+- `package_release.py` builds versioned internal release archives under `dist/releases/`.
+- `check_release_package.py` verifies the archives contain installer payloads, generated provider outputs, LangGraph runtime exports, reference docs, and consumer examples.
+
+Run both from a `release/vX.Y.Z` branch before tagging:
+
+```bash
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+```
+""")
+
     write("scripts/validate.py", r'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -1750,8 +1767,11 @@ def main() -> int:
         "VERSION",
         ".github/PULL_REQUEST_TEMPLATE.md",
         ".github/labels.yml",
+        ".github/workflows/release.yml",
         "examples/consumer-repo/README.md",
         "scripts/check_consumer_install.py",
+        "scripts/package_release.py",
+        "scripts/check_release_package.py",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     if missing:
@@ -1896,6 +1916,241 @@ def main() -> int:
     check_langgraph_runtime_install()
     check_existing_context_skip()
     print("Consumer install smoke checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
+    write("scripts/package_release.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import hashlib
+import shutil
+import tarfile
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+RELEASES = ROOT / "dist" / "releases"
+PACKAGE_PREFIX = "nunneri-ai-assets"
+
+ROOT_FILES = [
+    "install.sh",
+    "uninstall.sh",
+    "VERSION",
+    "README.md",
+    "AI_ASSETS.md",
+    "RELEASE.md",
+    "CHANGELOG.md",
+]
+
+
+def copy_tree(src: Path, dest: Path) -> None:
+    shutil.copytree(
+        src,
+        dest,
+        ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", ".DS_Store", "releases"),
+    )
+
+
+def package_dir(version: str) -> Path:
+    return RELEASES / f"{PACKAGE_PREFIX}-{version}"
+
+
+def build_package(version: str) -> Path:
+    target = package_dir(version)
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True)
+    for name in ROOT_FILES:
+        shutil.copyfile(ROOT / name, target / name)
+    copy_tree(ROOT / "dist", target / "dist")
+    copy_tree(ROOT / "docs" / "reference", target / "docs" / "reference")
+    copy_tree(ROOT / "examples" / "consumer-repo", target / "examples" / "consumer-repo")
+    return target
+
+
+def write_zip(source: Path, archive: Path) -> None:
+    if archive.exists():
+        archive.unlink()
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for path in sorted(source.rglob("*")):
+            if path.is_file():
+                zf.write(path, path.relative_to(source.parent))
+
+
+def write_tar(source: Path, archive: Path) -> None:
+    if archive.exists():
+        archive.unlink()
+    with tarfile.open(archive, "w:gz") as tf:
+        tf.add(source, arcname=source.name)
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def write_checksums(paths: list[Path], checksum_file: Path) -> None:
+    checksum_file.write_text("\n".join(f"{sha256(path)}  {path.name}" for path in paths) + "\n", encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--version", default=(ROOT / "VERSION").read_text(encoding="utf-8").strip())
+    args = parser.parse_args()
+    version = args.version
+    if version != (ROOT / "VERSION").read_text(encoding="utf-8").strip():
+        print(f"--version {version} must match VERSION")
+        return 1
+    RELEASES.mkdir(parents=True, exist_ok=True)
+    source = build_package(version)
+    zip_path = RELEASES / f"{PACKAGE_PREFIX}-{version}.zip"
+    tar_path = RELEASES / f"{PACKAGE_PREFIX}-{version}.tar.gz"
+    checksum_path = RELEASES / f"{PACKAGE_PREFIX}-{version}.sha256"
+    write_zip(source, zip_path)
+    write_tar(source, tar_path)
+    write_checksums([zip_path, tar_path], checksum_path)
+    print(f"Wrote {zip_path}")
+    print(f"Wrote {tar_path}")
+    print(f"Wrote {checksum_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
+    write("scripts/check_release_package.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import shutil
+import subprocess
+import tarfile
+import tempfile
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+RELEASES = ROOT / "dist" / "releases"
+PACKAGE = f"nunneri-ai-assets-{VERSION}"
+
+REQUIRED_PATHS = [
+    "install.sh",
+    "uninstall.sh",
+    "VERSION",
+    "README.md",
+    "AI_ASSETS.md",
+    "RELEASE.md",
+    "CHANGELOG.md",
+    "dist/claude/CLAUDE.md",
+    "dist/codex/AGENTS.md",
+    "dist/gemini/GEMINI.md",
+    "dist/langgraph/LANGGRAPH.md",
+    "dist/open-source/AGENT_MANIFEST.md",
+    "docs/reference/README.md",
+    "docs/reference/examples/consumer-repo/README.md",
+    "examples/consumer-repo/README.md",
+]
+
+FORBIDDEN_PARTS = {".git", "__pycache__", ".DS_Store", "releases"}
+FORBIDDEN_SUFFIXES = {".pyc"}
+
+
+def fail(message: str) -> None:
+    raise AssertionError(message)
+
+
+def assert_exists(path: Path) -> None:
+    if not path.exists():
+        fail(f"missing expected package path: {path}")
+
+
+def check_tree(root: Path) -> None:
+    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+    if version != VERSION:
+        fail(f"package VERSION {version} does not match {VERSION}")
+    for rel in REQUIRED_PATHS:
+        assert_exists(root / rel)
+    for path in root.rglob("*"):
+        rel_parts = set(path.relative_to(root).parts)
+        if rel_parts & FORBIDDEN_PARTS:
+            fail(f"forbidden path in package: {path}")
+        if path.suffix in FORBIDDEN_SUFFIXES:
+            fail(f"forbidden file suffix in package: {path}")
+
+
+def run_install(root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["bash", "install.sh", *args],
+        cwd=root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=True,
+    )
+    return completed.stdout
+
+
+def check_install_from_package(root: Path) -> None:
+    output = run_install(root, "--provider", "claude", "--project", "--context-only", "--dry-run")
+    if "Would install CLAUDE.md (root-context)" not in output:
+        fail(f"dry-run output did not include root CLAUDE.md target:\n{output}")
+    with tempfile.TemporaryDirectory(prefix="nunneri-package-consumer-") as tmp:
+        consumer = Path(tmp)
+        for name in ("install.sh", "VERSION"):
+            shutil.copyfile(root / name, consumer / name)
+        shutil.copytree(root / "dist", consumer / "dist")
+        run_install(consumer, "--provider", "claude", "--project", "--context-only", "--force", "--skip-build")
+        assert_exists(consumer / "CLAUDE.md")
+        assert_exists(consumer / ".ai-assets-version")
+
+
+def check_zip() -> None:
+    archive = RELEASES / f"{PACKAGE}.zip"
+    assert_exists(archive)
+    with tempfile.TemporaryDirectory(prefix="nunneri-release-zip-") as tmp:
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(tmp)
+        root = Path(tmp) / PACKAGE
+        check_tree(root)
+        check_install_from_package(root)
+
+
+def check_tar() -> None:
+    archive = RELEASES / f"{PACKAGE}.tar.gz"
+    assert_exists(archive)
+    with tempfile.TemporaryDirectory(prefix="nunneri-release-tar-") as tmp:
+        with tarfile.open(archive, "r:gz") as tf:
+            try:
+                tf.extractall(tmp, filter="data")
+            except TypeError:
+                tf.extractall(tmp)
+        root = Path(tmp) / PACKAGE
+        check_tree(root)
+
+
+def check_checksums() -> None:
+    checksum = RELEASES / f"{PACKAGE}.sha256"
+    assert_exists(checksum)
+    text = checksum.read_text(encoding="utf-8")
+    for name in (f"{PACKAGE}.zip", f"{PACKAGE}.tar.gz"):
+        if name not in text:
+            fail(f"checksum file missing {name}")
+
+
+def main() -> int:
+    check_zip()
+    check_tar()
+    check_checksums()
+    print("Release package checks passed")
     return 0
 
 
@@ -2413,6 +2668,21 @@ python3 scripts/check_consumer_install.py
 
 The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
 
+## Internal Releases
+
+Internal dist releases use short-lived `release/vX.Y.Z` branches and `vX.Y.Z` tags. The GitHub release workflow publishes prerelease archives from tags that match `VERSION`.
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+git tag v0.1.0
+```
+
+See `RELEASE.md` for the full branch strategy and release checklist.
+
 ## Command Reference
 
 See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
@@ -2571,15 +2841,19 @@ Release owner: {RELEASE_OWNER}.
 
 ## Branch Strategy
 
-- Default branch: `{DEFAULT_BRANCH}`
-- Feature: `feature/<issue-number>-short-description`
-- Fix: `fix/<issue-number>-short-description`
-- Release: `release/vX.Y.Z`
-- Tags: `vX.Y.Z`
+- `main`: default integration branch for feature and fix PRs. It must always pass validation.
+- `feature/<issue-number>-short-description`: new assets, docs, installer changes, workflows, examples, and non-release enhancements.
+- `fix/<issue-number>-short-description`: bug fixes and small corrections.
+- `release/vX.Y.Z`: short-lived stabilization branch cut from `main` for internal releases.
+- `vX.Y.Z`: release tag created from a commit contained in `release/vX.Y.Z`.
+
+Do not use `develop` or `master` for this repository. The asset package is small enough that `main` plus short-lived release branches keeps the release process clear without adding another permanent integration branch.
 
 ## Versioning Rules
 
 Update `VERSION` and `CHANGELOG.md` before tagging.
+
+The GitHub release workflow requires the tag version to match `VERSION`. For example, tag `v0.1.0` requires `VERSION` to contain `0.1.0`.
 
 ## Changelog Rules
 
@@ -2592,13 +2866,56 @@ Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the sa
 ## Release Checklist
 
 1. Confirm planned issues are accepted and linked to merged PRs.
-2. Run validation and adapter builds.
-3. Run project-level installs.
-4. Update `CHANGELOG.md`.
-5. Run `scripts/prepare_release.py`.
-6. Create release commit.
-7. Ask before tagging.
-8. Ask before pushing tags or creating GitHub releases.
+2. Cut `release/vX.Y.Z` from `main`.
+3. Update `VERSION` and `CHANGELOG.md`.
+4. Run validation, adapter builds, docs sync, consumer install checks, and package checks.
+5. Create a release PR from `release/vX.Y.Z` back to `main`.
+6. After approval, tag the release branch with `vX.Y.Z`.
+7. Push the release branch and tag.
+8. Confirm GitHub Actions publishes the internal prerelease with dist archives.
+9. Merge release branch changes back to `main` if the branch contains release-only commits.
+
+## Internal Dist Release Flow
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+```
+
+Update `VERSION` and `CHANGELOG.md`, then run:
+
+```bash
+python3 scripts/validate.py
+python3 scripts/build_adapters.py
+python3 scripts/build_portal_manifest.py
+python3 scripts/sync_docs_reference.py
+python3 scripts/check_docs_links.py
+python3 scripts/check_context_exports.py
+python3 scripts/check_langgraph_exports.py
+python3 scripts/check_consumer_install.py
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+python3 scripts/check_release_ready.py --local-only
+```
+
+After review and approval:
+
+```bash
+git tag v0.1.0
+git push origin release/v0.1.0
+git push origin v0.1.0
+```
+
+The `Internal Dist Release` workflow publishes a GitHub prerelease with:
+
+```text
+nunneri-ai-assets-0.1.0.zip
+nunneri-ai-assets-0.1.0.tar.gz
+nunneri-ai-assets-0.1.0.sha256
+```
+
+Manual workflow dispatch is also supported for internal release reruns, but the requested version must match `VERSION`.
 
 ## Rollback Strategy
 
@@ -2632,6 +2949,15 @@ All notable changes to this project are documented here.
     write("VERSION", VERSION)
     write("CODEOWNERS", "* " + " ".join(CODEOWNERS))
     write("docs/_config.yml", f"title: {PLATFORM}\n")
+    write(".gitignore", """.claude/
+.codex/
+.gemini/
+.langgraph/
+dist/open-source/.ai-assets-version
+dist/releases/
+__pycache__/
+.DS_Store
+""")
     write("docs/index.html", portal_html())
 
     write("adapters/claude/CLAUDE.md", "# Claude Adapter\n\nGenerated Claude outputs are built into `dist/claude/`.")
@@ -2843,6 +3169,25 @@ Open an issue first and wait for acceptance before implementation.
 ## Release Cadence and Versioning
 
 See `RELEASE.md`.
+
+## Internal Dist Release Branches
+
+Use `main` as the default integration branch and cut `release/vX.Y.Z` branches for internal release stabilization. Do not introduce `develop` or `master` for this repo.
+
+```bash
+git checkout main
+git pull
+git checkout -b release/v0.1.0
+```
+
+Before tagging, run the release package checks:
+
+```bash
+python3 scripts/package_release.py
+python3 scripts/check_release_package.py
+```
+
+Tags must match `VERSION` exactly. Tag `v0.1.0` requires `VERSION` to contain `0.1.0`.
 """)
 
 
@@ -3058,6 +3403,18 @@ body:
 
 
 def create_github() -> None:
+    write(".github/workflows/README.md", """# .github/workflows
+
+This directory is part of the Nunneri AI Assets repository.
+
+## Workflows
+
+- `validate.yml` runs on `main`, `release/**`, and PRs into those branches.
+- `release.yml` publishes internal GitHub prereleases for `vX.Y.Z` tags or approved manual dispatch runs.
+
+Release tags must match `VERSION` and tag commits must be contained in the corresponding `release/vX.Y.Z` branch.
+""")
+
     templates = {
         "agent-feedback.yml": ("Agent Feedback", "Feedback about an existing agent", ["type:feedback"]),
         "enhancement-request.yml": ("Enhancement Request", "Request a new or changed capability", ["type:enhancement"]),
@@ -3151,9 +3508,13 @@ Required for portal or guide changes.
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "release/**"
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - "release/**"
 
 jobs:
   validate:
@@ -3184,6 +3545,109 @@ jobs:
           bash -n uninstall.sh
       - name: Ensure generated files are committed
         run: git diff --exit-code
+""")
+    write(".github/workflows/release.yml", """name: Internal Dist Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version without leading v, for example 0.1.0"
+        required: true
+        type: string
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version_file="$(cat VERSION)"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            requested="${{ inputs.version }}"
+            if [[ ! "$requested" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+              echo "Manual release version must look like X.Y.Z"
+              exit 1
+            fi
+            if [ "$requested" != "$version_file" ]; then
+              echo "Manual release version $requested must match VERSION $version_file"
+              exit 1
+            fi
+            tag="v$requested"
+          else
+            tag="${GITHUB_REF_NAME}"
+            if [[ ! "$tag" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+              echo "Tag $tag must look like vX.Y.Z"
+              exit 1
+            fi
+            requested="${tag#v}"
+            if [ "$requested" != "$version_file" ]; then
+              echo "Tag version $requested must match VERSION $version_file"
+              exit 1
+            fi
+            release_branch="origin/release/$tag"
+            git fetch origin "+refs/heads/release/$tag:refs/remotes/origin/release/$tag" || true
+            if ! git branch -r --contains "$GITHUB_SHA" | grep -qx "  $release_branch"; then
+              echo "Tag $tag must point to a commit contained in release/$tag"
+              exit 1
+            fi
+          fi
+          echo "version=$requested" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Validate frontmatter
+        run: python3 scripts/validate.py
+      - name: Build adapters
+        run: python3 scripts/build_adapters.py
+      - name: Build portal manifest
+        run: python3 scripts/build_portal_manifest.py
+      - name: Sync public reference docs
+        run: python3 scripts/sync_docs_reference.py
+      - name: Check docs links
+        run: python3 scripts/check_docs_links.py
+      - name: Check context exports
+        run: python3 scripts/check_context_exports.py
+      - name: Check LangGraph exports
+        run: python3 scripts/check_langgraph_exports.py
+      - name: Check consumer install
+        run: python3 scripts/check_consumer_install.py
+      - name: Check release readiness
+        run: python3 scripts/check_release_ready.py --local-only
+      - name: Validate shell scripts
+        run: |
+          bash -n install.sh
+          bash -n uninstall.sh
+      - name: Package release
+        run: python3 scripts/package_release.py --version "${{ steps.version.outputs.version }}"
+      - name: Check release package
+        run: python3 scripts/check_release_package.py
+      - name: Ensure generated files are committed before package output
+        run: git diff --exit-code -- . ":(exclude)dist/releases"
+
+      - name: Publish prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Nunneri AI Assets ${{ steps.version.outputs.tag }}
+          prerelease: true
+          generate_release_notes: true
+          files: |
+            dist/releases/nunneri-ai-assets-${{ steps.version.outputs.version }}.zip
+            dist/releases/nunneri-ai-assets-${{ steps.version.outputs.version }}.tar.gz
+            dist/releases/nunneri-ai-assets-${{ steps.version.outputs.version }}.sha256
 """)
     write(".github/release-drafter.yml", """name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
