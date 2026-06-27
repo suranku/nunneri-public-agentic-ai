@@ -83,6 +83,30 @@ runtimes:
 - Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
 - For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
 
+## Provider-Specific Instruction Overrides
+
+Use this section only for behavior that is specific to one assistant or runtime surface. Keep shared repository rules in the provider-neutral sections above.
+
+### Claude Code
+
+- Add Claude-only phrases, slash-command conventions, subagent routing terms, and behaviors here.
+- Example: if this repo uses the phrase `agent team` to trigger a Claude-specific behavior, define that behavior here and do not repeat it in Codex or Gemini sections.
+
+### Codex
+
+- Add Codex-only AGENTS.md guidance, coding-agent workflow preferences, sandbox expectations, and tool-use constraints here.
+- Do not copy Claude-specific trigger phrases unless Codex should intentionally interpret them.
+
+### Gemini
+
+- Add Gemini-only prompt, workflow, and context-loading guidance here.
+- Keep Gemini CLI command behavior separate from Claude slash-command behavior.
+
+### Open Source
+
+- Add runtime-neutral or framework-specific guidance for open-source agent consumers here.
+- Keep SDK-specific behavior optional unless the consuming repo explicitly adopts that framework.
+
 ## Structured Override Registry
 
 ```yaml
@@ -95,6 +119,11 @@ repo_agent_instructions:
   exceptions: []
   skill_overrides: []
   dispatch_overrides: []
+  provider_overrides:
+    claude: []
+    codex: []
+    gemini: []
+    open_source: []
   approval_gates:
     - name: implementation_changes
       required: true

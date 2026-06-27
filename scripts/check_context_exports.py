@@ -8,9 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "assets/context/repo-agent-instructions.md"
 PROVIDER_FILES = [
-    ROOT / "dist/claude/CLAUDE.md",
-    ROOT / "dist/codex/AGENTS.md",
-    ROOT / "dist/gemini/GEMINI.md",
+    ("claude", ROOT / "dist/claude/CLAUDE.md", "### Claude Code", ["### Codex", "### Gemini"]),
+    ("codex", ROOT / "dist/codex/AGENTS.md", "### Codex", ["### Claude Code", "### Gemini"]),
+    ("gemini", ROOT / "dist/gemini/GEMINI.md", "### Gemini", ["### Claude Code", "### Codex"]),
 ]
 REQUIRED_SECTIONS = [
     "## Repository Identity and Ownership",
@@ -23,6 +23,7 @@ REQUIRED_SECTIONS = [
     "## Skill Invocation Overrides",
     "## Agent Dispatch Rules Before Task Routing",
     "## Approval Gates and Release-Impact Rules",
+    "## Provider-Specific Instruction Overrides",
     "## Structured Override Registry",
 ]
 REQUIRED_KEYS = [
@@ -33,6 +34,7 @@ REQUIRED_KEYS = [
     "exceptions:",
     "skill_overrides:",
     "dispatch_overrides:",
+    "provider_overrides:",
     "approval_gates:",
 ]
 
@@ -63,7 +65,7 @@ def main() -> int:
         for key in REQUIRED_KEYS:
             if key not in yaml:
                 failures.append(f"{TEMPLATE}: missing YAML key {key}")
-    for path in PROVIDER_FILES:
+    for provider, path, expected_heading, forbidden_headings in PROVIDER_FILES:
         if not path.exists():
             failures.append(f"{path}: missing generated provider context")
             continue
@@ -73,6 +75,13 @@ def main() -> int:
                 failures.append(f"{path}: missing section {section}")
         if not structured_yaml(text):
             failures.append(f"{path}: missing structured YAML override block")
+        if expected_heading not in text:
+            failures.append(f"{path}: missing provider-specific heading {expected_heading}")
+        for heading in forbidden_headings:
+            if heading in text:
+                failures.append(f"{path}: leaked provider-specific heading {heading}")
+        if provider != "claude" and "`agent team`" in text:
+            failures.append(f"{path}: leaked Claude-only trigger phrase `agent team`")
     open_source = ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json"
     langgraph = ROOT / "dist/langgraph/context/repo-agent-instructions.json"
     for path in (open_source, langgraph):

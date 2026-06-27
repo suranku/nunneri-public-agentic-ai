@@ -65,6 +65,13 @@
 - Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
 - For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
 
+## Provider-Specific Instruction Overrides
+
+### Gemini
+
+- Add Gemini-only prompt, workflow, and context-loading guidance here.
+- Keep Gemini CLI command behavior separate from Claude slash-command behavior.
+
 ## Structured Override Registry
 
 ```yaml
@@ -77,6 +84,11 @@ repo_agent_instructions:
   exceptions: []
   skill_overrides: []
   dispatch_overrides: []
+  provider_overrides:
+    claude: []
+    codex: []
+    gemini: []
+    open_source: []
   approval_gates:
     - name: implementation_changes
       required: true

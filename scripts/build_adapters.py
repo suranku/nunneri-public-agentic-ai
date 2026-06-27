@@ -8,6 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PROVIDERS = ("claude", "codex", "gemini", "open-source")
 RUNTIMES = ("langgraph",)
+PROVIDER_OVERRIDE_HEADINGS = {
+    "claude": "### Claude Code",
+    "codex": "### Codex",
+    "gemini": "### Gemini",
+}
 
 TRIAGE_NINE_PHASE_GRAPH = {
     "name": "triage-nine-phase",
@@ -66,6 +71,29 @@ def structured_override_block(body: str) -> str:
     return body[start:end].strip()
 
 
+def provider_context_body(body: str, provider: str) -> str:
+    body = body.replace("# Repository Agent Instructions\n\n", "", 1)
+    body = body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+    section = "\n## Provider-Specific Instruction Overrides\n"
+    structured = "\n## Structured Override Registry\n"
+    section_start = body.find(section)
+    structured_start = body.find(structured)
+    if section_start == -1 or structured_start == -1 or structured_start < section_start:
+        return body
+    common = body[:section_start].rstrip()
+    provider_area = body[section_start:structured_start]
+    structured_body = body[structured_start:].lstrip()
+    heading = PROVIDER_OVERRIDE_HEADINGS[provider]
+    provider_start = provider_area.find(heading)
+    if provider_start == -1:
+        selected = ""
+    else:
+        next_start = provider_area.find("\n### ", provider_start + 1)
+        selected = provider_area[provider_start: next_start if next_start != -1 else len(provider_area)].strip()
+    provider_section = f"## Provider-Specific Instruction Overrides\n\n{selected}" if selected else "## Provider-Specific Instruction Overrides\n\n- No provider-specific overrides are defined."
+    return f"{common}\n\n{provider_section}\n\n{structured_body}".strip()
+
+
 def build_context() -> None:
     src = ROOT / "assets/context/repo-agent-instructions.md"
     data, body = frontmatter_and_body(src)
@@ -75,8 +103,7 @@ def build_context() -> None:
         "gemini": ("GEMINI.md", "Gemini Repository Context"),
     }
     for provider, (filename, title) in provider_files.items():
-        provider_body = body.replace("# Repository Agent Instructions\n\n", "", 1)
-        provider_body = provider_body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+        provider_body = provider_context_body(body, provider)
         content = f"""# {title}
 
 > Generated from `{src.relative_to(ROOT)}`. Edit the canonical context template, then rebuild adapters.

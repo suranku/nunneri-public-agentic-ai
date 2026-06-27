@@ -585,6 +585,30 @@ runtimes:
 - Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
 - For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
 
+## Provider-Specific Instruction Overrides
+
+Use this section only for behavior that is specific to one assistant or runtime surface. Keep shared repository rules in the provider-neutral sections above.
+
+### Claude Code
+
+- Add Claude-only phrases, slash-command conventions, subagent routing terms, and behaviors here.
+- Example: if this repo uses the phrase `agent team` to trigger a Claude-specific behavior, define that behavior here and do not repeat it in Codex or Gemini sections.
+
+### Codex
+
+- Add Codex-only AGENTS.md guidance, coding-agent workflow preferences, sandbox expectations, and tool-use constraints here.
+- Do not copy Claude-specific trigger phrases unless Codex should intentionally interpret them.
+
+### Gemini
+
+- Add Gemini-only prompt, workflow, and context-loading guidance here.
+- Keep Gemini CLI command behavior separate from Claude slash-command behavior.
+
+### Open Source
+
+- Add runtime-neutral or framework-specific guidance for open-source agent consumers here.
+- Keep SDK-specific behavior optional unless the consuming repo explicitly adopts that framework.
+
 ## Structured Override Registry
 
 ```yaml
@@ -597,6 +621,11 @@ repo_agent_instructions:
   exceptions: []
   skill_overrides: []
   dispatch_overrides: []
+  provider_overrides:
+    claude: []
+    codex: []
+    gemini: []
+    open_source: []
   approval_gates:
     - name: implementation_changes
       required: true
@@ -850,6 +879,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PROVIDERS = ("claude", "codex", "gemini", "open-source")
 RUNTIMES = ("langgraph",)
+PROVIDER_OVERRIDE_HEADINGS = {
+    "claude": "### Claude Code",
+    "codex": "### Codex",
+    "gemini": "### Gemini",
+}
 
 TRIAGE_NINE_PHASE_GRAPH = {
     "name": "triage-nine-phase",
@@ -908,6 +942,29 @@ def structured_override_block(body: str) -> str:
     return body[start:end].strip()
 
 
+def provider_context_body(body: str, provider: str) -> str:
+    body = body.replace("# Repository Agent Instructions\n\n", "", 1)
+    body = body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+    section = "\n## Provider-Specific Instruction Overrides\n"
+    structured = "\n## Structured Override Registry\n"
+    section_start = body.find(section)
+    structured_start = body.find(structured)
+    if section_start == -1 or structured_start == -1 or structured_start < section_start:
+        return body
+    common = body[:section_start].rstrip()
+    provider_area = body[section_start:structured_start]
+    structured_body = body[structured_start:].lstrip()
+    heading = PROVIDER_OVERRIDE_HEADINGS[provider]
+    provider_start = provider_area.find(heading)
+    if provider_start == -1:
+        selected = ""
+    else:
+        next_start = provider_area.find("\n### ", provider_start + 1)
+        selected = provider_area[provider_start: next_start if next_start != -1 else len(provider_area)].strip()
+    provider_section = f"## Provider-Specific Instruction Overrides\n\n{selected}" if selected else "## Provider-Specific Instruction Overrides\n\n- No provider-specific overrides are defined."
+    return f"{common}\n\n{provider_section}\n\n{structured_body}".strip()
+
+
 def build_context() -> None:
     src = ROOT / "assets/context/repo-agent-instructions.md"
     data, body = frontmatter_and_body(src)
@@ -917,8 +974,7 @@ def build_context() -> None:
         "gemini": ("GEMINI.md", "Gemini Repository Context"),
     }
     for provider, (filename, title) in provider_files.items():
-        provider_body = body.replace("# Repository Agent Instructions\n\n", "", 1)
-        provider_body = provider_body.replace("> Generated from `assets/context/repo-agent-instructions.md`. Customize a repo-local copy when installing into a consuming repository.\n\n", "", 1)
+        provider_body = provider_context_body(body, provider)
         content = f"""# {title}
 
 > Generated from `{src.relative_to(ROOT)}`. Edit the canonical context template, then rebuild adapters.
@@ -1302,9 +1358,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "assets/context/repo-agent-instructions.md"
 PROVIDER_FILES = [
-    ROOT / "dist/claude/CLAUDE.md",
-    ROOT / "dist/codex/AGENTS.md",
-    ROOT / "dist/gemini/GEMINI.md",
+    ("claude", ROOT / "dist/claude/CLAUDE.md", "### Claude Code", ["### Codex", "### Gemini"]),
+    ("codex", ROOT / "dist/codex/AGENTS.md", "### Codex", ["### Claude Code", "### Gemini"]),
+    ("gemini", ROOT / "dist/gemini/GEMINI.md", "### Gemini", ["### Claude Code", "### Codex"]),
 ]
 REQUIRED_SECTIONS = [
     "## Repository Identity and Ownership",
@@ -1317,6 +1373,7 @@ REQUIRED_SECTIONS = [
     "## Skill Invocation Overrides",
     "## Agent Dispatch Rules Before Task Routing",
     "## Approval Gates and Release-Impact Rules",
+    "## Provider-Specific Instruction Overrides",
     "## Structured Override Registry",
 ]
 REQUIRED_KEYS = [
@@ -1327,6 +1384,7 @@ REQUIRED_KEYS = [
     "exceptions:",
     "skill_overrides:",
     "dispatch_overrides:",
+    "provider_overrides:",
     "approval_gates:",
 ]
 
@@ -1357,7 +1415,7 @@ def main() -> int:
         for key in REQUIRED_KEYS:
             if key not in yaml:
                 failures.append(f"{TEMPLATE}: missing YAML key {key}")
-    for path in PROVIDER_FILES:
+    for provider, path, expected_heading, forbidden_headings in PROVIDER_FILES:
         if not path.exists():
             failures.append(f"{path}: missing generated provider context")
             continue
@@ -1367,6 +1425,13 @@ def main() -> int:
                 failures.append(f"{path}: missing section {section}")
         if not structured_yaml(text):
             failures.append(f"{path}: missing structured YAML override block")
+        if expected_heading not in text:
+            failures.append(f"{path}: missing provider-specific heading {expected_heading}")
+        for heading in forbidden_headings:
+            if heading in text:
+                failures.append(f"{path}: leaked provider-specific heading {heading}")
+        if provider != "claude" and "`agent team`" in text:
+            failures.append(f"{path}: leaked Claude-only trigger phrase `agent team`")
     open_source = ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json"
     langgraph = ROOT / "dist/langgraph/context/repo-agent-instructions.json"
     for path in (open_source, langgraph):

@@ -65,6 +65,13 @@
 - Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
 - For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
 
+## Provider-Specific Instruction Overrides
+
+### Claude Code
+
+- Add Claude-only phrases, slash-command conventions, subagent routing terms, and behaviors here.
+- Example: if this repo uses the phrase `agent team` to trigger a Claude-specific behavior, define that behavior here and do not repeat it in Codex or Gemini sections.
+
 ## Structured Override Registry
 
 ```yaml
@@ -77,6 +84,11 @@ repo_agent_instructions:
   exceptions: []
   skill_overrides: []
   dispatch_overrides: []
+  provider_overrides:
+    claude: []
+    codex: []
+    gemini: []
+    open_source: []
   approval_gates:
     - name: implementation_changes
       required: true

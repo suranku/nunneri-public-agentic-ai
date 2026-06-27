@@ -43,6 +43,8 @@ python3 scripts/build_portal_manifest.py
 
 The context template generates root files such as `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` with known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, and dispatch rules.
 
+Provider-specific instructions can be defined in the same template. During generation, Claude receives only the Claude override section, Codex receives only the Codex section, and Gemini receives only the Gemini section.
+
 ## Install for Claude
 
 ```bash

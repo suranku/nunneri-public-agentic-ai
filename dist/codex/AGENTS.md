@@ -65,6 +65,13 @@
 - Summarize changed files, validation results, release impact, rollback notes, and open risks before release-impacting actions.
 - For read-only work, complete evidence gathering and stop with findings unless the user explicitly authorizes changes.
 
+## Provider-Specific Instruction Overrides
+
+### Codex
+
+- Add Codex-only AGENTS.md guidance, coding-agent workflow preferences, sandbox expectations, and tool-use constraints here.
+- Do not copy Claude-specific trigger phrases unless Codex should intentionally interpret them.
+
 ## Structured Override Registry
 
 ```yaml
@@ -77,6 +84,11 @@ repo_agent_instructions:
   exceptions: []
   skill_overrides: []
   dispatch_overrides: []
+  provider_overrides:
+    claude: []
+    codex: []
+    gemini: []
+    open_source: []
   approval_gates:
     - name: implementation_changes
       required: true

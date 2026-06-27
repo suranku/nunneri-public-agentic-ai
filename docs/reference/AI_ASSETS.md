@@ -14,6 +14,8 @@ Canonical assets live under `assets/`. Provider-specific files are generated int
 
 Use it for known issues, DevOps overrides, common library links, workflow overrides, exceptions, skill overrides, dispatch rules, approval gates, and release-impact instructions.
 
+Provider-specific behavior belongs in the template's provider override section. The generator renders only the matching override into `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md` so provider-only trigger phrases do not leak across assistants.
+
 ## Provider Adapters
 
 - Claude Code: `dist/claude`
