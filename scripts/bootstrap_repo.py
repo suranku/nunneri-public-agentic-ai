@@ -249,28 +249,63 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
   <title>{title} - {PLATFORM}</title>
   <style>
     :root {{
-      --bg:#0a0e1a; --bg2:#111827; --border:#1e2d45; --blue:#3b82f6; --cyan:#22d3ee;
-      --green:#10b981; --orange:#f59e0b; --red:#ef4444; --purple:#8b5cf6; --text:#e2e8f0; --muted:#64748b;
+      --bg:#101114; --surface:#181b20; --surface2:#20242b; --border:#343a43;
+      --text:#f4f7fb; --muted:#a1aab8; --teal:#2dd4bf; --green:#34d399;
+      --amber:#fbbf24; --red:#fb7185; --blue:#60a5fa; --focus:#f8fafc;
     }}
     * {{ box-sizing: border-box; }}
-    body {{ margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }}
-    nav {{ position:sticky; top:0; z-index:2; display:flex; gap:16px; align-items:center; padding:14px 24px; background:rgba(10,14,26,.92); border-bottom:1px solid var(--border); }}
-    nav a {{ color:var(--text); text-decoration:none; font-size:14px; }}
-    main {{ max-width:1100px; margin:0 auto; padding:48px 20px; }}
-    section {{ padding:28px 0; }}
-    h1 {{ font-size:clamp(34px, 6vw, 68px); line-height:1; margin:0 0 16px; letter-spacing:0; }}
+    html {{ scroll-behavior: smooth; }}
+    body {{ margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }}
+    nav {{ position:sticky; top:0; z-index:5; display:flex; gap:16px; align-items:center; padding:14px 24px; background:rgba(16,17,20,.94); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); overflow:auto; }}
+    nav a {{ color:var(--text); text-decoration:none; font-size:14px; white-space:nowrap; }}
+    main {{ max-width:1180px; margin:0 auto; padding:44px 20px; }}
+    section {{ padding:34px 0; }}
+    h1 {{ font-size:clamp(36px, 6vw, 72px); line-height:1; margin:0 0 16px; letter-spacing:0; max-width:900px; }}
     h2 {{ font-size:28px; margin:0 0 16px; }}
+    h3 {{ margin:0 0 10px; }}
     p {{ color:var(--muted); line-height:1.7; }}
-    .hero {{ min-height:68vh; display:grid; align-content:center; }}
+    .hero {{ min-height:64vh; display:grid; align-content:center; gap:22px; }}
     .stats, .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }}
-    .card, details {{ border:1px solid var(--border); background:var(--bg2); border-radius:8px; padding:18px; }}
-    .badge {{ display:inline-block; border:1px solid var(--border); border-radius:999px; padding:5px 10px; color:var(--cyan); font-size:13px; }}
-    button {{ border:1px solid var(--blue); background:transparent; color:var(--text); padding:10px 14px; border-radius:6px; cursor:pointer; }}
-    button:hover, .active {{ background:var(--blue); }}
-    .panel {{ margin-top:16px; border-left:3px solid var(--cyan); padding:16px; background:rgba(34,211,238,.08); }}
+    .card, details {{ border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:18px; box-shadow:0 18px 55px rgba(0,0,0,.22); }}
+    .card strong {{ display:block; font-size:24px; margin-bottom:6px; }}
+    .badge {{ display:inline-block; width:max-content; border:1px solid var(--border); border-radius:999px; padding:5px 10px; color:var(--teal); font-size:13px; }}
+    .demo-shell {{ display:grid; grid-template-columns:minmax(220px,300px) 1fr; gap:18px; align-items:stretch; }}
+    .timeline {{ border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:12px; max-height:520px; overflow:auto; }}
+    .timeline button {{ width:100%; display:grid; grid-template-columns:34px 1fr; gap:10px; align-items:center; text-align:left; margin:0 0 8px; border:1px solid transparent; background:transparent; color:var(--text); padding:10px; border-radius:6px; cursor:pointer; }}
+    .timeline button:hover, .timeline button:focus-visible {{ border-color:var(--teal); outline:none; }}
+    .timeline button.active {{ background:var(--surface2); border-color:var(--teal); }}
+    .step-index {{ display:grid; place-items:center; width:28px; height:28px; border-radius:999px; background:#2a3038; color:var(--teal); font-size:13px; }}
+    .active .step-index {{ background:var(--teal); color:#08110f; }}
+    .progress-wrap {{ height:8px; border:1px solid var(--border); background:#0c0d10; border-radius:999px; overflow:hidden; margin:0 0 14px; }}
+    .progress {{ height:100%; width:0; background:var(--green); transition:width .28s ease; }}
+    .panel-stage {{ border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:18px; min-height:360px; position:relative; overflow:hidden; }}
+    .panel-stage::before {{ content:""; position:absolute; inset:0 0 auto; height:4px; background:var(--teal); }}
+    .panel {{ display:none; animation:panelIn .28s ease both; }}
+    .panel.active-panel {{ display:block; }}
+    .panel[hidden] {{ display:none; }}
+    .panel strong {{ display:block; color:var(--text); font-size:24px; margin:6px 0 10px; }}
+    .evidence-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:18px; }}
+    .metric {{ border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--surface2); }}
+    .metric span {{ color:var(--muted); font-size:12px; display:block; }}
+    .metric b {{ display:block; margin-top:4px; }}
+    .status-line {{ margin-top:14px; color:var(--muted); min-height:24px; }}
+    [data-reveal] {{ opacity:0; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease; }}
+    [data-reveal].visible {{ opacity:1; transform:none; }}
     table {{ width:100%; border-collapse:collapse; overflow:hidden; border-radius:8px; }}
     th, td {{ border-bottom:1px solid var(--border); padding:12px; text-align:left; }}
     footer {{ border-top:1px solid var(--border); padding:28px 20px; color:var(--muted); text-align:center; }}
+    a {{ color:var(--teal); }}
+    @keyframes panelIn {{ from {{ opacity:0; transform:translateY(8px); }} to {{ opacity:1; transform:none; }} }}
+    @media (max-width:760px) {{
+      nav {{ padding:12px 16px; }}
+      main {{ padding:30px 16px; }}
+      .demo-shell {{ grid-template-columns:1fr; }}
+      .timeline {{ max-height:none; }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      html {{ scroll-behavior:auto; }}
+      *, *::before, *::after {{ animation:none !important; transition:none !important; }}
+    }}
   </style>
 </head>
 <body>
@@ -286,17 +321,17 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
       <h1>{title}</h1>
       <p>{subtitle}</p>
       <div class="stats">
-        <div class="card">4 providers</div>
-        <div class="card">Canonical source of truth</div>
-        <div class="card">Issue-first contribution</div>
+        <div class="card" data-reveal><strong>4</strong><p>Provider adapters generated from one source.</p></div>
+        <div class="card" data-reveal><strong>1</strong><p>Canonical asset model for commands and workflows.</p></div>
+        <div class="card" data-reveal><strong>2</strong><p>Approval gates before implementation and release actions.</p></div>
       </div>
     </section>
     <section id="problem">
       <h2>The Problem Before</h2>
       <div class="grid">
-        <details open><summary>Provider lock-in</summary><p>Assets often work only for one assistant and cannot move cleanly across teams.</p></details>
-        <details><summary>Unclear ownership</summary><p>Feedback arrives without enough context to triage, prioritize, or release.</p></details>
-        <details><summary>Manual drift</summary><p>Repeated copies diverge when commands, agents, and docs are maintained separately.</p></details>
+        <details open data-reveal><summary>Provider lock-in</summary><p>Assets often work only for one assistant and cannot move cleanly across teams.</p></details>
+        <details data-reveal><summary>Unclear ownership</summary><p>Feedback arrives without enough context to triage, prioritize, or release.</p></details>
+        <details data-reveal><summary>Manual drift</summary><p>Repeated copies diverge when commands, agents, and docs are maintained separately.</p></details>
       </div>
     </section>
     <section id="solution">
@@ -305,19 +340,55 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
     </section>
     <section id="interactive">
       <h2>Interactive</h2>
-      {interactive}
+      <div class="progress-wrap" aria-hidden="true"><div class="progress" id="progress"></div></div>
+      <div class="demo-shell">
+        {interactive}
+      </div>
+      <p class="status-line" id="status" aria-live="polite"></p>
     </section>
   </main>
   <footer><a href="../docs/index.html">Portal</a> | <a href="../CONTRIBUTING.md">CONTRIBUTING.md</a></footer>
   <script>
-    document.querySelectorAll("button[data-panel]").forEach((button) => {{
-      button.addEventListener("click", () => {{
-        document.querySelectorAll("[data-content]").forEach((panel) => panel.hidden = true);
-        document.querySelectorAll("button[data-panel]").forEach((item) => item.classList.remove("active"));
-        document.querySelector(`[data-content="${{button.dataset.panel}}"]`).hidden = false;
-        button.classList.add("active");
+    const buttons = Array.from(document.querySelectorAll("button[data-panel]"));
+    const panels = Array.from(document.querySelectorAll("[data-content]"));
+    const progress = document.getElementById("progress");
+    const status = document.getElementById("status");
+    function activate(index) {{
+      buttons.forEach((button) => {{
+        const active = Number(button.dataset.panel) === index;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+        button.tabIndex = active ? 0 : -1;
+      }});
+      panels.forEach((panel) => {{
+        const active = Number(panel.dataset.content) === index;
+        panel.hidden = !active;
+        panel.classList.toggle("active-panel", active);
+      }});
+      if (progress) progress.style.width = `${{((index + 1) / Math.max(buttons.length, 1)) * 100}}%`;
+      if (status && buttons[index]) status.textContent = `Showing ${{buttons[index].textContent.trim()}} of ${{buttons.length}}`;
+    }}
+    buttons.forEach((button, index) => {{
+      button.setAttribute("role", "tab");
+      button.addEventListener("click", () => activate(index));
+      button.addEventListener("keydown", (event) => {{
+        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let next = index;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % buttons.length;
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + buttons.length) % buttons.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = buttons.length - 1;
+        buttons[next].focus();
+        activate(next);
       }});
     }});
+    panels.forEach((panel) => panel.setAttribute("role", "tabpanel"));
+    activate(0);
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {{
+      if (entry.isIntersecting) entry.target.classList.add("visible");
+    }}), {{threshold:.12}});
+    document.querySelectorAll("[data-reveal]").forEach((item) => observer.observe(item));
   </script>
 </body>
 </html>"""
@@ -479,8 +550,51 @@ EXAMPLE_INVOCATIONS = {
 
 
 def executive_summary(title: str, commands: list[str]) -> str:
+    if title == "Triage":
+        examples = "\n".join(EXAMPLE_INVOCATIONS.get(cmd, f"/{cmd} --project . --provider claude") for cmd in commands[:3])
+        return f"""> **One-liner:** Triage gives teams a provider-neutral nine-phase workflow for moving from symptom to evidence, approved fix plan, validation, and release impact.
+
+## The Problem Before
+
+Teams duplicated triage prompts for each assistant, mixed diagnosis with implementation, and often skipped approval gates before edits or release actions.
+
+## The Solution
+
+Canonical triage assets define one stable nine-phase workflow. Claude, Codex, Gemini, open-source exports, and LangGraph runtime manifests are generated from the same source of truth.
+
+## Command Reference
+
+| Command | What it does | When to use |
+| --- | --- | --- |
+| `/triage` | Runs bug triage from intake through RCA and approval gates | Use for application bugs or unclear symptoms |
+| `/prodops-triage` | Classifies incidents and determines whether a runbook or defect is needed | Use for production incidents or environment-specific failures |
+| `/devhub-fix` | Fixes a governance finding with test-first validation and approval gates | Use when DevHub or governance JSON identifies a remediable issue |
+
+## How It Works
+
+```text
+1 intake
+  -> 2 context load
+  -> 3 classification
+  -> 4 evidence collection
+  -> 5 root cause analysis
+  -> 6 gate 1: RCA and fix plan approval
+  -> 7 test-first fix
+  -> 8 validation
+  -> 9 gate 2: summary and release impact
+```
+
+Post-triage actions such as commit, push, PR creation, release tagging, and publishing require explicit human confirmation.
+
+## Real Examples
+
+```text
+{examples}
+```
+"""
+
     rows = "\n".join(f"| `/{cmd}` | Runs the {cmd} workflow | Use when the request maps to {cmd} |" for cmd in commands)
-    examples = "\n".join(EXAMPLE_INVOCATIONS.get(cmd, f"/{cmd} sample-input --provider claude") for cmd in commands[:3])
+    examples = "\n".join(EXAMPLE_INVOCATIONS.get(cmd, f"/{cmd} --project . --provider claude") for cmd in commands[:3])
     return f"""> **One-liner:** {title} gives teams a provider-neutral way to use AI assets across Claude, Codex, Gemini, and open-source runtimes.
 
 ## The Problem Before
@@ -2382,9 +2496,23 @@ def create_guides() -> None:
         "contribute-demo.html": ("Contribute Demo", "Issue-first contribution and release flow.", ["Issue", "Triage", "PR", "CI", "Release"]),
     }
     for filename, (title, subtitle, panels) in guide_specs.items():
-        buttons = "\n".join(f'<button data-panel="{i}" class="{"active" if i == 0 else ""}">{panel}</button>' for i, panel in enumerate(panels))
-        contents = "\n".join(f'<div class="panel" data-content="{i}" {"hidden" if i else ""}><strong>{panel}</strong><p>{panel} produces evidence that feeds the provider-neutral workflow.</p></div>' for i, panel in enumerate(panels))
-        write(f"guides/{filename}", simple_html(title, subtitle, f"<div>{buttons}</div>{contents}"))
+        buttons = "\n".join(
+            f'<button data-panel="{i}" class="{"active" if i == 0 else ""}"><span class="step-index">{i + 1}</span><span>{panel}</span></button>'
+            for i, panel in enumerate(panels)
+        )
+        contents = "\n".join(
+            f'''<div class="panel" data-content="{i}" {"hidden" if i else ""}>
+  <strong>{panel}</strong>
+  <p>{panel} produces evidence that feeds the provider-neutral workflow, adapter generation, and release readiness checks.</p>
+  <div class="evidence-grid">
+    <div class="metric"><span>Input</span><b>Issue or command context</b></div>
+    <div class="metric"><span>Output</span><b>Evidence-backed next action</b></div>
+    <div class="metric"><span>Gate</span><b>{"Approval required" if "Gate" in panel or panel in {"PR", "Release", "Fix"} else "Continue when validated"}</b></div>
+  </div>
+</div>'''
+            for i, panel in enumerate(panels)
+        )
+        write(f"guides/{filename}", simple_html(title, subtitle, f'<div class="timeline" role="tablist" aria-label="{title} steps">{buttons}</div><div class="panel-stage">{contents}</div>'))
 
     summaries = {
         "triage-executive-summary.md": ("Triage", ["triage", "prodops-triage", "devhub-fix"]),

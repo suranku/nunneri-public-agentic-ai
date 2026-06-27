@@ -6,7 +6,7 @@ Teams duplicated triage prompts for each assistant, mixed diagnosis with impleme
 
 ## The Solution
 
-Canonical triage assets define one stable nine-phase workflow. Claude, Codex, Gemini, and open-source adapters receive generated copies from the same source of truth.
+Canonical triage assets define one stable nine-phase workflow. Claude, Codex, Gemini, open-source exports, and LangGraph runtime manifests are generated from the same source of truth.
 
 ## Command Reference
 
