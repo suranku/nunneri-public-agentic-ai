@@ -101,6 +101,22 @@ python3 scripts/build_adapters.py
 
 The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
 
+## Consumer Repository Example
+
+Use `examples/consumer-repo/` to see the expected install layout for a normal GitHub repository.
+
+```bash
+python3 scripts/check_consumer_install.py
+```
+
+The check stages a temporary consumer repository and verifies:
+
+- context-only dry run writes nothing
+- context-only Claude install writes root `CLAUDE.md` and `.ai-assets-version`
+- full Claude install writes root context plus `.claude/` assets
+- LangGraph install writes `.langgraph/` graph, agent, and context manifests
+- existing root context is skipped unless `--force` is used
+
 ## Repos with Context Files
 
 | Stack | Repos |

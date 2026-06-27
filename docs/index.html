@@ -68,6 +68,7 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>Install Claude Context</h3><pre><code>./install.sh --provider claude --project --context-only --force</code></pre></div>
         <div class="card" data-reveal><h3>Run Triage</h3><pre><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre></div>
         <div class="card" data-reveal><h3>Export LangGraph</h3><pre><code>./install.sh --runtime langgraph --project --force</code></pre></div>
+        <div class="card" data-reveal><h3>Verify Consumer Install</h3><pre><code>python3 scripts/check_consumer_install.py</code></pre></div>
       </div>
     </section>
     <section id="providers">
@@ -80,13 +81,6 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>LangGraph Runtime</h3><p>Graph and runtime manifests for stateful workflow orchestration. LangGraph is not a model provider.</p></div>
       </div>
     </section>
-    <section id="context">
-      <h2>Repository Context</h2>
-      <div class="grid">
-        <div class="card" data-reveal><h3>Standard Template</h3><p>One provider-neutral template generates CLAUDE.md, AGENTS.md, GEMINI.md, open-source context metadata, and LangGraph pre-dispatch context.</p></div>
-        <div class="card" data-reveal><h3>Override Registry</h3><p>Structured YAML captures known issues, DevOps overrides, library links, workflow overrides, exceptions, skill overrides, dispatch rules, and approval gates.</p></div>
-      </div>
-    </section>
     <section id="commands">
       <h2>Commands</h2>
       <input id="search" placeholder="Filter commands, agents, or skills">
@@ -94,12 +88,19 @@ python3 scripts/build_adapters.py
     </section>
     <section id="agents"><h2>Agents</h2><div id="agent-list" class="grid"></div></section>
     <section id="skills"><h2>Skills</h2><div id="skill-list" class="grid"></div></section>
+    <section id="context">
+      <h2>Repository Context</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Standard Template</h3><p>One provider-neutral template generates CLAUDE.md, AGENTS.md, GEMINI.md, open-source context metadata, and LangGraph pre-dispatch context.</p></div>
+        <div class="card" data-reveal><h3>Override Registry</h3><p>Structured YAML captures known issues, DevOps overrides, library links, workflow overrides, exceptions, skill overrides, dispatch rules, and approval gates.</p></div>
+      </div>
+    </section>
     <section id="guides"><h2>Interactive Guides</h2><div id="guide-list" class="grid"></div></section>
     <section id="reference">
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>

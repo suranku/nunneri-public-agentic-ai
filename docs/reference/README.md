@@ -101,6 +101,16 @@ python3 scripts/build_adapters.py
 ./install.sh --runtime langgraph --project --force
 ```
 
+## Install Into a Consumer Repository
+
+Use `examples/consumer-repo/` as the reference flow for installing Nunneri AI Assets into another GitHub repository.
+
+```bash
+python3 scripts/check_consumer_install.py
+```
+
+The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
+
 ## Command Reference
 
 See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.

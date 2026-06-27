@@ -465,6 +465,7 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>Install Claude Context</h3><pre><code>./install.sh --provider claude --project --context-only --force</code></pre></div>
         <div class="card" data-reveal><h3>Run Triage</h3><pre><code>/triage NUN-1024 "Checkout API returns 500 after deploy" --provider claude</code></pre></div>
         <div class="card" data-reveal><h3>Export LangGraph</h3><pre><code>./install.sh --runtime langgraph --project --force</code></pre></div>
+        <div class="card" data-reveal><h3>Verify Consumer Install</h3><pre><code>python3 scripts/check_consumer_install.py</code></pre></div>
       </div>
     </section>
     <section id="providers">
@@ -496,7 +497,7 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
@@ -1346,6 +1347,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / "docs/reference"
 GUIDE_REFERENCE = REFERENCE / "guides"
 CONTEXT_REFERENCE = REFERENCE / "context"
+EXAMPLES_REFERENCE = REFERENCE / "examples"
 
 ROOT_DOCS = [
     "README.md",
@@ -1370,6 +1372,7 @@ def sync() -> None:
     REFERENCE.mkdir(parents=True, exist_ok=True)
     GUIDE_REFERENCE.mkdir(parents=True, exist_ok=True)
     CONTEXT_REFERENCE.mkdir(parents=True, exist_ok=True)
+    EXAMPLES_REFERENCE.mkdir(parents=True, exist_ok=True)
 
     for name in ROOT_DOCS:
         copy_file(ROOT / name, REFERENCE / name)
@@ -1389,6 +1392,9 @@ def sync() -> None:
         text = dest.read_text(encoding="utf-8")
         text = text.replace("../docs/index.html", "../../index.html")
         dest.write_text(text, encoding="utf-8")
+
+    for src in sorted((ROOT / "examples").glob("**/*.md")):
+        copy_file(src, EXAMPLES_REFERENCE / src.relative_to(ROOT / "examples"))
 
     print(f"Synced public reference docs into {REFERENCE}")
 
@@ -1738,7 +1744,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-only", action="store_true")
     parser.parse_args()
-    required = ["CHANGELOG.md", "RELEASE.md", "VERSION", ".github/PULL_REQUEST_TEMPLATE.md", ".github/labels.yml"]
+    required = [
+        "CHANGELOG.md",
+        "RELEASE.md",
+        "VERSION",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".github/labels.yml",
+        "examples/consumer-repo/README.md",
+        "scripts/check_consumer_install.py",
+    ]
     missing = [path for path in required if not (ROOT / path).exists()]
     if missing:
         for path in missing:
@@ -1749,6 +1763,139 @@ def main() -> int:
         print("CHANGELOG.md must contain ## [Unreleased]")
         return 1
     print("Release readiness local checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
+    write("scripts/check_consumer_install.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def stage_payload(target: Path) -> None:
+    for name in ("install.sh", "VERSION"):
+        shutil.copyfile(ROOT / name, target / name)
+    shutil.copytree(ROOT / "dist", target / "dist")
+
+
+def run_install(target: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["bash", "install.sh", *args],
+        cwd=target,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=True,
+    )
+    return completed.stdout
+
+
+def assert_contains(text: str, expected: str) -> None:
+    if expected not in text:
+        raise AssertionError(f"expected output to contain {expected!r}; got:\n{text}")
+
+
+def assert_exists(path: Path) -> None:
+    if not path.exists():
+        raise AssertionError(f"expected missing path: {path}")
+
+
+def assert_missing(path: Path) -> None:
+    if path.exists():
+        raise AssertionError(f"unexpected path exists: {path}")
+
+
+def assert_not_contains(path: Path, forbidden: str) -> None:
+    if forbidden in path.read_text(encoding="utf-8"):
+        raise AssertionError(f"{path} unexpectedly contains {forbidden!r}")
+
+
+def write_consumer_repo(path: Path) -> None:
+    (path / "README.md").write_text("# Consumer App\n", encoding="utf-8")
+    (path / "pyproject.toml").write_text("[project]\nname = \"consumer-app\"\nversion = \"0.1.0\"\n", encoding="utf-8")
+
+
+def check_context_only_dry_run() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-dry-run-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--provider", "claude", "--project", "--context-only", "--dry-run")
+        assert_contains(output, "Would install CLAUDE.md (root-context)")
+        assert_contains(output, "Would write version metadata to .ai-assets-version")
+        assert_missing(target / "CLAUDE.md")
+        assert_missing(target / ".ai-assets-version")
+        assert_missing(target / ".claude")
+
+
+def check_context_only_force() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-context-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--provider", "claude", "--project", "--context-only", "--force", "--skip-build")
+        assert_contains(output, "Installed CLAUDE.md into project root")
+        assert_exists(target / "CLAUDE.md")
+        assert_exists(target / ".ai-assets-version")
+        assert_missing(target / ".claude")
+        assert_not_contains(target / "CLAUDE.md", "## Codex")
+        assert_not_contains(target / "CLAUDE.md", "## Gemini")
+
+
+def check_full_provider_install() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-full-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--provider", "claude", "--project", "--force", "--skip-build")
+        assert_contains(output, "Installed CLAUDE.md into project root")
+        assert_exists(target / "CLAUDE.md")
+        assert_exists(target / ".claude" / "agents" / "python-triage-specialist.md")
+        assert_exists(target / ".claude" / "commands" / "triage.md")
+        assert_exists(target / ".claude" / ".ai-assets-version")
+
+
+def check_langgraph_runtime_install() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-langgraph-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--runtime", "langgraph", "--project", "--force", "--skip-build")
+        assert_contains(output, "Summary for langgraph runtime")
+        assert_exists(target / ".langgraph" / "graphs" / "triage-nine-phase.json")
+        assert_exists(target / ".langgraph" / "manifests" / "agents" / "python-triage-specialist.json")
+        assert_exists(target / ".langgraph" / "context" / "repo-agent-instructions.json")
+        assert_exists(target / ".langgraph" / ".ai-assets-version")
+
+
+def check_existing_context_skip() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-skip-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        (target / "CLAUDE.md").write_text("# Existing Claude Context\n", encoding="utf-8")
+        output = run_install(target, "--provider", "claude", "--project", "--context-only", "--skip-build")
+        assert_contains(output, "Skip existing CLAUDE.md")
+        if (target / "CLAUDE.md").read_text(encoding="utf-8") != "# Existing Claude Context\n":
+            raise AssertionError("existing CLAUDE.md was overwritten without --force")
+
+
+def main() -> int:
+    check_context_only_dry_run()
+    check_context_only_force()
+    check_full_provider_install()
+    check_langgraph_runtime_install()
+    check_existing_context_skip()
+    print("Consumer install smoke checks passed")
     return 0
 
 
@@ -2256,6 +2403,16 @@ python3 scripts/build_adapters.py
 ./install.sh --runtime langgraph --project --force
 ```
 
+## Install Into a Consumer Repository
+
+Use `examples/consumer-repo/` as the reference flow for installing {PLATFORM} into another GitHub repository.
+
+```bash
+python3 scripts/check_consumer_install.py
+```
+
+The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
+
 ## Command Reference
 
 See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
@@ -2629,6 +2786,22 @@ python3 scripts/build_adapters.py
 
 The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
 
+## Consumer Repository Example
+
+Use `examples/consumer-repo/` to see the expected install layout for a normal GitHub repository.
+
+```bash
+python3 scripts/check_consumer_install.py
+```
+
+The check stages a temporary consumer repository and verifies:
+
+- context-only dry run writes nothing
+- context-only Claude install writes root `CLAUDE.md` and `.ai-assets-version`
+- full Claude install writes root context plus `.claude/` assets
+- LangGraph install writes `.langgraph/` graph, agent, and context manifests
+- existing root context is skipped unless `--force` is used
+
 ## Repos with Context Files
 
 | Stack | Repos |
@@ -2670,6 +2843,139 @@ Open an issue first and wait for acceptance before implementation.
 ## Release Cadence and Versioning
 
 See `RELEASE.md`.
+""")
+
+
+def create_examples() -> None:
+    write("examples/consumer-repo/README.md", f"""# Consumer Repository Example
+
+This fixture shows how a normal GitHub repository can consume {PLATFORM} without becoming tied to one AI provider.
+
+## What This Example Proves
+
+- Provider context files install at the consumer repository root.
+- Provider assets install under provider directories such as `.claude/`, `.codex/`, and `.gemini/`.
+- LangGraph runtime exports install under `.langgraph/`.
+- Dry runs show planned writes without modifying the consumer repository.
+- Existing root context files are skipped unless `--force` is used.
+
+## Preview a Context-Only Install
+
+```bash
+./install.sh --provider claude --project --context-only --dry-run
+```
+
+Expected output includes:
+
+```text
+Would install CLAUDE.md (root-context)
+Would write version metadata to .ai-assets-version
+```
+
+## Install Claude Context Only
+
+```bash
+./install.sh --provider claude --project --context-only --force --skip-build
+```
+
+Expected consumer files:
+
+```text
+CLAUDE.md
+.ai-assets-version
+```
+
+## Install Full Claude Assets
+
+```bash
+./install.sh --provider claude --project --force --skip-build
+```
+
+Expected consumer files:
+
+```text
+CLAUDE.md
+.claude/.ai-assets-version
+.claude/agents/python-triage-specialist.md
+.claude/commands/triage.md
+```
+
+## Install Codex or Gemini
+
+```bash
+./install.sh --provider codex --project --force --skip-build
+./install.sh --provider gemini --project --force --skip-build
+```
+
+Expected root context files:
+
+```text
+AGENTS.md
+GEMINI.md
+```
+
+## Install LangGraph Runtime Exports
+
+```bash
+./install.sh --runtime langgraph --project --force --skip-build
+```
+
+Expected consumer files:
+
+```text
+.langgraph/.ai-assets-version
+.langgraph/context/repo-agent-instructions.json
+.langgraph/graphs/triage-nine-phase.json
+.langgraph/manifests/agents/python-triage-specialist.json
+```
+
+## Automated Verification
+
+Run the smoke check from the asset repository root:
+
+```bash
+python3 scripts/check_consumer_install.py
+```
+
+The check stages a temporary consumer repository, runs the installer in dry-run, context-only, full provider, LangGraph, and existing-file scenarios, and verifies the expected files.
+""")
+    write("examples/consumer-repo/expected/README.md", """# Expected Install Artifacts
+
+These files document the key artifacts a consumer repository should see after installing Nunneri AI Assets.
+
+The full generated provider and runtime payload is intentionally not duplicated here. The authoritative outputs are generated under `dist/` and verified by `scripts/check_consumer_install.py`.
+
+## Context-Only Claude Install
+
+```text
+CLAUDE.md
+.ai-assets-version
+```
+
+## Full Claude Install
+
+```text
+CLAUDE.md
+.claude/.ai-assets-version
+.claude/agents/python-triage-specialist.md
+.claude/commands/triage.md
+```
+
+## Codex and Gemini Context Files
+
+```text
+AGENTS.md
+GEMINI.md
+```
+
+## LangGraph Runtime Install
+
+```text
+.langgraph/.ai-assets-version
+.langgraph/context/repo-agent-instructions.json
+.langgraph/graphs/triage-nine-phase.json
+.langgraph/manifests/agents/python-triage-specialist.json
+```
 """)
 
 
@@ -2868,6 +3174,8 @@ jobs:
         run: python3 scripts/check_context_exports.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
+      - name: Check consumer install
+        run: python3 scripts/check_consumer_install.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
@@ -2898,9 +3206,11 @@ def sync_reference_docs() -> None:
     reference = ROOT / "docs/reference"
     guide_reference = reference / "guides"
     context_reference = reference / "context"
+    examples_reference = reference / "examples"
     reference.mkdir(parents=True, exist_ok=True)
     guide_reference.mkdir(parents=True, exist_ok=True)
     context_reference.mkdir(parents=True, exist_ok=True)
+    examples_reference.mkdir(parents=True, exist_ok=True)
     for name in ("README.md", "AI_ASSETS.md", "CONTRIBUTING.md", "RELEASE.md", "CHANGELOG.md", "VERSION"):
         shutil.copyfile(ROOT / name, reference / name)
     shutil.copyfile(ROOT / "LANGGRAPH_RUNTIME.md", reference / "langgraph-runtime.md")
@@ -2914,6 +3224,10 @@ def sync_reference_docs() -> None:
         text = dest.read_text(encoding="utf-8")
         text = text.replace("../docs/index.html", "../../index.html")
         dest.write_text(text, encoding="utf-8")
+    for src in sorted((ROOT / "examples").glob("**/*.md")):
+        dest = examples_reference / src.relative_to(ROOT / "examples")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
 
 
 def main() -> None:
@@ -2922,6 +3236,7 @@ def main() -> None:
     create_installers()
     create_docs()
     create_guides()
+    create_examples()
     create_github()
     sync_reference_docs()
 
