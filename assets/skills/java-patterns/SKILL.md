@@ -1,0 +1,18 @@
+---
+name: java-patterns
+description: Java Patterns
+category: skill
+providers:
+  claude:
+    enabled: true
+  codex:
+    enabled: true
+  gemini:
+    enabled: true
+  open_source:
+    enabled: true
+---
+
+# Java Patterns
+
+Use these commands and gotchas when working on java repositories for Nuneri Platform. Include build, test, coverage, commit, and PR conventions.

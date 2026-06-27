@@ -1,0 +1,14 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "Added"
+    labels: ["type:enhancement"]
+  - title: "Fixed"
+    labels: ["type:bug"]
+  - title: "Provider Adapters"
+    labels: ["type:provider-adapter"]
+change-template: "- $TITLE (#$NUMBER)"
+template: |
+  ## Changes
+
+  $CHANGES

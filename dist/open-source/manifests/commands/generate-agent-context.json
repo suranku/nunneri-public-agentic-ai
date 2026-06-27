@@ -1,0 +1,7 @@
+{
+  "name": "generate-agent-context",
+  "description": "Generate or augment provider-specific repo context files",
+  "category": "compliance",
+  "source": "assets/commands/compliance/generate-agent-context.md",
+  "body": "# /generate-agent-context\n\n## What It Does\n\nGenerate or augment provider-specific repo context files. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `compliance-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: none.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/generate-agent-context [options]\n/generate-agent-context [options] --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+}

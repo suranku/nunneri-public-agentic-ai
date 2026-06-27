@@ -1,0 +1,7 @@
+{
+  "name": "prodops-triage",
+  "description": "Classify an incident into a known runbook or JIRA defect",
+  "category": "triage",
+  "source": "assets/commands/triage/prodops-triage.md",
+  "body": "# /prodops-triage\n\n## What It Does\n\nClassify an incident into a known runbook or JIRA defect. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `triage-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: INC-ID, ENV, error.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/prodops-triage <INC-ID> <ENV> <error>\n/prodops-triage <INC-ID> <ENV> <error> --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+}

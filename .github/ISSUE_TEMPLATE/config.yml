@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/pallava/nuneri-public/discussions
+    about: Ask questions before opening a structured request.

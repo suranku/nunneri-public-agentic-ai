@@ -1,0 +1,75 @@
+name: Agent Feedback
+description: Feedback about an existing agent
+title: "[Agent Feedback] "
+labels: [type:feedback, status:needs-triage]
+assignees:
+  - pallava
+body:
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Affected provider
+      options:
+        - Claude
+        - Codex
+        - Gemini
+        - Open-source
+        - Provider-neutral canonical asset
+        - All providers
+    validations:
+      required: true
+  - type: dropdown
+    id: asset
+    attributes:
+      label: Asset type
+      options:
+        - Agent
+        - Skill
+        - Command
+        - Workflow
+        - Guide
+        - Installer
+        - Portal
+        - Provider adapter
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or request
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - critical
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+  - type: dropdown
+    id: release
+    attributes:
+      label: Release target
+      options:
+        - next patch
+        - next minor
+        - backlog
+        - not sure
+    validations:
+      required: true

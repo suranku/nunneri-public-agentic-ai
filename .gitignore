@@ -1,0 +1,6 @@
+.claude/
+.codex/
+.gemini/
+dist/open-source/.ai-assets-version
+__pycache__/
+.DS_Store

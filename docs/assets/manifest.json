@@ -1,0 +1,358 @@
+{
+  "counts": {
+    "agents": 24,
+    "commands": 16,
+    "skills": 8,
+    "workflows": 3,
+    "providers": 4,
+    "guides": 8
+  },
+  "agents": [
+    {
+      "name": "column-lineage-analyst",
+      "description": "Field-level lineage tracing",
+      "category": "analysis",
+      "path": "assets/agents/analysis/column-lineage-analyst.md"
+    },
+    {
+      "name": "impact-analyst",
+      "description": "Forward lineage from any changed object",
+      "category": "analysis",
+      "path": "assets/agents/analysis/impact-analyst.md"
+    },
+    {
+      "name": "ingestion-dependency-analyst",
+      "description": "Backward trace from API to data sources",
+      "category": "analysis",
+      "path": "assets/agents/analysis/ingestion-dependency-analyst.md"
+    },
+    {
+      "name": "schema-drift-analyst",
+      "description": "Detect breaking schema changes",
+      "category": "analysis",
+      "path": "assets/agents/analysis/schema-drift-analyst.md"
+    },
+    {
+      "name": "agent-context-generator",
+      "description": "Generate or augment provider-specific repo context files",
+      "category": "compliance",
+      "path": "assets/agents/compliance/agent-context-generator.md"
+    },
+    {
+      "name": "go-eh-specialist",
+      "description": "Exception handling compliance audit for go",
+      "category": "compliance",
+      "path": "assets/agents/compliance/go-eh-specialist.md"
+    },
+    {
+      "name": "java-eh-specialist",
+      "description": "Exception handling compliance audit for java",
+      "category": "compliance",
+      "path": "assets/agents/compliance/java-eh-specialist.md"
+    },
+    {
+      "name": "javascript-eh-specialist",
+      "description": "Exception handling compliance audit for javascript",
+      "category": "compliance",
+      "path": "assets/agents/compliance/javascript-eh-specialist.md"
+    },
+    {
+      "name": "logging-standards-analyst",
+      "description": "Logging standards audit",
+      "category": "compliance",
+      "path": "assets/agents/compliance/logging-standards-analyst.md"
+    },
+    {
+      "name": "nfr-governance-analyst",
+      "description": "Domain-level NFR readiness coordination",
+      "category": "compliance",
+      "path": "assets/agents/compliance/nfr-governance-analyst.md"
+    },
+    {
+      "name": "python-eh-specialist",
+      "description": "Exception handling compliance audit for python",
+      "category": "compliance",
+      "path": "assets/agents/compliance/python-eh-specialist.md"
+    },
+    {
+      "name": "changelog-analyst",
+      "description": "Summarize what changed between builds or releases",
+      "category": "operations",
+      "path": "assets/agents/operations/changelog-analyst.md"
+    },
+    {
+      "name": "prodops-specialist",
+      "description": "Incident classification against known patterns",
+      "category": "operations",
+      "path": "assets/agents/operations/prodops-specialist.md"
+    },
+    {
+      "name": "release-ops-analyst",
+      "description": "Version tracking and environment comparison",
+      "category": "operations",
+      "path": "assets/agents/operations/release-ops-analyst.md"
+    },
+    {
+      "name": "report-bug-analyzer",
+      "description": "Diagnose report rendering bugs",
+      "category": "reporting",
+      "path": "assets/agents/reporting/report-bug-analyzer.md"
+    },
+    {
+      "name": "report-gap-analyst",
+      "description": "BRD-to-code gap analysis",
+      "category": "reporting",
+      "path": "assets/agents/reporting/report-gap-analyst.md"
+    },
+    {
+      "name": "go-bug-analyzer",
+      "description": "Read-only diagnosis for go bugs",
+      "category": "triage",
+      "path": "assets/agents/triage/go-bug-analyzer.md"
+    },
+    {
+      "name": "go-triage-specialist",
+      "description": "Full 9-phase bug triage workflow for go",
+      "category": "triage",
+      "path": "assets/agents/triage/go-triage-specialist.md"
+    },
+    {
+      "name": "java-bug-analyzer",
+      "description": "Read-only diagnosis for java bugs",
+      "category": "triage",
+      "path": "assets/agents/triage/java-bug-analyzer.md"
+    },
+    {
+      "name": "java-triage-specialist",
+      "description": "Full 9-phase bug triage workflow for java",
+      "category": "triage",
+      "path": "assets/agents/triage/java-triage-specialist.md"
+    },
+    {
+      "name": "javascript-bug-analyzer",
+      "description": "Read-only diagnosis for javascript bugs",
+      "category": "triage",
+      "path": "assets/agents/triage/javascript-bug-analyzer.md"
+    },
+    {
+      "name": "javascript-triage-specialist",
+      "description": "Full 9-phase bug triage workflow for javascript",
+      "category": "triage",
+      "path": "assets/agents/triage/javascript-triage-specialist.md"
+    },
+    {
+      "name": "python-bug-analyzer",
+      "description": "Read-only diagnosis for python bugs",
+      "category": "triage",
+      "path": "assets/agents/triage/python-bug-analyzer.md"
+    },
+    {
+      "name": "python-triage-specialist",
+      "description": "Full 9-phase bug triage workflow for python",
+      "category": "triage",
+      "path": "assets/agents/triage/python-triage-specialist.md"
+    }
+  ],
+  "commands": [
+    {
+      "name": "column-trace",
+      "description": "Trace one field through the full stack",
+      "category": "analysis",
+      "path": "assets/commands/analysis/column-trace.md"
+    },
+    {
+      "name": "ddl-impact",
+      "description": "Assess blast radius for a table DDL change",
+      "category": "analysis",
+      "path": "assets/commands/analysis/ddl-impact.md"
+    },
+    {
+      "name": "impact-analysis",
+      "description": "Trace forward lineage from a table to downstream consumers",
+      "category": "analysis",
+      "path": "assets/commands/analysis/impact-analysis.md"
+    },
+    {
+      "name": "schema-drift",
+      "description": "Detect breaking schema changes from the latest build",
+      "category": "analysis",
+      "path": "assets/commands/analysis/schema-drift.md"
+    },
+    {
+      "name": "what-changed",
+      "description": "Create a changelog of new and removed objects",
+      "category": "analysis",
+      "path": "assets/commands/analysis/what-changed.md"
+    },
+    {
+      "name": "check-logging",
+      "description": "Audit logging against standards",
+      "category": "compliance",
+      "path": "assets/commands/compliance/check-logging.md"
+    },
+    {
+      "name": "exception-handling",
+      "description": "Run exception handling audit and static scan",
+      "category": "compliance",
+      "path": "assets/commands/compliance/exception-handling.md"
+    },
+    {
+      "name": "generate-agent-context",
+      "description": "Generate or augment provider-specific repo context files",
+      "category": "compliance",
+      "path": "assets/commands/compliance/generate-agent-context.md"
+    },
+    {
+      "name": "nfr-readiness",
+      "description": "Produce EH and logging readiness heatmap for a domain",
+      "category": "compliance",
+      "path": "assets/commands/compliance/nfr-readiness.md"
+    },
+    {
+      "name": "ingestion-check",
+      "description": "Trace upstream dependencies for an API endpoint",
+      "category": "operations",
+      "path": "assets/commands/operations/ingestion-check.md"
+    },
+    {
+      "name": "pipeline-health",
+      "description": "Check chain completeness and gaps for a domain",
+      "category": "operations",
+      "path": "assets/commands/operations/pipeline-health.md"
+    },
+    {
+      "name": "release-lookup",
+      "description": "Compare module versions and latest releases",
+      "category": "operations",
+      "path": "assets/commands/operations/release-lookup.md"
+    },
+    {
+      "name": "report-lineage",
+      "description": "Identify objects that feed or use a report",
+      "category": "reporting",
+      "path": "assets/commands/reporting/report-lineage.md"
+    },
+    {
+      "name": "devhub-fix",
+      "description": "Fix a governance finding with test-first workflow and PR",
+      "category": "triage",
+      "path": "assets/commands/triage/devhub-fix.md"
+    },
+    {
+      "name": "prodops-triage",
+      "description": "Classify an incident into a known runbook or JIRA defect",
+      "category": "triage",
+      "path": "assets/commands/triage/prodops-triage.md"
+    },
+    {
+      "name": "triage",
+      "description": "Detect stack and dispatch to the right specialist",
+      "category": "triage",
+      "path": "assets/commands/triage/triage.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "exception-handling-audit",
+      "description": "Exception Handling Audit",
+      "path": "assets/skills/exception-handling-audit/SKILL.md"
+    },
+    {
+      "name": "go-patterns",
+      "description": "Go Patterns",
+      "path": "assets/skills/go-patterns/SKILL.md"
+    },
+    {
+      "name": "java-patterns",
+      "description": "Java Patterns",
+      "path": "assets/skills/java-patterns/SKILL.md"
+    },
+    {
+      "name": "javascript-patterns",
+      "description": "Javascript Patterns",
+      "path": "assets/skills/javascript-patterns/SKILL.md"
+    },
+    {
+      "name": "logging-standards",
+      "description": "Logging Standards",
+      "path": "assets/skills/logging-standards/SKILL.md"
+    },
+    {
+      "name": "provider-adapter-guidelines",
+      "description": "Provider Adapter Guidelines",
+      "path": "assets/skills/provider-adapter-guidelines/SKILL.md"
+    },
+    {
+      "name": "python-patterns",
+      "description": "Python Patterns",
+      "path": "assets/skills/python-patterns/SKILL.md"
+    },
+    {
+      "name": "triage-workflow",
+      "description": "Universal Triage Workflow",
+      "path": "assets/skills/triage-workflow/SKILL.md"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "adapter-build",
+      "description": "Provider Adapter Build Workflow",
+      "category": "workflow",
+      "path": "assets/workflows/adapter-build.md"
+    },
+    {
+      "name": "issue-to-release",
+      "description": "Issue to Release Workflow",
+      "category": "workflow",
+      "path": "assets/workflows/issue-to-release.md"
+    },
+    {
+      "name": "triage-nine-phase",
+      "description": "Nine Phase Triage Workflow",
+      "category": "workflow",
+      "path": "assets/workflows/triage-nine-phase.md"
+    }
+  ],
+  "guides": [
+    {
+      "name": "compliance-demo.html",
+      "title": "Compliance Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "contribute-demo.html",
+      "title": "Contribute Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "developer-tools-demo.html",
+      "title": "Developer Tools Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "ingestion-pipeline-demo.html",
+      "title": "Ingestion Pipeline Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "operations-demo.html",
+      "title": "Operations Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "reporting-demo.html",
+      "title": "Reporting Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "schema-lineage-demo.html",
+      "title": "Schema Lineage Demo",
+      "description": "Interactive provider-neutral guide."
+    },
+    {
+      "name": "triage-demo.html",
+      "title": "Triage Demo",
+      "description": "Interactive provider-neutral guide."
+    }
+  ]
+}
