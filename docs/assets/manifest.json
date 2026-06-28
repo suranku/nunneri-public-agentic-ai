@@ -7,7 +7,7 @@
     "context": 1,
     "providers": 4,
     "runtimes": 1,
-    "guides": 8
+    "guides": 9
   },
   "agents": [
     {
@@ -341,6 +341,12 @@
       "title": "Developer Tools Demo",
       "description": "Interactive provider-neutral guide.",
       "href": "reference/guides/developer-tools-demo.html"
+    },
+    {
+      "name": "end-user-setup-demo.html",
+      "title": "End User Setup Demo",
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/end-user-setup-demo.html"
     },
     {
       "name": "ingestion-pipeline-demo.html",

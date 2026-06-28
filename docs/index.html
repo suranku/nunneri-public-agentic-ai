@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nunneri AI Assets</title>
+  <title>Nunneri — Responsible AI for Everyone</title>
   <style>
     :root {
       --bg:#0a0e1a; --bg2:#111827; --border:#1e2d45; --blue:#3b82f6; --cyan:#22d3ee;
@@ -58,29 +58,69 @@
 <body>
   <nav>
     <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#examples">Examples</a><a href="#providers">Providers</a>
-    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
+    <a href="#graph-studio" style="color:var(--cyan);font-weight:600">Graph Studio</a><a href="#platform-assets">Platform Assets</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
     <section id="hero" class="hero">
-      <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
-      <h1>Nunneri AI Assets</h1>
-      <p>Provider-agnostic AI agents, skills, commands, workflows, repository context, guides, and adapters for Nunneri Platform.</p>
-      <div id="stats" class="grid"></div>
+      <span class="badge">Open Source · Run Anywhere · No Lock-In</span>
+      <h1>Nunneri</h1>
+      <p style="max-width:680px;font-size:15px">
+        A mission to open the doors for everyone to follow responsible AI.
+        Enterprise-grade agentic workflows — self-hosted, auditable, and open.
+        Run on a laptop or in any cloud. No vendor lock-in for models or infrastructure.
+      </p>
+      <div id="stats" class="grid" style="margin-top:24px"></div>
+      <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <a href="http://localhost:8000/ui" target="_blank" rel="noopener"
+          style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:var(--cyan);color:#04101a;border-radius:7px;font-weight:700;font-size:14px;text-decoration:none;">
+          ⬡ Open Graph Studio
+        </a>
+        <a href="reference/guides/api-server.md"
+          style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border:1px solid var(--border);color:var(--text);border-radius:7px;font-weight:600;font-size:14px;text-decoration:none;">
+          Developer Setup →
+        </a>
+      </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted)">
+        Built on Ollama · LangGraph · PostgreSQL · FastAPI — all open source, all self-hostable.
+      </p>
     </section>
     <section id="problem">
-      <h2>Why This Exists</h2>
+      <h2>The Mission</h2>
+      <p class="section-lede" style="margin-bottom:20px">
+        Responsible AI and enterprise agentic workflows should not be the exclusive domain of large companies with large budgets.
+        Nunneri makes them accessible, auditable, and self-hostable — for any team, any size, anywhere.
+      </p>
       <div class="grid">
-        <details open><summary>Before: assets trapped in one assistant</summary><p>After: canonical assets generate provider-specific outputs.</p></details>
-        <details><summary>Before: unclear feedback paths</summary><p>After: GitHub Issues collect provider, priority, asset type, and release target.</p></details>
-        <details><summary>Before: manual release notes</summary><p>After: issues and labels drive changelog and release readiness checks.</p></details>
-        <details><summary>Before: duplicated prompts drift</summary><p>After: adapters are rebuilt from one source of truth.</p></details>
-        <details><summary>Before: repo instructions vary by assistant</summary><p>After: one context template renders provider-native root files and structured override manifests.</p></details>
+        <div class="card" data-reveal>
+          <h3>Run Locally</h3>
+          <p>Fully air-gapped on a laptop with Ollama. No API keys required, no data leaves your machine. Swap in cloud models (Gemini, Claude) when you choose to.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>No Model Lock-In</h3>
+          <p>Use any Ollama-supported model today, add <code>GEMINI_API_KEY</code> or <code>ANTHROPIC_API_KEY</code> for cloud models. One prefix change — <code>gemini:gemini-2.0-flash</code> — is all it takes.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>No Infrastructure Lock-In</h3>
+          <p>Standard PostgreSQL for state. Standard OIDC (Keycloak, Okta, Azure AD) for auth. Standard FastAPI for the server. Deploy it yourself, on any host.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>Responsible by Design</h3>
+          <p>Human approval gates in every workflow. Full run audit trail with per-node state in the database. Role-based access across org → team → project. Error detail stored, not lost.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>Provider-Agnostic Assets</h3>
+          <p>One source of truth generates context for Claude, Codex, Gemini, and open-source frameworks. No duplicated prompts, no provider drift.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>Open Core, Open Roadmap</h3>
+          <p>The core is open source. Issues and contributions through GitHub. The roadmap belongs to the community.</p>
+        </div>
       </div>
     </section>
     <section id="quick-start">
       <h2>Quick Start</h2>
-      <pre><code>git clone https://github.com/Yamini-Suranku/nunneri-public-ai-assets
-cd nunneri-public-ai-assets
+      <pre><code>git clone https://github.com/suranku/nunneri-public-agentic-ai
+cd nunneri-public-agentic-ai
 python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force</code></pre>
     </section>
@@ -94,6 +134,8 @@ python3 scripts/build_adapters.py
           <button class="example-button" data-example="2" role="tab" aria-selected="false" aria-controls="example-panel-2" tabindex="-1"><span class="example-index">3</span><span><strong>Run Triage</strong>Route a defect through workflow assets.</span></button>
           <button class="example-button" data-example="3" role="tab" aria-selected="false" aria-controls="example-panel-3" tabindex="-1"><span class="example-index">4</span><span><strong>Export Runtime</strong>Generate LangGraph artifacts.</span></button>
           <button class="example-button" data-example="4" role="tab" aria-selected="false" aria-controls="example-panel-4" tabindex="-1"><span class="example-index">5</span><span><strong>Verify Consumer</strong>Smoke-test install behavior.</span></button>
+          <button class="example-button" data-example="5" role="tab" aria-selected="false" aria-controls="example-panel-5" tabindex="-1"><span class="example-index">6</span><span><strong>End-User Setup</strong>Walk through state and tracing.</span></button>
+          <button class="example-button" data-example="6" role="tab" aria-selected="false" aria-controls="example-panel-6" tabindex="-1"><span class="example-index">7</span><span><strong>Agent Runner UI</strong>Run agents live with graph traces.</span></button>
         </div>
         <div class="example-preview">
           <article class="example-panel active-example" id="example-panel-0" data-example-panel="0" role="tabpanel">
@@ -126,6 +168,25 @@ python3 scripts/build_adapters.py
             <pre class="example-command"><code>python3 scripts/check_consumer_install.py</code></pre>
             <div class="example-output"><div><span>Checks</span><strong>Dry-run and force</strong></div><div><span>Providers</span><strong>Claude context</strong></div><div><span>Runtime</span><strong>LangGraph export</strong></div></div>
           </article>
+          <article class="example-panel" id="example-panel-5" data-example-panel="5" role="tabpanel" hidden>
+            <p class="example-kicker">Stateful runtime setup</p>
+            <h3>Guide users through provider install, LangGraph state, and tracing.</h3>
+            <pre class="example-command"><code>NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel</code></pre>
+            <div class="example-output"><div><span>Guide</span><strong><a href="reference/guides/end-user-langgraph-setup.md">Read setup</a></strong></div><div><span>Demo</span><strong><a href="reference/guides/end-user-setup-demo.html">Open walkthrough</a></strong></div><div><span>Optional UI</span><strong>LangSmith via opt-in key</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-6" data-example-panel="6" role="tabpanel" hidden>
+            <p class="example-kicker">Agentic workflow UI</p>
+            <h3>Run any agent or command interactively with live LangGraph trace visualization.</h3>
+            <pre class="example-command"><code>uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
+            <div class="example-output">
+              <div><span>Open</span><strong><a href="http://localhost:8000/ui" target="_blank" rel="noopener">localhost:8000/ui ↗</a></strong></div>
+
+              <div><span>Requires</span><strong>Ollama running locally</strong></div>
+              <div><span>Features</span><strong>9-phase graph · run history · project context</strong></div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -139,13 +200,45 @@ python3 scripts/build_adapters.py
         <div class="card" data-reveal><h3>LangGraph Runtime</h3><p>Graph and runtime manifests for stateful workflow orchestration. LangGraph is not a model provider.</p></div>
       </div>
     </section>
-    <section id="commands">
-      <h2>Commands</h2>
-      <input id="search" placeholder="Filter commands, agents, or skills">
-      <div id="command-list" class="grid"></div>
+    <section id="graph-studio">
+      <h2>Graph Studio</h2>
+      <p class="section-lede">Graph Studio is the operational interface for running agents. It is separate from this documentation portal — agents here are provider context files; in Graph Studio they are executable LangGraph workflows with live DAG visualisation, thread history, and per-node configuration.</p>
+      <div class="grid" style="margin-top:20px">
+        <div class="card" data-reveal style="border-color:var(--cyan)">
+          <h3 style="color:var(--cyan)">⬡ Open Graph Studio</h3>
+          <p>Select an agent or command, attach a project path, run it, and watch the graph execute node by node with live token streaming.</p>
+          <div style="margin-top:14px">
+            <a href="http://localhost:8000/ui" target="_blank" rel="noopener"
+              style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--cyan);color:#04101a;border-radius:7px;font-weight:700;font-size:13px;text-decoration:none;">
+              Launch Graph Studio ↗
+            </a>
+          </div>
+          <p style="margin-top:12px;font-size:12px">Requires <code>uvicorn api.main:app</code> and Ollama running locally.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>Thread History</h3>
+          <p>Every run is persisted to PostgreSQL. Click any thread to restore the graph view with node completion states, the full run output, and the error detail if it failed.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>Node Configuration</h3>
+          <p>Click any node in the graph to set a per-node system prompt, classification labels, and routing rules — stored in the database and applied on every run.</p>
+        </div>
+        <div class="card" data-reveal>
+          <h3>LLM Providers</h3>
+          <p>Runs on local Ollama by default. Add <code>GEMINI_API_KEY</code> or <code>ANTHROPIC_API_KEY</code> to enable cloud models (<code>gemini:gemini-2.0-flash</code>, <code>claude:claude-sonnet-4-6</code>, …).</p>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <a href="reference/guides/graph-studio.md">User guide →</a>
+        &nbsp;&nbsp;
+        <a href="reference/guides/api-server.md">Developer setup →</a>
+      </div>
     </section>
-    <section id="agents"><h2>Agents</h2><div id="agent-list" class="grid"></div></section>
-    <section id="skills"><h2>Skills</h2><div id="skill-list" class="grid"></div></section>
+    <section id="platform-assets">
+      <h2>Platform Assets</h2>
+      <p class="section-lede">These are provider context files — markdown and YAML assets that generate <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>GEMINI.md</code>, and LangGraph manifests. They are not directly runnable. To run them, open Graph Studio above.</p>
+      <div id="asset-summary" class="grid" style="margin-top:18px"></div>
+    </section>
     <section id="context">
       <h2>Repository Context</h2>
       <div class="grid">
@@ -158,20 +251,36 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
+        <div class="card"><h3>Graph Studio</h3><p><a href="reference/guides/graph-studio.md">User Guide</a></p><p><a href="reference/guides/api-server.md">API Server (Developer)</a></p><p><a href="reference/guides/platform-onboarding.md">Platform Onboarding</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p></div>
         <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
-  <footer>Nunneri AI Assets | <a href="reference/CONTRIBUTING.md">Contribute</a></footer>
+  <footer>
+    <strong>Nunneri</strong> — Open source. Self-hostable. Responsible AI for everyone.<br>
+    <span style="font-size:12px"><a href="reference/CONTRIBUTING.md">Contribute</a> · <a href="reference/RELEASE.md">Releases</a> · <a href="reference/guides/api-server.md">Developer Docs</a></span>
+  </footer>
   <script>
     const fallback = {counts:{agents:0,commands:0,skills:0,workflows:0,context:1,providers:4,runtimes:1,guides:8}, agents:[], commands:[], skills:[], guides:[]};
-    const card = (item) => `<div class="card" data-reveal><h3><code>${item.name}</code></h3><p>${item.description || item.category || ""}</p></div>`;
+    const ASSET_LABELS = {agents:"Agents",commands:"Commands",skills:"Skills",workflows:"Workflows",context:"Context files",providers:"Providers",runtimes:"Runtimes",guides:"Guides"};
     function render(data) {
       const counts = data.counts || fallback.counts;
-      document.getElementById("stats").innerHTML = Object.entries(counts).map(([k,v]) => `<div class="card" data-reveal><strong>${v}</strong><p>${k}</p></div>`).join("");
-      document.getElementById("command-list").innerHTML = (data.commands || []).map(card).join("");
-      document.getElementById("agent-list").innerHTML = (data.agents || []).map(card).join("");
-      document.getElementById("skill-list").innerHTML = (data.skills || []).map(card).join("");
+      // Hero stats — show total counts only, no clickable grid of assets
+      const heroKeys = ["agents","commands","skills","workflows"];
+      document.getElementById("stats").innerHTML = heroKeys
+        .filter(k => counts[k] != null)
+        .map(k => `<div class="card" data-reveal><strong>${counts[k]}</strong><p>${ASSET_LABELS[k] || k}</p></div>`).join("");
+      // Platform assets summary — counts with type descriptions, no individual cards
+      const assetRows = [
+        {key:"agents",   desc:"Multi-phase agentic workflows (intake → analysis → gate → output). Run these in Graph Studio."},
+        {key:"commands", desc:"Targeted single-purpose workflows (dispatch → execute → summarize). Run these in Graph Studio."},
+        {key:"skills",   desc:"Reusable task modules installed under provider directories (.claude/, .codex/, .gemini/)."},
+        {key:"workflows",desc:"Structured multi-step process definitions for provider context."},
+      ];
+      document.getElementById("asset-summary").innerHTML = assetRows.map(r =>
+        `<div class="card" data-reveal><h3>${counts[r.key] || 0} ${ASSET_LABELS[r.key]}</h3><p>${r.desc}</p></div>`
+      ).join("");
+      // Interactive guides
       document.getElementById("guide-list").innerHTML = (data.guides || []).filter(g => g.name.endsWith(".html")).map(g => `<div class="card" data-reveal><h3>${g.title}</h3><p>${g.description}</p><a href="${g.href || `reference/guides/${g.name}`}">Open guide</a></div>`).join("");
       reveal();
     }
@@ -211,12 +320,6 @@ python3 scripts/build_adapters.py
       });
     });
     fetch("assets/manifest.json").then((response) => response.json()).then(render).catch(() => render(fallback));
-    document.getElementById("search").addEventListener("input", (event) => {
-      const q = event.target.value.toLowerCase();
-      document.querySelectorAll("#command-list .card, #agent-list .card, #skill-list .card").forEach((item) => {
-        item.style.display = item.textContent.toLowerCase().includes(q) ? "" : "none";
-      });
-    });
   </script>
 </body>
 </html>

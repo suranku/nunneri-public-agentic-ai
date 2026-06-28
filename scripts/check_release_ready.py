@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-only", action="store_true")
-    parser.parse_args()
+    args = parser.parse_args()
+    # args.local_only reserved for future remote-only gate differentiation
     required = [
         "CHANGELOG.md",
         "RELEASE.md",
@@ -20,6 +21,10 @@ def main() -> int:
         ".github/workflows/release.yml",
         "examples/consumer-repo/README.md",
         "scripts/check_consumer_install.py",
+        "scripts/check_user_setup_docs.py",
+        "scripts/check_human_gates.py",
+        "guides/end-user-langgraph-setup.md",
+        "guides/end-user-setup-demo.html",
         "scripts/package_release.py",
         "scripts/check_release_package.py",
     ]

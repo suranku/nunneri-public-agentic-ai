@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>End-User Setup Demo - Nunneri AI Assets</title>
+  <style>
+    :root {
+      --bg:#0b1020; --surface:#121a2c; --surface2:#172338; --panel:#0f172a;
+      --border:#2c3b55; --text:#edf2f7; --muted:#9aa9bd; --cyan:#22d3ee;
+      --green:#34d399; --amber:#fbbf24; --blue:#60a5fa; --rose:#fb7185;
+    }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
+    nav { position:sticky; top:0; z-index:5; display:flex; gap:16px; align-items:center; padding:14px 24px; background:rgba(11,16,32,.92); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); overflow:auto; }
+    nav a { color:var(--text); text-decoration:none; font-size:14px; white-space:nowrap; }
+    main { max-width:1180px; margin:0 auto; padding:44px 20px; }
+    section { padding:34px 0; }
+    h1 { font-size:clamp(38px,6vw,76px); line-height:1; margin:0 0 16px; letter-spacing:0; max-width:920px; }
+    h2 { font-size:28px; margin:0 0 16px; }
+    h3 { margin:0 0 10px; }
+    p { color:var(--muted); line-height:1.7; }
+    a { color:var(--cyan); }
+    pre, code { background:#080d19; border:1px solid var(--border); border-radius:8px; color:var(--text); }
+    code { padding:1px 5px; }
+    pre { padding:14px; overflow:auto; }
+    .hero { min-height:64vh; display:grid; align-content:center; gap:22px; }
+    .badge { display:inline-block; width:max-content; border:1px solid var(--border); border-radius:999px; padding:5px 10px; color:var(--cyan); font-size:13px; }
+    .stats, .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    .card, details { min-width:0; border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:18px; box-shadow:0 18px 55px rgba(0,0,0,.22); }
+    .card strong { display:block; font-size:24px; margin-bottom:6px; }
+    .demo-shell { display:grid; grid-template-columns:minmax(230px,310px) 1fr; gap:18px; align-items:stretch; }
+    .timeline { border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:12px; max-height:560px; overflow:auto; }
+    .timeline button { width:100%; display:grid; grid-template-columns:34px 1fr; gap:10px; align-items:center; text-align:left; margin:0 0 8px; border:1px solid transparent; background:transparent; color:var(--text); padding:10px; border-radius:6px; cursor:pointer; }
+    .timeline button:hover, .timeline button:focus-visible { border-color:var(--cyan); outline:none; }
+    .timeline button.active { background:var(--surface2); border-color:var(--cyan); }
+    .step-index { display:grid; place-items:center; width:28px; height:28px; border-radius:999px; background:#263244; color:var(--cyan); font-size:13px; }
+    .active .step-index { background:var(--cyan); color:#06111c; }
+    .progress-wrap { height:8px; border:1px solid var(--border); background:#080d19; border-radius:999px; overflow:hidden; margin:0 0 14px; }
+    .progress { height:100%; width:0; background:linear-gradient(90deg,var(--cyan),var(--green)); transition:width .28s ease; }
+    .panel-stage { border:1px solid var(--border); border-radius:8px; background:linear-gradient(180deg,var(--surface),var(--panel)); padding:18px; min-height:430px; position:relative; overflow:hidden; }
+    .panel-stage::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber)); }
+    .panel { display:none; animation:panelIn .28s ease both; }
+    .panel.active-panel { display:block; }
+    .panel[hidden] { display:none; }
+    .panel strong { display:block; color:var(--text); font-size:25px; margin:6px 0 10px; }
+    .evidence-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:18px; }
+    .metric { min-width:0; border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--surface2); }
+    .metric span { color:var(--muted); font-size:12px; display:block; }
+    .metric b { display:block; margin-top:4px; }
+    .status-line { margin-top:14px; color:var(--muted); min-height:24px; }
+    [data-reveal] { opacity:0; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease; }
+    [data-reveal].visible { opacity:1; transform:none; }
+    footer { border-top:1px solid var(--border); padding:28px 20px; color:var(--muted); text-align:center; }
+    @keyframes panelIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+    @media (max-width:760px) {
+      nav { padding:12px 16px; }
+      main { width:100%; max-width:100vw; padding:30px 14px; overflow:hidden; }
+      section, .hero, .stats, .grid, .demo-shell, .panel-stage, .timeline, .card, details { width:100%; max-width:100%; overflow:hidden; }
+      h1 { max-width:100%; overflow-wrap:anywhere; font-size:36px; }
+      p { width:300px; max-width:100%; }
+      .card p, .metric p { width:280px; max-width:100%; }
+      p, b, strong, code, summary, span { white-space:normal; word-break:normal; overflow-wrap:break-word; }
+      pre { max-width:100%; }
+      .stats, .grid, .evidence-grid { grid-template-columns:1fr; }
+      .demo-shell { grid-template-columns:1fr; }
+      .timeline { max-height:none; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      html { scroll-behavior:auto; }
+      *, *::before, *::after { animation:none !important; transition:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="../docs/index.html">Home</a>
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#interactive">Interactive</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <span class="badge">Open-source-first LangGraph setup</span>
+      <h1>End-User Setup Demo</h1>
+      <p>Install provider context, export LangGraph runtime manifests, keep workflow state outside the LLM context, and choose tracing without adding mandatory hosted dependencies.</p>
+      <div class="stats">
+        <div class="card" data-reveal><strong>3</strong><p>Provider-native root files: CLAUDE.md, AGENTS.md, and GEMINI.md.</p></div>
+        <div class="card" data-reveal><strong>1</strong><p>LangGraph runtime export under .langgraph/.</p></div>
+        <div class="card" data-reveal><strong>3</strong><p>Trace modes: otel, langsmith, or none.</p></div>
+      </div>
+    </section>
+    <section id="problem">
+      <h2>The Problem Before</h2>
+      <div class="grid">
+        <details open data-reveal><summary>Setup is assistant-specific</summary><p>Teams often copy one assistant file and lose provider-neutral behavior for the next tool.</p></details>
+        <details data-reveal><summary>Runtime state disappears</summary><p>Long triage flows need checkpoints and durable context outside the model prompt.</p></details>
+        <details data-reveal><summary>Monitoring choices are unclear</summary><p>Tracing should be optional, documented, and open-source-first by default.</p></details>
+      </div>
+    </section>
+    <section id="solution">
+      <h2>The Solution</h2>
+      <p>Install provider context at the project root, install LangGraph manifests under <code>.langgraph/</code>, store runtime state in a repo-local checkpoint path, and select <code>otel</code>, <code>langsmith</code>, or <code>none</code> for tracing.</p>
+    </section>
+    <section id="interactive">
+      <h2>Interactive Setup</h2>
+      <div class="progress-wrap" aria-hidden="true"><div class="progress" id="progress"></div></div>
+      <div class="demo-shell">
+        <div class="timeline" role="tablist" aria-label="End-user setup steps">
+          <button data-panel="0" role="tab" aria-selected="true" aria-controls="panel-0" tabindex="0" class="active"><span class="step-index">1</span><span>Select Provider</span></button>
+          <button data-panel="1" role="tab" aria-selected="false" aria-controls="panel-1" tabindex="-1"><span class="step-index">2</span><span>Preview Context</span></button>
+          <button data-panel="2" role="tab" aria-selected="false" aria-controls="panel-2" tabindex="-1"><span class="step-index">3</span><span>Install Assets</span></button>
+          <button data-panel="3" role="tab" aria-selected="false" aria-controls="panel-3" tabindex="-1"><span class="step-index">4</span><span>Export Runtime</span></button>
+          <button data-panel="4" role="tab" aria-selected="false" aria-controls="panel-4" tabindex="-1"><span class="step-index">5</span><span>Persist State</span></button>
+          <button data-panel="5" role="tab" aria-selected="false" aria-controls="panel-5" tabindex="-1"><span class="step-index">6</span><span>Trace and Monitor</span></button>
+          <button data-panel="6" role="tab" aria-selected="false" aria-controls="panel-6" tabindex="-1"><span class="step-index">7</span><span>Validate Setup</span></button>
+        </div>
+        <div class="panel-stage">
+          <div class="panel" id="panel-0" data-content="0" role="tabpanel">
+            <strong>Select Provider</strong>
+            <p>Choose the assistant surface for the consuming repository. LangGraph remains the runtime export, not the provider.</p>
+            <pre><code>./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider codex --project --context-only --dry-run
+./install.sh --provider gemini --project --context-only --dry-run</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Provider</span><b>Claude, Codex, or Gemini</b></div><div class="metric"><span>Runtime</span><b>LangGraph later</b></div><div class="metric"><span>Risk</span><b>No files written</b></div></div>
+          </div>
+          <div class="panel" id="panel-1" data-content="1" role="tabpanel" hidden>
+            <strong>Preview Context</strong>
+            <p>Dry-run the project root context file before writing <code>CLAUDE.md</code>, <code>AGENTS.md</code>, or <code>GEMINI.md</code>.</p>
+            <pre><code>./install.sh --provider claude --project --context-only --dry-run</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Writes</span><b>None</b></div><div class="metric"><span>Shows</span><b>Root context target</b></div><div class="metric"><span>Next</span><b>Use --force when approved</b></div></div>
+          </div>
+          <div class="panel" id="panel-2" data-content="2" role="tabpanel" hidden>
+            <strong>Install Assets</strong>
+            <p>Install provider context at the repository root and provider assets under the provider folder.</p>
+            <pre><code>./install.sh --provider claude --project --force</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Root</span><b>CLAUDE.md</b></div><div class="metric"><span>Assets</span><b>.claude/</b></div><div class="metric"><span>Metadata</span><b>.ai-assets-version</b></div></div>
+          </div>
+          <div class="panel" id="panel-3" data-content="3" role="tabpanel" hidden>
+            <strong>Export Runtime</strong>
+            <p>Install LangGraph graph, command, agent, and pre-dispatch context manifests.</p>
+            <pre><code>python3 scripts/build_adapters.py
+./install.sh --runtime langgraph --project --force</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Target</span><b>.langgraph/</b></div><div class="metric"><span>Graph</span><b>triage-nine-phase</b></div><div class="metric"><span>Context</span><b>pre_dispatch</b></div></div>
+          </div>
+          <div class="panel" id="panel-4" data-content="4" role="tabpanel" hidden>
+            <strong>Persist State</strong>
+            <p>Keep checkpoints and durable runtime context outside the LLM context window.</p>
+            <pre><code>NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+.nunneri/langgraph/state.sqlite</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>State</span><b>Repository local</b></div><div class="metric"><span>Use</span><b>Resumable workflows</b></div><div class="metric"><span>Commit</span><b>Usually ignored</b></div></div>
+          </div>
+          <div class="panel" id="panel-5" data-content="5" role="tabpanel" hidden>
+            <strong>Trace and Monitor</strong>
+            <p>Default to OpenTelemetry for an open-source-first path. Use LangSmith only when a team wants the hosted tracing UI.</p>
+            <pre><code>NUNNERI_TRACE_MODE=otel
+NUNNERI_TRACE_MODE=langsmith
+LANGSMITH_API_KEY=replace-with-your-key
+NUNNERI_TRACE_MODE=none</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Default</span><b>OpenTelemetry</b></div><div class="metric"><span>Optional</span><b>LangSmith</b></div><div class="metric"><span>Offline</span><b>none</b></div></div>
+          </div>
+          <div class="panel" id="panel-6" data-content="6" role="tabpanel" hidden>
+            <strong>Validate Setup</strong>
+            <p>Confirm the consumer install, LangGraph exports, and setup docs before sharing the pattern.</p>
+            <pre><code>python3 scripts/check_consumer_install.py
+python3 scripts/check_langgraph_exports.py
+python3 scripts/check_user_setup_docs.py</code></pre>
+            <div class="evidence-grid"><div class="metric"><span>Install</span><b>Consumer smoke test</b></div><div class="metric"><span>Runtime</span><b>Graph contract</b></div><div class="metric"><span>Docs</span><b>Demo and reference sync</b></div></div>
+          </div>
+        </div>
+      </div>
+      <p class="status-line" id="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <footer><a href="../docs/index.html">Portal</a> | <a href="end-user-langgraph-setup.md">Setup guide</a></footer>
+  <script>
+    const buttons = Array.from(document.querySelectorAll("button[data-panel]"));
+    const panels = Array.from(document.querySelectorAll("[data-content]"));
+    const progress = document.getElementById("progress");
+    const status = document.getElementById("status");
+    function activate(index) {
+      buttons.forEach((button) => {
+        const active = Number(button.dataset.panel) === index;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+        button.tabIndex = active ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        const active = Number(panel.dataset.content) === index;
+        panel.hidden = !active;
+        panel.classList.toggle("active-panel", active);
+      });
+      if (progress) progress.style.width = `${((index + 1) / Math.max(buttons.length, 1)) * 100}%`;
+      if (status && buttons[index]) status.textContent = `Showing ${buttons[index].textContent.trim()} of ${buttons.length}`;
+    }
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", () => activate(index));
+      button.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let next = index;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % buttons.length;
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + buttons.length) % buttons.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = buttons.length - 1;
+        buttons[next].focus();
+        activate(next);
+      });
+    });
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add("visible");
+    }), {threshold:.12});
+    document.querySelectorAll("[data-reveal]").forEach((item) => observer.observe(item));
+    activate(0);
+  </script>
+</body>
+</html>

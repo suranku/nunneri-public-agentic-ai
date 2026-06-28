@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ORG = "Nunneri Engineering"
 PLATFORM = "Nunneri AI Assets"
-REPO_URL = "github.com/Yamini-Suranku/nunneri-public-ai-assets"
+REPO_URL = "github.com/suranku/nunneri-public-agentic-ai"
 TEAM = "Nunneri Platform"
 STACKS = ["python", "javascript", "java", "go"]
 DOMAINS = ["Platform", "Applications", "Data", "Reporting"]
@@ -255,7 +255,7 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
     }}
     * {{ box-sizing: border-box; }}
     html {{ scroll-behavior: smooth; }}
-    body {{ margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }}
+    body {{ margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }}
     nav {{ position:sticky; top:0; z-index:5; display:flex; gap:16px; align-items:center; padding:14px 24px; background:rgba(16,17,20,.94); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); overflow:auto; }}
     nav a {{ color:var(--text); text-decoration:none; font-size:14px; white-space:nowrap; }}
     main {{ max-width:1180px; margin:0 auto; padding:44px 20px; }}
@@ -264,9 +264,12 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
     h2 {{ font-size:28px; margin:0 0 16px; }}
     h3 {{ margin:0 0 10px; }}
     p {{ color:var(--muted); line-height:1.7; }}
+    pre, code {{ background:#0c0d10; border:1px solid var(--border); border-radius:8px; color:var(--text); }}
+    code {{ padding:1px 5px; }}
+    pre {{ padding:14px; overflow:auto; }}
     .hero {{ min-height:64vh; display:grid; align-content:center; gap:22px; }}
     .stats, .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }}
-    .card, details {{ border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:18px; box-shadow:0 18px 55px rgba(0,0,0,.22); }}
+    .card, details {{ min-width:0; border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:18px; box-shadow:0 18px 55px rgba(0,0,0,.22); }}
     .card strong {{ display:block; font-size:24px; margin-bottom:6px; }}
     .badge {{ display:inline-block; width:max-content; border:1px solid var(--border); border-radius:999px; padding:5px 10px; color:var(--teal); font-size:13px; }}
     .demo-shell {{ display:grid; grid-template-columns:minmax(220px,300px) 1fr; gap:18px; align-items:stretch; }}
@@ -285,7 +288,7 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
     .panel[hidden] {{ display:none; }}
     .panel strong {{ display:block; color:var(--text); font-size:24px; margin:6px 0 10px; }}
     .evidence-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:18px; }}
-    .metric {{ border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--surface2); }}
+    .metric {{ min-width:0; border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--surface2); }}
     .metric span {{ color:var(--muted); font-size:12px; display:block; }}
     .metric b {{ display:block; margin-top:4px; }}
     .status-line {{ margin-top:14px; color:var(--muted); min-height:24px; }}
@@ -298,7 +301,14 @@ def simple_html(title: str, subtitle: str, interactive: str) -> str:
     @keyframes panelIn {{ from {{ opacity:0; transform:translateY(8px); }} to {{ opacity:1; transform:none; }} }}
     @media (max-width:760px) {{
       nav {{ padding:12px 16px; }}
-      main {{ padding:30px 16px; }}
+      main {{ width:100%; max-width:100vw; padding:30px 14px; overflow:hidden; }}
+      section, .hero, .stats, .grid, .demo-shell, .panel-stage, .timeline, .card, details {{ width:100%; max-width:100%; overflow:hidden; }}
+      h1 {{ max-width:100%; overflow-wrap:anywhere; font-size:36px; }}
+      p {{ width:300px; max-width:100%; }}
+      .card p, .metric p {{ width:280px; max-width:100%; }}
+      p, b, strong, code, summary, span {{ white-space:normal; word-break:normal; overflow-wrap:break-word; }}
+      pre {{ max-width:100%; }}
+      .stats, .grid, .evidence-grid {{ grid-template-columns:1fr; }}
       .demo-shell {{ grid-template-columns:1fr; }}
       .timeline {{ max-height:none; }}
     }}
@@ -477,7 +487,7 @@ def portal_html() -> str:
     <section id="quick-start">
       <h2>Quick Start</h2>
       <pre><code>git clone https://{REPO_URL}
-cd nunneri-public-ai-assets
+cd nunneri-public-agentic-ai
 python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force</code></pre>
     </section>
@@ -491,6 +501,7 @@ python3 scripts/build_adapters.py
           <button class="example-button" data-example="2" role="tab" aria-selected="false" aria-controls="example-panel-2" tabindex="-1"><span class="example-index">3</span><span><strong>Run Triage</strong>Route a defect through workflow assets.</span></button>
           <button class="example-button" data-example="3" role="tab" aria-selected="false" aria-controls="example-panel-3" tabindex="-1"><span class="example-index">4</span><span><strong>Export Runtime</strong>Generate LangGraph artifacts.</span></button>
           <button class="example-button" data-example="4" role="tab" aria-selected="false" aria-controls="example-panel-4" tabindex="-1"><span class="example-index">5</span><span><strong>Verify Consumer</strong>Smoke-test install behavior.</span></button>
+          <button class="example-button" data-example="5" role="tab" aria-selected="false" aria-controls="example-panel-5" tabindex="-1"><span class="example-index">6</span><span><strong>End-User Setup</strong>Walk through state and tracing.</span></button>
         </div>
         <div class="example-preview">
           <article class="example-panel active-example" id="example-panel-0" data-example-panel="0" role="tabpanel">
@@ -522,6 +533,14 @@ python3 scripts/build_adapters.py
             <h3>Prove installs work in a clean temporary repository.</h3>
             <pre class="example-command"><code>python3 scripts/check_consumer_install.py</code></pre>
             <div class="example-output"><div><span>Checks</span><strong>Dry-run and force</strong></div><div><span>Providers</span><strong>Claude context</strong></div><div><span>Runtime</span><strong>LangGraph export</strong></div></div>
+          </article>
+          <article class="example-panel" id="example-panel-5" data-example-panel="5" role="tabpanel" hidden>
+            <p class="example-kicker">Stateful runtime setup</p>
+            <h3>Guide users through provider install, LangGraph state, and tracing.</h3>
+            <pre class="example-command"><code>NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel</code></pre>
+            <div class="example-output"><div><span>Guide</span><strong><a href="reference/guides/end-user-langgraph-setup.md">Read setup</a></strong></div><div><span>Demo</span><strong><a href="reference/guides/end-user-setup-demo.html">Open walkthrough</a></strong></div><div><span>Optional UI</span><strong>LangSmith via opt-in key</strong></div></div>
           </article>
         </div>
       </div>
@@ -555,7 +574,7 @@ python3 scripts/build_adapters.py
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
@@ -1857,6 +1876,9 @@ def main() -> int:
         ".github/workflows/release.yml",
         "examples/consumer-repo/README.md",
         "scripts/check_consumer_install.py",
+        "scripts/check_user_setup_docs.py",
+        "guides/end-user-langgraph-setup.md",
+        "guides/end-user-setup-demo.html",
         "scripts/package_release.py",
         "scripts/check_release_package.py",
     ]
@@ -2114,6 +2136,79 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ''', True)
 
+    write("scripts/check_user_setup_docs.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def fail(message: str) -> None:
+    raise AssertionError(message)
+
+
+def require(path: Path) -> str:
+    if not path.exists():
+        fail(f"missing required setup doc artifact: {path.relative_to(ROOT)}")
+    return path.read_text(encoding="utf-8")
+
+
+def main() -> int:
+    guide = require(ROOT / "guides" / "end-user-langgraph-setup.md")
+    demo = require(ROOT / "guides" / "end-user-setup-demo.html")
+    reference_guide = require(ROOT / "docs" / "reference" / "guides" / "end-user-langgraph-setup.md")
+    reference_demo = require(ROOT / "docs" / "reference" / "guides" / "end-user-setup-demo.html")
+    portal = require(ROOT / "docs" / "index.html")
+    manifest_text = require(ROOT / "docs" / "assets" / "manifest.json")
+    manifest = json.loads(manifest_text)
+
+    for snippet in (
+        "NUNNERI_RUNTIME=langgraph",
+        "NUNNERI_STATE_STORE=sqlite",
+        "NUNNERI_TRACE_MODE=otel|langsmith|none",
+        "LANGSMITH_API_KEY",
+        ".nunneri/langgraph/state.sqlite",
+        "OpenTelemetry",
+        "LangSmith",
+    ):
+        if snippet not in guide:
+            fail(f"setup guide missing snippet: {snippet}")
+
+    for snippet in (
+        "Select Provider",
+        "Preview Context",
+        "Install Assets",
+        "Export Runtime",
+        "Persist State",
+        "Trace and Monitor",
+        "Validate Setup",
+        "NUNNERI_TRACE_MODE=otel",
+    ):
+        if snippet not in demo:
+            fail(f"setup demo missing step or config snippet: {snippet}")
+
+    if "End-User Setup" not in portal or "end-user-setup-demo.html" not in portal:
+        fail("portal does not link the end-user setup demo")
+
+    guide_names = {item.get("name") for item in manifest.get("guides", [])}
+    if "end-user-setup-demo.html" not in guide_names:
+        fail("portal manifest does not include end-user-setup-demo.html")
+
+    if guide != reference_guide:
+        fail("reference setup guide is out of sync")
+    if "../../index.html" not in reference_demo:
+        fail("reference setup demo link rewrite is missing")
+
+    print("End-user setup docs checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
     write("scripts/check_release_package.py", r'''#!/usr/bin/env python3
 from __future__ import annotations
 
@@ -2143,6 +2238,8 @@ REQUIRED_PATHS = [
     "dist/langgraph/LANGGRAPH.md",
     "dist/open-source/AGENT_MANIFEST.md",
     "docs/reference/README.md",
+    "docs/reference/guides/end-user-langgraph-setup.md",
+    "docs/reference/guides/end-user-setup-demo.html",
     "docs/reference/examples/consumer-repo/README.md",
     "examples/consumer-repo/README.md",
 ]
@@ -2745,6 +2842,20 @@ python3 scripts/build_adapters.py
 ./install.sh --runtime langgraph --project --force
 ```
 
+LangGraph exports are runtime manifests for stateful orchestration. They do not install LangGraph, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+
+For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
+
+Recommended portable runtime configuration:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use `NUNNERI_TRACE_MODE=langsmith` and `LANGSMITH_API_KEY` only when the consuming team chooses LangSmith as an optional hosted tracing UI. Use `NUNNERI_TRACE_MODE=none` for offline or no-observability installs.
+
 ## Install Into a Consumer Repository
 
 Use `examples/consumer-repo/` as the reference flow for installing {PLATFORM} into another GitHub repository.
@@ -2838,12 +2949,43 @@ Install only graph workflows:
 ./install.sh --runtime langgraph --project --force --workflows-only
 ```
 
+## End-User Runtime Setup
+
+Use LangGraph as an orchestration runtime target after installing the provider context for Claude, Codex, or Gemini. The base repository exports manifests only; it does not add LangGraph, LangSmith, OpenTelemetry, or provider SDK dependencies to the root project.
+
+Recommended portable configuration:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use repository-local durable state for checkpoints and resumable workflow context:
+
+```text
+.nunneri/langgraph/state.sqlite
+```
+
+Supported trace modes:
+
+```text
+otel       OpenTelemetry-first monitoring path
+langsmith  Optional hosted LangGraph tracing UI path
+none       No tracing
+```
+
+`LANGSMITH_API_KEY` is only required when `NUNNERI_TRACE_MODE=langsmith`.
+
+See `guides/end-user-langgraph-setup.md` and `guides/end-user-setup-demo.html` for the end-user walkthrough.
+
 ## Validation
 
 Run:
 
 ```bash
 python3 scripts/check_langgraph_exports.py
+python3 scripts/check_user_setup_docs.py
 ```
 
 This verifies that the LangGraph export exists, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.
@@ -3084,6 +3226,38 @@ def create_guides() -> None:
         )
         write(f"guides/{filename}", simple_html(title, subtitle, f'<div class="timeline" role="tablist" aria-label="{title} steps">{buttons}</div><div class="panel-stage">{contents}</div>'))
 
+    setup_steps = [
+        ("Select Provider", "Choose Claude, Codex, or Gemini for the consuming repository. LangGraph remains the runtime export, not the provider.", "./install.sh --provider claude --project --context-only --dry-run\n./install.sh --provider codex --project --context-only --dry-run\n./install.sh --provider gemini --project --context-only --dry-run", "No files written"),
+        ("Preview Context", "Dry-run the provider root context file before writing CLAUDE.md, AGENTS.md, or GEMINI.md.", "./install.sh --provider claude --project --context-only --dry-run", "Root context target"),
+        ("Install Assets", "Install provider context at the repository root and provider assets under the provider folder.", "./install.sh --provider claude --project --force", "CLAUDE.md and .claude/"),
+        ("Export Runtime", "Install LangGraph graph, command, agent, and pre-dispatch context manifests.", "python3 scripts/build_adapters.py\n./install.sh --runtime langgraph --project --force", ".langgraph/"),
+        ("Persist State", "Keep checkpoints and durable runtime context outside the LLM context window.", "NUNNERI_RUNTIME=langgraph\nNUNNERI_STATE_STORE=sqlite\n.nunneri/langgraph/state.sqlite", "Repository-local state"),
+        ("Trace and Monitor", "Default to OpenTelemetry. Use LangSmith only when a team chooses the hosted tracing UI.", "NUNNERI_TRACE_MODE=otel\nNUNNERI_TRACE_MODE=langsmith\nLANGSMITH_API_KEY=replace-with-your-key\nNUNNERI_TRACE_MODE=none", "otel, langsmith, or none"),
+        ("Validate Setup", "Confirm the consumer install, LangGraph exports, and setup docs before sharing the pattern.", "python3 scripts/check_consumer_install.py\npython3 scripts/check_langgraph_exports.py\npython3 scripts/check_user_setup_docs.py", "Checks pass"),
+    ]
+    setup_buttons = "\n".join(
+        f'<button data-panel="{i}" role="tab" aria-selected="{"true" if i == 0 else "false"}" aria-controls="panel-{i}" tabindex="{0 if i == 0 else -1}" class="{"active" if i == 0 else ""}"><span class="step-index">{i + 1}</span><span>{title}</span></button>'
+        for i, (title, _, _, _) in enumerate(setup_steps)
+    )
+    setup_contents = "\n".join(
+        f'''<div class="panel" id="panel-{i}" data-content="{i}" role="tabpanel" {"hidden" if i else ""}>
+  <strong>{title}</strong>
+  <p>{description}</p>
+  <pre><code>{command}</code></pre>
+  <div class="evidence-grid">
+    <div class="metric"><span>Step</span><b>{i + 1} of {len(setup_steps)}</b></div>
+    <div class="metric"><span>Signal</span><b>{signal}</b></div>
+    <div class="metric"><span>Runtime</span><b>{"LangGraph" if i >= 3 else "Provider context first"}</b></div>
+  </div>
+</div>'''
+        for i, (title, description, command, signal) in enumerate(setup_steps)
+    )
+    write("guides/end-user-setup-demo.html", simple_html(
+        "End-User Setup Demo",
+        "Install provider context, export LangGraph runtime manifests, keep workflow state outside the LLM context, and choose tracing without mandatory hosted dependencies.",
+        f'<div class="timeline" role="tablist" aria-label="End-user setup steps">{setup_buttons}</div><div class="panel-stage">{setup_contents}</div>',
+    ))
+
     summaries = {
         "triage-executive-summary.md": ("Triage", ["triage", "prodops-triage", "devhub-fix"]),
         "compliance-executive-summary.md": ("Compliance", ["exception-handling", "nfr-readiness", "check-logging"]),
@@ -3095,6 +3269,116 @@ def create_guides() -> None:
     }
     for filename, (title, cmds) in summaries.items():
         write(f"guides/{filename}", executive_summary(title, cmds))
+
+    write("guides/end-user-langgraph-setup.md", """# End-User LangGraph Setup
+
+This guide shows how a consumer repository can install Nunneri provider context, add LangGraph runtime exports, and prepare for stateful orchestration with optional tracing.
+
+LangGraph is a runtime adapter target in Nunneri, not a model provider. Claude, Codex, Gemini, and open-source exports remain the provider targets. LangGraph consumes the generated graph, agent, command, and context manifests.
+
+## Setup Path
+
+Start from a clone or an internal release package:
+
+```bash
+git clone https://github.com/suranku/nunneri-public-agentic-ai.git
+cd nunneri-public-agentic-ai
+python3 scripts/build_adapters.py
+```
+
+Preview what provider context would write into your project root:
+
+```bash
+./install.sh --provider claude --project --context-only --dry-run
+```
+
+Install the provider context and assets you need:
+
+```bash
+./install.sh --provider claude --project --force
+./install.sh --provider codex --project --force
+./install.sh --provider gemini --project --force
+```
+
+Install LangGraph runtime exports:
+
+```bash
+./install.sh --runtime langgraph --project --force
+```
+
+The runtime install writes generated graph, command, agent, and pre-dispatch context manifests under `.langgraph/`.
+
+## Runtime Configuration
+
+Use repository-local configuration so orchestration state can live outside the LLM context window:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel|langsmith|none
+```
+
+Recommended default:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+For optional LangSmith tracing, add:
+
+```bash
+LANGSMITH_API_KEY=replace-with-your-key
+```
+
+Do not require `LANGSMITH_API_KEY` for base setup. OpenTelemetry is the open-source-first monitoring path; LangSmith is an optional hosted tracing UI path.
+
+## Durable State
+
+Use a project-local state path such as:
+
+```text
+.nunneri/langgraph/state.sqlite
+```
+
+This file is for runtime checkpoints, resumable workflow state, and context that should persist outside the LLM prompt. Add it to the consuming repo's ignore rules unless the team has a deliberate reason to commit runtime state.
+
+## Validation
+
+Run the repo checks before sharing the setup:
+
+```bash
+python3 scripts/check_consumer_install.py
+python3 scripts/check_langgraph_exports.py
+python3 scripts/check_user_setup_docs.py
+```
+
+For the interactive walkthrough, open:
+
+```text
+guides/end-user-setup-demo.html
+```
+
+## What This Does Not Add Yet
+
+This setup does not add a Python LangGraph application, SDK dependency, hosted monitoring dependency, or provider SDK dependency. It defines the portable install and runtime contract first.
+""")
+
+    write("guides/README.md", """# Guides
+
+This directory contains executive summaries and static interactive demos for Nunneri AI Assets.
+
+## Setup
+
+- `platform-onboarding.md` explains provider installs, root context files, LangGraph runtime exports, and release flow.
+- `end-user-langgraph-setup.md` explains how a consuming repository can install provider context, add `.langgraph/` runtime exports, keep durable state outside the LLM context, and choose `otel`, `langsmith`, or `none` tracing.
+- `end-user-setup-demo.html` is the step-by-step interactive setup walkthrough for end users.
+
+## Demos
+
+Open the HTML files directly or through the GitHub Pages portal under `docs/index.html`.
+""")
 
     write("guides/platform-onboarding.md", f"""# Platform Onboarding
 
@@ -3198,6 +3482,28 @@ python3 scripts/build_adapters.py
 ```
 
 The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
+
+## End-User LangGraph Setup
+
+For a consuming repository, install the provider context first, then add LangGraph runtime exports:
+
+```bash
+./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider claude --project --force
+./install.sh --runtime langgraph --project --force
+```
+
+Use OpenTelemetry as the open-source-first tracing default:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use `.nunneri/langgraph/state.sqlite` as the recommended project-local checkpoint path for stateful workflows. Use `NUNNERI_TRACE_MODE=langsmith` plus `LANGSMITH_API_KEY` only when the team chooses LangSmith as an optional hosted tracing UI. Use `NUNNERI_TRACE_MODE=none` for no tracing.
+
+Open `guides/end-user-setup-demo.html` for the interactive setup walkthrough.
 
 ## Consumer Repository Example
 
@@ -3514,7 +3820,7 @@ Release tags must match `VERSION` and tag commits must be contained in the corre
     write(".github/ISSUE_TEMPLATE/config.yml", """blank_issues_enabled: false
 contact_links:
   - name: Discussions
-    url: https://github.com/Yamini-Suranku/nunneri-public-ai-assets/discussions
+    url: https://github.com/suranku/nunneri-public-agentic-ai/discussions
     about: Ask questions before opening a structured request.
 """)
     write(".github/labels.yml", "\n".join([
@@ -3624,6 +3930,8 @@ jobs:
         run: python3 scripts/check_langgraph_exports.py
       - name: Check consumer install
         run: python3 scripts/check_consumer_install.py
+      - name: Check end-user setup docs
+        run: python3 scripts/check_user_setup_docs.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts
@@ -3711,6 +4019,8 @@ jobs:
         run: python3 scripts/check_langgraph_exports.py
       - name: Check consumer install
         run: python3 scripts/check_consumer_install.py
+      - name: Check end-user setup docs
+        run: python3 scripts/check_user_setup_docs.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts

@@ -101,6 +101,22 @@ python3 scripts/build_adapters.py
 ./install.sh --runtime langgraph --project --force
 ```
 
+LangGraph exports are runtime manifests for stateful orchestration. They do not install LangGraph, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+
+For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
+
+The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`.
+
+Recommended portable runtime configuration:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use `NUNNERI_TRACE_MODE=langsmith` and `LANGSMITH_API_KEY` only when the consuming team chooses LangSmith as an optional hosted tracing UI. Use `NUNNERI_TRACE_MODE=none` for offline or no-observability installs.
+
 ## Install Into a Consumer Repository
 
 Use `examples/consumer-repo/` as the reference flow for installing Nunneri AI Assets into another GitHub repository.
@@ -122,6 +138,7 @@ git checkout -b release/v0.1.0
 python3 scripts/package_release.py
 python3 scripts/check_release_package.py
 git tag v0.1.0
+git push origin v0.1.0
 ```
 
 See `RELEASE.md` for the full branch strategy and release checklist.

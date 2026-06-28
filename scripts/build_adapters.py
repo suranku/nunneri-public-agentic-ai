@@ -47,6 +47,8 @@ TRIAGE_NINE_PHASE_GRAPH = {
 def frontmatter_and_body(path: Path) -> tuple[dict[str, str], str]:
     text = path.read_text(encoding="utf-8")
     end = text.find("\n---", 4)
+    if end == -1:
+        raise ValueError(f"{path}: unterminated YAML frontmatter")
     data: dict[str, str] = {}
     for line in text[4:end].splitlines():
         if ":" in line and not line.startswith(" "):

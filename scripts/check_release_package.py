@@ -27,6 +27,8 @@ REQUIRED_PATHS = [
     "dist/langgraph/LANGGRAPH.md",
     "dist/open-source/AGENT_MANIFEST.md",
     "docs/reference/README.md",
+    "docs/reference/guides/end-user-langgraph-setup.md",
+    "docs/reference/guides/end-user-setup-demo.html",
     "docs/reference/examples/consumer-repo/README.md",
     "examples/consumer-repo/README.md",
 ]
@@ -84,12 +86,21 @@ def check_install_from_package(root: Path) -> None:
         assert_exists(consumer / ".ai-assets-version")
 
 
+def safe_zip_extractall(zf: zipfile.ZipFile, dest: Path) -> None:
+    dest = dest.resolve()
+    for member in zf.namelist():
+        target = (dest / member).resolve()
+        if not target.is_relative_to(dest):
+            fail(f"zip-slip detected: {member}")
+    zf.extractall(dest)
+
+
 def check_zip() -> None:
     archive = RELEASES / f"{PACKAGE}.zip"
     assert_exists(archive)
     with tempfile.TemporaryDirectory(prefix="nunneri-release-zip-") as tmp:
         with zipfile.ZipFile(archive) as zf:
-            zf.extractall(tmp)
+            safe_zip_extractall(zf, Path(tmp))
         root = Path(tmp) / PACKAGE
         check_tree(root)
         check_install_from_package(root)
@@ -103,6 +114,12 @@ def check_tar() -> None:
             try:
                 tf.extractall(tmp, filter="data")
             except TypeError:
+                # Python < 3.12: apply manual path validation before extracting
+                dest = Path(tmp).resolve()
+                for member in tf.getmembers():
+                    target = (dest / member.name).resolve()
+                    if not target.is_relative_to(dest):
+                        fail(f"tar-slip detected: {member.name}")
                 tf.extractall(tmp)
         root = Path(tmp) / PACKAGE
         check_tree(root)

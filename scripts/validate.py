@@ -17,6 +17,7 @@ def frontmatter(path: Path) -> dict[str, str]:
     if end == -1:
         raise ValueError("unterminated YAML frontmatter")
     data: dict[str, str] = {}
+    # Flat key: value parser only. Indented/nested lines (stacks:, providers:) are skipped by design.
     for line in text[4:end].splitlines():
         if ":" in line and not line.startswith(" "):
             key, value = line.split(":", 1)

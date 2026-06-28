@@ -76,6 +76,8 @@ jobs:
         run: python3 scripts/check_langgraph_exports.py
       - name: Check consumer install
         run: python3 scripts/check_consumer_install.py
+      - name: Check end-user setup docs
+        run: python3 scripts/check_user_setup_docs.py
       - name: Check release readiness
         run: python3 scripts/check_release_ready.py --local-only
       - name: Validate shell scripts

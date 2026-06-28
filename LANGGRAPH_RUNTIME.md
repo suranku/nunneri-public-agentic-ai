@@ -43,6 +43,29 @@ gate_2
 
 `gate_1` and `gate_2` are marked as human approval checkpoints.
 
+## Human-Blocking Gate Runtime
+
+When the API server runs a LangGraph workflow, human approval checkpoints use LangGraph `interrupt()` and durable checkpoint state. A gate does not auto-pass.
+
+Runtime behavior:
+
+- The graph pauses at the gate and stores the checkpoint under the same `thread_id`.
+- SSE emits `gate_waiting` with a JSON approval payload.
+- `nunneri_runs.status` becomes `waiting_approval`.
+- The gate's `nunneri_run_nodes.status` becomes `waiting_approval`.
+- The graph resumes only through an explicit decision endpoint.
+
+Resume endpoints:
+
+```text
+POST /threads/{thread_id}/gates/{gate_id}/approve
+POST /threads/{thread_id}/gates/{gate_id}/reject
+```
+
+Approval resumes the checkpoint with `Command(resume={"approved": true, ...})` and continues downstream. Rejection resumes with `approved: false`, marks the gate `rejected`, emits `run_rejected`, and routes to a terminal cancellation node instead of executing downstream work.
+
+The legacy `/agents/{name}/invoke/trace` path is only a simulated trace. It stops at a gate with `gate_waiting` and does not imply real approval.
+
 ## Installation
 
 Install generated runtime exports into a project-local `.langgraph/` directory:
@@ -57,12 +80,43 @@ Install only graph workflows:
 ./install.sh --runtime langgraph --project --force --workflows-only
 ```
 
+## End-User Runtime Setup
+
+Use LangGraph as an orchestration runtime target after installing the provider context for Claude, Codex, or Gemini. The base repository exports manifests only; it does not add LangGraph, LangSmith, OpenTelemetry, or provider SDK dependencies to the root project.
+
+Recommended portable configuration:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use repository-local durable state for checkpoints and resumable workflow context:
+
+```text
+.nunneri/langgraph/state.sqlite
+```
+
+Supported trace modes:
+
+```text
+otel       OpenTelemetry-first monitoring path
+langsmith  Optional hosted LangGraph tracing UI path
+none       No tracing
+```
+
+`LANGSMITH_API_KEY` is only required when `NUNNERI_TRACE_MODE=langsmith`.
+
+See `guides/end-user-langgraph-setup.md` and `guides/end-user-setup-demo.html` for the end-user walkthrough.
+
 ## Validation
 
 Run:
 
 ```bash
 python3 scripts/check_langgraph_exports.py
+python3 scripts/check_user_setup_docs.py
 ```
 
 This verifies that the LangGraph export exists, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.

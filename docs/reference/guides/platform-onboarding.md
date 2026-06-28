@@ -101,6 +101,28 @@ python3 scripts/build_adapters.py
 
 The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
 
+## End-User LangGraph Setup
+
+For a consuming repository, install the provider context first, then add LangGraph runtime exports:
+
+```bash
+./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider claude --project --force
+./install.sh --runtime langgraph --project --force
+```
+
+Use OpenTelemetry as the open-source-first tracing default:
+
+```bash
+NUNNERI_RUNTIME=langgraph
+NUNNERI_STATE_STORE=sqlite
+NUNNERI_TRACE_MODE=otel
+```
+
+Use `.nunneri/langgraph/state.sqlite` as the recommended project-local checkpoint path for stateful workflows. Use `NUNNERI_TRACE_MODE=langsmith` plus `LANGSMITH_API_KEY` only when the team chooses LangSmith as an optional hosted tracing UI. Use `NUNNERI_TRACE_MODE=none` for no tracing.
+
+Open `guides/end-user-setup-demo.html` for the interactive setup walkthrough.
+
 ## Consumer Repository Example
 
 Use `examples/consumer-repo/` to see the expected install layout for a normal GitHub repository.
@@ -130,6 +152,47 @@ The check stages a temporary consumer repository and verifies:
 
 Commands inspect files, build tools, and repo context to choose stack-specific agents.
 
+## Graph Studio and API Server
+
+The `api/` directory contains a FastAPI server that turns the generated manifests into a running
+agent execution environment with a browser UI.
+
+### Quick start (local dev)
+
+```bash
+# 1. Start PostgreSQL
+cd api && docker compose up -d
+
+# 2. Install dependencies
+pip install -r api/requirements.txt
+
+# 3. Start the server (from repo root)
+AUTH_ENABLED=false uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Open `http://localhost:8000/ui` for the Graph Studio, `http://localhost:8000` for the portal.
+
+### LLM providers
+
+| Prefix | Provider | Env var needed |
+|---|---|---|
+| `mistral`, `phi3`, … (none) | Local Ollama | — |
+| `gemini:gemini-2.0-flash` | Google AI | `GEMINI_API_KEY` |
+| `claude:claude-sonnet-4-6` | Anthropic | `ANTHROPIC_API_KEY` |
+
+### Key env vars
+
+```bash
+DATABASE_URL=postgresql://nunneri:nunneri@localhost:5432/nunneri
+AUTH_ENABLED=false          # set true + OIDC_* for production
+OLLAMA_MAX_CONCURRENT=2     # parallel Ollama slots
+GEMINI_API_KEY=…            # optional cloud provider
+ANTHROPIC_API_KEY=…         # optional cloud provider
+```
+
+See `guides/api-server.md` for the full developer reference and `guides/graph-studio.md` for the
+end-user UI guide.
+
 ## AI Agent Groups
 
 Triage, analysis, compliance, operations, and reporting.
@@ -146,10 +209,6 @@ runbook:
 ## Environment Reference Convention
 
 Do not hardcode environments. Link to approved environment references.
-
-## Coverage Requirements
-
-Target 85 percent coverage where the application stack supports coverage measurement.
 
 ## Contribution Through GitHub Issues
 
