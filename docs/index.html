@@ -16,7 +16,6 @@
     body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
     nav { position:fixed; top:0; left:0; right:0; z-index:5; display:flex; align-items:center; gap:14px; padding:14px 24px; background:rgba(10,14,26,.92); border-bottom:1px solid var(--border); overflow:auto; }
     nav a { color:var(--text); text-decoration:none; white-space:nowrap; font-size:14px; }
-    nav .nav-cta { margin-left:auto; padding:6px 16px; border:1px solid var(--cyan); border-radius:6px; color:var(--cyan); font-size:13px; font-weight:600; flex-shrink:0; }
     main { max-width:1180px; margin:0 auto; padding:84px 20px 44px; }
     section { padding:52px 0; border-top:1px solid var(--border); }
     section:first-child { border-top:none; }
@@ -49,7 +48,6 @@
     .check-list.dim li { color:var(--muted); }
     .check-list.dim li::before { content:"◦"; color:var(--muted); }
     .step-num { width:34px; height:34px; border-radius:50%; background:#0d1a2e; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:14px; font-weight:700; flex-shrink:0; margin-bottom:12px; }
-    .coming-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; border:1px solid #f59e0b55; color:var(--orange); margin-bottom:14px; }
     footer { border-top:1px solid var(--border); padding:28px 20px; text-align:center; color:var(--muted); font-size:13px; }
     @media (max-width:760px) {
       .grid-2 { grid-template-columns:1fr; }
@@ -71,11 +69,9 @@
     <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:18px;color:#f4f7fa;letter-spacing:-.01em">nunneri</span>
   </a>
   <a href="#open-source">Open Source</a>
-  <a href="#managed">Managed</a>
   <a href="#mission">Mission</a>
   <a href="#guides">Guides</a>
   <a href="#reference">Reference</a>
-  <a href="mailto:yamini.sk@suranku.com?subject=Nunneri%20Managed%20Waitlist" class="nav-cta">Join Waitlist</a>
 </nav>
 
 <main>
@@ -88,21 +84,20 @@
         <span class="badge cyan">Open Source</span>
         <span class="badge">Self-Hostable</span>
         <span class="badge">No Vendor Lock-In</span>
-        <span class="badge orange">Managed Cloud — Coming Soon</span>
       </div>
       <h1>Responsible AI<br>for everyone.</h1>
       <p style="font-size:16px;margin-bottom:28px">
         Enterprise-grade agentic workflows — open source, self-hostable, auditable.
-        Start free on your laptop. Scale to managed cloud when you're ready.
+        Start free on your laptop. Run it anywhere.
       </p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
         <a href="#open-source"
           style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:var(--cyan);color:#04101a;border-radius:7px;font-weight:700;font-size:15px;text-decoration:none">
           Start free — open source ↓
         </a>
-        <a href="mailto:yamini.sk@suranku.com?subject=Nunneri%20Managed%20Waitlist"
+        <a href="https://github.com/suranku/nunneri-public-agentic-ai" target="_blank" rel="noopener"
           style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border:1px solid var(--border);color:var(--text);border-radius:7px;font-weight:600;font-size:15px;text-decoration:none">
-          Join managed waitlist →
+          ★ View on GitHub →
         </a>
       </div>
       <p style="margin-top:14px;font-size:12px">
@@ -205,32 +200,6 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
   </div>
 </section>
 
-<!-- ── Managed / Commercial ──────────────────────────────────────────────── -->
-<section id="managed">
-  <div class="card" style="max-width:780px;border-color:#8b5cf633">
-    <div class="coming-badge">Coming Soon</div>
-    <h2 style="margin-bottom:10px">Managed Nunneri</h2>
-    <p style="max-width:560px;margin-bottom:22px">
-      All the power of the community edition, hosted and managed by us.
-      No infrastructure to operate, enterprise features included, SLA-backed.
-    </p>
-    <ul class="check-list dim">
-      <li>Managed cloud hosting — zero infrastructure to run or maintain</li>
-      <li>Cloud LLMs pre-configured — Gemini, Claude, GPT — no API key juggling</li>
-      <li>Enterprise SSO — SAML / OIDC integration with your identity provider</li>
-      <li>Dedicated support and SLA</li>
-      <li>Compliance audit exports and advanced reporting</li>
-      <li>Usage dashboards and cost attribution per team / project</li>
-    </ul>
-    <a href="mailto:yamini.sk@suranku.com?subject=Nunneri%20Managed%20Waitlist"
-      style="display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:10px 22px;border:1px solid #8b5cf666;color:#a78bfa;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none">
-      Join the waitlist →
-    </a>
-    <p style="font-size:12px;margin-top:14px;max-width:520px">
-      The community edition is complete and fully functional — managed Nunneri adds hosting convenience and enterprise extras, not feature gates.
-    </p>
-  </div>
-</section>
 
 <!-- ── Mission ───────────────────────────────────────────────────────────── -->
 <section id="mission">
@@ -243,7 +212,7 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
     </div>
     <div class="card" data-reveal>
       <h3>No Lock-In</h3>
-      <p>Standard PostgreSQL for state. Standard OIDC for auth. Standard FastAPI for the server. Switch models, switch clouds, or move to managed Nunneri without rewriting workflows.</p>
+      <p>Standard PostgreSQL for state. Standard OIDC for auth. Standard FastAPI for the server. Switch models or switch clouds without rewriting workflows.</p>
     </div>
     <div class="card" data-reveal>
       <h3>Responsible by Design</h3>
