@@ -256,6 +256,40 @@ async def finish_run(
         )
 
 
+async def cancel_run(run_id: str, reason: str = "Cancelled by user") -> Run | None:
+    async with await get_conn() as conn:
+        rows = await conn.execute("SELECT * FROM nunneri_runs WHERE id=%s", (run_id,))
+        row = await rows.fetchone()
+        if not row:
+            return None
+        duration_s = max(0.0, time.time() - float(row.get("started_at") or time.time()))
+        await conn.execute(
+            """
+            UPDATE nunneri_runs
+            SET status='cancelled',
+                duration_s=%s,
+                error_detail=%s
+            WHERE id=%s AND status IN ('running', 'waiting_approval')
+            """,
+            (duration_s, reason, run_id),
+        )
+        await conn.execute(
+            """
+            UPDATE nunneri_run_nodes
+            SET status='cancelled',
+                exited_at=EXTRACT(EPOCH FROM NOW())
+            WHERE run_id=%s
+              AND status IN ('pending', 'active', 'waiting_approval')
+            """,
+            (run_id,),
+        )
+        rows = await conn.execute("SELECT * FROM nunneri_runs WHERE id=%s", (run_id,))
+        updated = await rows.fetchone()
+        run = Run(**{k: v for k, v in updated.items() if k != "nodes"})
+        run.nodes = await list_run_nodes(run_id, conn=conn)
+        return run
+
+
 async def list_runs(
     thread_id: str | None = None,
     project_id: str | None = None,

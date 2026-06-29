@@ -36,6 +36,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 #queue-badge{font-size:11px;padding:3px 10px;border-radius:12px;
   background:var(--surface3);color:var(--muted);border:1px solid var(--border);
   display:none;align-items:center;gap:5px}
+#queue-badge button{border:0;background:transparent;color:inherit;font-size:11px;
+  cursor:pointer;padding:0 0 0 5px;border-left:1px solid currentColor;opacity:.75}
+#queue-badge button:hover{opacity:1}
 #queue-badge.busy{display:flex;color:var(--yellow);border-color:#f59e0b55}
 #queue-badge.waiting{display:flex;color:var(--red);border-color:#ef444455}
 .q-dot{width:6px;height:6px;border-radius:50%;background:currentColor;
@@ -45,9 +48,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 
 /* ── Body ────────────────────────────────────────────────────── */
 #body{display:flex;flex:1;overflow:hidden}
+.resize-handle{flex:0 0 6px;background:transparent;position:relative;z-index:4}
+.resize-handle::after{content:"";position:absolute;background:var(--border);transition:background .15s}
+.resize-handle:hover::after,.resize-handle.dragging::after{background:var(--accent)}
+.resize-handle.vertical{cursor:col-resize}
+.resize-handle.vertical::after{top:0;bottom:0;left:2px;width:1px}
+.resize-handle.horizontal{cursor:row-resize;height:8px;flex:0 0 8px;margin-top:-4px}
+.resize-handle.horizontal::after{left:0;right:0;top:3px;height:1px}
+body.resizing{user-select:none;cursor:col-resize}
+body.resizing-y{user-select:none;cursor:row-resize}
 
 /* ── Left panel ──────────────────────────────────────────────── */
-#left{width:220px;min-width:180px;background:var(--surface);
+#left{width:220px;min-width:160px;max-width:460px;background:var(--surface);
   border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 #left-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
 .lt-btn{flex:1;padding:9px 0;font-size:11px;font-weight:600;color:var(--muted);
@@ -90,7 +102,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .ng-text{font-size:14px}
 .ng-sub{font-size:12px;max-width:240px;text-align:center;line-height:1.5;color:var(--muted)}
 
-#transcript-wrap{border-top:1px solid var(--border);height:190px;min-height:100px;
+#transcript-wrap{border-top:1px solid var(--border);height:190px;min-height:100px;max-height:60vh;
   display:flex;flex-direction:column;background:var(--surface);flex-shrink:0}
 #transcript-hdr{padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:.5px;
   color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border);
@@ -116,7 +128,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .gate-card.simulated button{display:none}
 
 /* ── Right panel ─────────────────────────────────────────────── */
-#right{width:272px;min-width:220px;background:var(--surface);
+#right{width:272px;min-width:220px;max-width:560px;background:var(--surface);
   border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 #right-header{padding:8px 14px 0;border-bottom:1px solid var(--border);
   display:flex;flex-direction:column;gap:0;flex-shrink:0}
@@ -302,7 +314,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
   <div class="spacer"></div>
   <a class="hl" href="/">&#8592; Nunneri Home</a>
   <a class="hl" href="/docs" target="_blank">API Docs</a>
-  <div id="queue-badge"><span class="q-dot"></span><span id="queue-badge-txt"></span></div>
+  <div id="queue-badge"><span class="q-dot"></span><span id="queue-badge-txt"></span><button onclick="resetQueue(event)" title="Reset stale queue counter">Reset</button></div>
   <div id="health-badge">Checking&#8230;</div>
 </div>
 
@@ -328,6 +340,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
       </div>
     </div>
   </div>
+  <div id="left-resize" class="resize-handle vertical" title="Drag to resize navigation"></div>
 
   <!-- Center: SVG canvas + transcript -->
   <div id="center">
@@ -347,6 +360,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
       </div>
     </div>
     <div id="transcript-wrap">
+      <div id="transcript-resize" class="resize-handle horizontal" title="Drag to resize output"></div>
       <div id="transcript-hdr">
         Output
         <button onclick="clearTranscript()">Clear</button>
@@ -354,6 +368,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
       <div id="transcript"><span class="si-empty">Run an agent to see output&#8230;</span></div>
     </div>
   </div>
+  <div id="right-resize" class="resize-handle vertical" title="Drag to resize inspector"></div>
 
   <!-- Right panel: State Inspector + Node Config -->
   <div id="right">
@@ -441,12 +456,77 @@ let abortCtrl = null;
 let checkpoints = [];
 let _graphDone = false;
 let pendingGate = null;    // {thread_id, run_id, id}
+let currentRunId = null;
+let currentLoadedRun = null;
 
 // ── Init ───────────────────────────────────────────────────────────────────
 window.onload = async () => {
+  setupPaneResizers();
   await checkHealth();
   await loadAgents();
 };
+
+// ── Resizable panes ────────────────────────────────────────────────────────
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function refreshGraphSize() {
+  if (liveNodes && liveNodes.length) renderDAG(liveNodes, liveEdges);
+}
+
+function setupPaneResizers() {
+  const left = document.getElementById('left');
+  const right = document.getElementById('right');
+  const transcript = document.getElementById('transcript-wrap');
+  const savedLeft = Number(localStorage.getItem('nunneri:leftWidth'));
+  const savedRight = Number(localStorage.getItem('nunneri:rightWidth'));
+  const savedOutput = Number(localStorage.getItem('nunneri:outputHeight'));
+  if (savedLeft) left.style.width = clamp(savedLeft, 160, 460) + 'px';
+  if (savedRight) right.style.width = clamp(savedRight, 220, 560) + 'px';
+  if (savedOutput) transcript.style.height = clamp(savedOutput, 100, Math.floor(window.innerHeight * 0.6)) + 'px';
+
+  bindPaneDrag('left-resize', 'x', (x) => {
+    const w = clamp(x, 160, Math.min(460, window.innerWidth - 520));
+    left.style.width = w + 'px';
+    localStorage.setItem('nunneri:leftWidth', String(w));
+    refreshGraphSize();
+  });
+  bindPaneDrag('right-resize', 'x', (x) => {
+    const w = clamp(window.innerWidth - x, 220, Math.min(560, window.innerWidth - 520));
+    right.style.width = w + 'px';
+    localStorage.setItem('nunneri:rightWidth', String(w));
+    refreshGraphSize();
+  });
+  bindPaneDrag('transcript-resize', 'y', (y) => {
+    const bottomPad = document.getElementById('input-bar').offsetHeight || 0;
+    const h = clamp(window.innerHeight - y - bottomPad, 100, Math.floor(window.innerHeight * 0.6));
+    transcript.style.height = h + 'px';
+    localStorage.setItem('nunneri:outputHeight', String(h));
+    refreshGraphSize();
+  });
+}
+
+function bindPaneDrag(handleId, axis, onMove) {
+  const handle = document.getElementById(handleId);
+  if (!handle) return;
+  handle.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault();
+    handle.setPointerCapture(ev.pointerId);
+    handle.classList.add('dragging');
+    document.body.classList.add(axis === 'x' ? 'resizing' : 'resizing-y');
+    const move = (e) => onMove(axis === 'x' ? e.clientX : e.clientY);
+    const up = () => {
+      handle.classList.remove('dragging');
+      document.body.classList.remove('resizing', 'resizing-y');
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      refreshGraphSize();
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  });
+}
 
 // ── Health ─────────────────────────────────────────────────────────────────
 async function checkHealth() {
@@ -486,6 +566,23 @@ function updateQueueBadge(q) {
     txt.textContent = `${q.active}/${q.max_concurrent} Ollama slots`;
   } else {
     badge.className = '';   // hidden
+  }
+}
+
+async function resetQueue(event) {
+  if (event) event.stopPropagation();
+  try {
+    const resp = await fetch('/queue/reset', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({reason:'Reset stale queue counter from Graph Studio'}),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const d = await resp.json();
+    updateQueueBadge(d.after || {active:0, waiting:0, max_concurrent:2});
+    appendTranscript('gate', 'Ollama queue counter reset');
+  } catch (e) {
+    appendTranscript('error', 'Queue reset failed: ' + e.message);
   }
 }
 
@@ -693,6 +790,8 @@ async function loadRunForThread(thread) {
     const d = await fetch('/threads/' + thread.id + '/runs').then(r => r.json());
     if (!d.runs || !d.runs.length) return;
     const lastRun = d.runs[0];
+    currentLoadedRun = lastRun;
+    currentRunId = lastRun.id;
 
     // Restore agent selection if not already set correctly
     if (!selAgent || selAgent.name !== lastRun.agent) {
@@ -765,6 +864,14 @@ async function loadRunForThread(thread) {
       'Model: ' + esc(lastRun.model) + ' · ' + (lastRun.duration_s != null ? lastRun.duration_s + 's' : '—');
     tc.appendChild(meta);
 
+    const actionRow = document.createElement('div');
+    actionRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px';
+    const canCancel = lastRun.status === 'running' || lastRun.status === 'waiting_approval';
+    actionRow.innerHTML =
+      (canCancel ? '<button style="font-size:11px;padding:5px 9px;border:1px solid #ef444466;background:#260808;color:var(--red);border-radius:6px;cursor:pointer" onclick="cancelRunById(&quot;' + esc(lastRun.id) + '&quot;)">Cancel run</button>' : '') +
+      '<button style="font-size:11px;padding:5px 9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:6px;cursor:pointer" onclick="rerunLoadedRun()">Rerun as new thread</button>';
+    tc.appendChild(actionRow);
+
     if (run.output) {
       const span = document.createElement('span');
       span.style.cssText = 'white-space:pre-wrap;display:block;margin-top:4px;color:var(--text)';
@@ -784,6 +891,41 @@ async function loadRunForThread(thread) {
   } catch(e) {
     console.error('loadRunForThread failed', e);
   }
+}
+
+async function cancelRunById(runId) {
+  if (!runId) return;
+  try {
+    const resp = await fetch(`/runs/${encodeURIComponent(runId)}/cancel`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({reason:'Cancelled in Graph Studio'}),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    appendTranscript('gate', 'Run cancelled: ' + runId);
+    if (currentLoadedRun && currentLoadedRun.id === runId) currentLoadedRun.status = 'cancelled';
+    await loadThreads();
+    if (selThreadId) await loadRunForThread({id: selThreadId});
+  } catch (e) {
+    appendTranscript('error', 'Cancel failed: ' + e.message);
+  }
+}
+
+async function rerunLoadedRun() {
+  if (!currentLoadedRun) return;
+  const item = _allItems.find(it => it.name === currentLoadedRun.agent);
+  if (item) {
+    selAgent = item;
+    filterItems(document.getElementById('agent-search').value);
+    document.getElementById('run-btn').disabled = false;
+  }
+  document.getElementById('model-sel').value = currentLoadedRun.model || selModel;
+  document.getElementById('msg-input').value = currentLoadedRun.message || '';
+  document.getElementById('path-input').value = currentLoadedRun.project_path || '';
+  autoResize(document.getElementById('msg-input'));
+  selThreadId = null;
+  updateSiThread(null);
+  await handleRun();
 }
 
 // ── DAG SVG rendering ──────────────────────────────────────────────────────
@@ -1127,7 +1269,9 @@ async function handleRun() {
 
   const btn = document.getElementById('run-btn');
   if (abortCtrl) {
+    const runId = currentRunId;
     abortCtrl.abort(); abortCtrl = null;
+    if (runId) await cancelRunById(runId);
     btn.textContent = '▶ Run'; btn.classList.remove('running'); return;
   }
 
@@ -1157,6 +1301,8 @@ async function handleRun() {
   document.getElementById('si-phase').innerHTML = '<span class="si-empty">Running…</span>';
   document.getElementById('si-output').innerHTML = '<span class="si-empty">Waiting…</span>';
   pendingGate = null;
+  currentRunId = null;
+  currentLoadedRun = null;
 
   const body = {
     message: msg,
@@ -1299,6 +1445,7 @@ function handleEvent(ev) {
         renderDAG(ev.nodes, liveEdges);
       }
       if (ev.thread_id) { selThreadId=ev.thread_id; updateSiThread(ev.thread_id); }
+      if (ev.run_id) currentRunId = ev.run_id;
       break;
 
     case 'run_start':
@@ -1371,6 +1518,7 @@ function handleEvent(ev) {
       break;
 
     case 'gate_waiting':
+      if (ev.run_id) currentRunId = ev.run_id;
       pendingGate = {
         id: ev.id,
         thread_id: ev.thread_id || selThreadId,

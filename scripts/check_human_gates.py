@@ -29,6 +29,8 @@ def main() -> int:
     require(main_py, "from langgraph.types import Command", "LangGraph Command import", failures)
     require(main_py, '@app.post("/threads/{thread_id}/gates/{gate_id}/approve"', "approve endpoint", failures)
     require(main_py, '@app.post("/threads/{thread_id}/gates/{gate_id}/reject"', "reject endpoint", failures)
+    require(main_py, '@app.post("/runs/{run_id}/cancel"', "run cancel endpoint", failures)
+    require(main_py, '@app.post("/queue/reset"', "queue reset endpoint", failures)
     require(main_py, '"type": "gate_waiting"', "gate_waiting SSE event", failures)
     require(main_py, '"type": "gate_approved"', "gate_approved SSE event", failures)
     require(main_py, '"type": "gate_rejected"', "gate_rejected SSE event", failures)
@@ -39,6 +41,9 @@ def main() -> int:
 
     require(ui, "Approve and resume", "Graph Studio approval button", failures)
     require(ui, "Reject and stop", "Graph Studio rejection button", failures)
+    require(ui, "Cancel run", "Graph Studio cancel button", failures)
+    require(ui, "Rerun as new thread", "Graph Studio rerun button", failures)
+    require(ui, "resetQueue", "Graph Studio queue reset handler", failures)
     require(ui, "case 'gate_waiting':", "Graph Studio waiting handler", failures)
 
     if failures:

@@ -24,6 +24,18 @@ The header shows:
 - **Ollama ✓ · N models** — Ollama is reachable and the model count is shown. Red means Ollama is offline.
 - **Queue badge** — appears yellow when Ollama slots are busy, red when requests are waiting.
 
+## Resizing the Workspace
+
+Graph Studio panes are resizable:
+
+| Area | Drag target |
+|---|---|
+| Left navigation | Border between the navigation pane and graph canvas |
+| Right inspector / node config | Border between the graph canvas and inspector pane |
+| Bottom output | Border above the output transcript |
+
+Pane sizes are saved in browser local storage so the workspace reopens with the same proportions.
+
 ---
 
 ## Selecting an Agent or Command
@@ -91,7 +103,9 @@ Thread IDs are shown in full and are click-to-copy for debugging and support.
 | `✕ Run failed` + error detail | The run errored. The exact exception is shown in red. |
 | `⚠ Run appears stuck` | Status is still "running" but started more than 2 minutes ago — the server or browser disconnected mid-run. |
 
-Stuck runs are automatically closed with `status=error` on the next server restart if they are older than 1 hour.
+Stuck runs are automatically closed with `status=error` on the next server restart if they are older than 1 hour. You can also open the thread and click **Cancel run** to mark a stale running run as `cancelled` immediately.
+
+If the run is complete but the header still shows an active Ollama slot, click **Reset** in the queue badge. This resets only the in-memory queue counter; it does not change persisted runs or checkpoints.
 
 ### Approval gates
 
@@ -138,8 +152,15 @@ Click **Save** to persist. Node configs are stored in PostgreSQL and applied to 
 
 ## Stopping a Run
 
-Click **■ Stop** to abort the current run. Runs that do not complete within **10 minutes** are
-aborted automatically and a timeout message appears in the transcript.
+Click **■ Stop** to abort the current browser stream. If Graph Studio has received the run id, it also calls `POST /runs/{run_id}/cancel` so the database no longer shows the run as active.
+
+For an already-stuck historical run:
+
+1. Open the thread.
+2. Click **Cancel run**.
+3. Click **Rerun as new thread** to retry the same agent, model, project path, and message without reusing the stuck checkpoint.
+
+Runs that do not complete within **10 minutes** are aborted automatically and a timeout message appears in the transcript.
 
 ---
 

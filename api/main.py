@@ -285,6 +285,10 @@ class GateDecisionRequest(BaseModel):
     reason: str | None = Field(None, description="Optional human approval or rejection reason")
 
 
+class RunCancelRequest(BaseModel):
+    reason: str | None = Field(None, description="Optional cancellation reason")
+
+
 # ---------------------------------------------------------------------------
 # Ollama helpers
 # ---------------------------------------------------------------------------
@@ -541,7 +545,7 @@ async def _langgraph_sse(graph, graph_input, config: dict,
         {"id": n["id"], "label": n["label"], "phase": n.get("phase", 1),
          "node_type": n.get("type", "work")}
         for n in graph_node_defs
-    ]})
+    ], "run_id": run.id})
 
     try:
         async for event in graph.astream_events(graph_input, config, version="v2"):
@@ -1360,19 +1364,50 @@ async def list_runs_endpoint(
 
 
 @app.get("/runs/{run_id}", tags=["meta"])
-async def get_run_endpoint(run_id: str):
+async def get_run_endpoint(
+    run_id: str,
+    user: User = Depends(_auth.get_current_user),
+):
     """Return a single run including full output and per-node state."""
     r = await _db.get_run(run_id)
     if not r:
         raise HTTPException(status_code=404, detail="Run not found")
+    if r.project_id:
+        await _auth.require_project_role(r.project_id, "viewer", user)
     return r.model_dump()
 
 
 @app.get("/runs/{run_id}/nodes", tags=["meta"])
-async def get_run_nodes(run_id: str):
+async def get_run_nodes(
+    run_id: str,
+    user: User = Depends(_auth.get_current_user),
+):
     """Return per-node execution records for a run."""
+    r = await _db.get_run(run_id)
+    if not r:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if r.project_id:
+        await _auth.require_project_role(r.project_id, "viewer", user)
     nodes = await _db.list_run_nodes(run_id)
     return {"run_id": run_id, "nodes": [n.model_dump() for n in nodes]}
+
+
+@app.post("/runs/{run_id}/cancel", tags=["meta"])
+async def cancel_run_endpoint(
+    run_id: str,
+    body: RunCancelRequest | None = None,
+    user: User = Depends(_auth.get_current_user),
+):
+    """Cancel a running or approval-waiting run and close pending node records."""
+    r = await _db.get_run(run_id)
+    if not r:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if r.project_id:
+        await _auth.require_project_role(r.project_id, "member", user)
+    if r.status not in ("running", "waiting_approval"):
+        return {"run": r.model_dump(), "cancelled": False, "message": f"Run is already {r.status}"}
+    updated = await _db.cancel_run(run_id, (body.reason if body else None) or f"Cancelled by {user.email}")
+    return {"run": updated.model_dump() if updated else None, "cancelled": True}
 
 
 # ---------------------------------------------------------------------------
@@ -1418,6 +1453,16 @@ def serve_ui():
 async def queue_status():
     """Live Ollama queue stats — active calls, waiters, average wait time."""
     return ollama_queue.stats()
+
+
+@app.post("/queue/reset", tags=["meta"])
+async def reset_queue(
+    body: RunCancelRequest | None = None,
+    user: User = Depends(_auth.get_current_user),
+):
+    """Reset stale in-memory Ollama queue counters without touching persisted runs."""
+    reason = (body.reason if body else None) or f"Manual queue reset by {user.email}"
+    return ollama_queue.reset_stale(reason)
 
 
 @app.get("/health", tags=["meta"])

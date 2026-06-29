@@ -52,6 +52,20 @@ def stats() -> dict:
     }
 
 
+def reset_stale(reason: str = "manual reset") -> dict:
+    """Reset in-memory queue counters after a stale active slot is detected."""
+    global _sem, _active, _waiting, _total_completed
+    before = stats()
+    stale_active = _active
+    _sem = asyncio.Semaphore(MAX_CONCURRENT)
+    _active = 0
+    _waiting = 0
+    if stale_active:
+        _total_completed += stale_active
+    after = stats()
+    return {"before": before, "after": after, "reason": reason}
+
+
 @asynccontextmanager
 async def slot(timeout: float = QUEUE_TIMEOUT_S):
     """Async context manager: acquire an Ollama slot, yield, release.

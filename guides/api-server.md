@@ -150,6 +150,7 @@ Ollama calls are throttled through the concurrency queue. Cloud provider calls b
 | `GET` | `/health` | Ollama status, available models, agent/command count |
 | `GET` | `/models` | All models grouped by provider with configured status |
 | `GET` | `/queue/status` | Live Ollama queue stats |
+| `POST` | `/queue/reset` | Reset stale in-memory Ollama queue counters |
 | `GET` | `/agents` | List all agents |
 | `GET` | `/commands` | List all commands |
 | `POST` | `/graphs/{agent}/run` | Run an agent via SSE streaming |
@@ -158,6 +159,7 @@ Ollama calls are throttled through the concurrency queue. Cloud provider calls b
 | `GET/POST/DELETE` | `/threads` | Thread management |
 | `GET` | `/threads/{id}/runs` | Run history for a thread |
 | `GET` | `/runs/{id}` | Full run detail including per-node state |
+| `POST` | `/runs/{id}/cancel` | Mark a running or approval-waiting run cancelled and close active nodes |
 | `PUT` | `/agents/{agent}/nodes/{node}/config` | Save node configuration |
 | `GET/POST/DELETE` | `/orgs`, `/teams`, `/projects` | Tenant management |
 | `GET` | `/auth/login` | Redirect to OIDC provider |
@@ -237,8 +239,24 @@ PostgreSQL is not running. Start it: `cd api && docker compose up -d`.
 **Ollama offline badge in UI**  
 Ollama is not running. Start it: `ollama serve`.
 
+**Queue badge shows an active slot after the run completed**  
+The persisted run may be complete while the in-memory queue counter is stale after a dropped stream or reload. In Graph Studio, click **Reset** in the queue badge. From the API:
+
+```bash
+curl -X POST http://localhost:8000/queue/reset \
+  -H 'Content-Type: application/json' \
+  -d '{"reason":"Reset stale queue counter"}'
+```
+
 **Run stuck at first node**  
 The previous SSE connection dropped without cleanup. The run will be auto-closed on next restart.
+From Graph Studio, open the thread and click **Cancel run**, then **Rerun as new thread**.
+From the API:
+```bash
+curl -X POST http://localhost:8000/runs/<run-id>/cancel \
+  -H 'Content-Type: application/json' \
+  -d '{"reason":"Cancelled stale run"}'
+```
 To close it manually:
 ```sql
 UPDATE nunneri_runs SET status='error' WHERE status='running';
