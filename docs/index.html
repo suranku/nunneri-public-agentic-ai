@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nunneri — Responsible AI for Everyone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:#0a0e1a; --bg2:#111827; --border:#1e2d45; --cyan:#22d3ee;
@@ -24,7 +27,8 @@
     a { color:var(--cyan); }
     code { background:#070b14; border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:.92em; color:var(--text); }
     pre { background:#070b14; border:1px solid var(--border); border-radius:8px; padding:18px; overflow:auto; font-size:13px; line-height:1.65; color:var(--text); }
-    .hero { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; min-height:72vh; padding:32px 0; }
+    .hero { padding:56px 0 0; }
+    .hero-text { max-width:660px; margin-bottom:40px; }
     .arch-wrap { position:relative; width:100%; aspect-ratio:1240/800; overflow:hidden; border-radius:14px; border:1px solid var(--border); background:#07090c; }
     .arch-wrap iframe { position:absolute; top:0; left:0; width:1240px; height:800px; border:none; transform-origin:top left; }
     .badge-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
@@ -45,10 +49,6 @@
     .step-num { width:34px; height:34px; border-radius:50%; background:#0d1a2e; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:14px; font-weight:700; flex-shrink:0; margin-bottom:12px; }
     .coming-badge { display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; border:1px solid #f59e0b55; color:var(--orange); margin-bottom:14px; }
     footer { border-top:1px solid var(--border); padding:28px 20px; text-align:center; color:var(--muted); font-size:13px; }
-    @media (max-width:900px) {
-      .hero { grid-template-columns:1fr; }
-      .arch-wrap { display:none; }
-    }
     @media (max-width:760px) {
       .grid-2 { grid-template-columns:1fr; }
       main { padding-left:16px; padding-right:16px; }
@@ -58,7 +58,16 @@
 <body>
 
 <nav>
-  <a href="#hero" style="font-weight:700;font-size:15px;letter-spacing:-.2px">⬡ Nunneri</a>
+  <a href="#hero" style="display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0">
+    <svg width="26" height="26" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <path d="M30 92 L30 30 L90 92 L90 30" stroke="#34e3c0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="30" cy="30" r="10" fill="#34e3c0"/><circle cx="30" cy="30" r="3.4" fill="#0a0d12"/>
+      <circle cx="90" cy="30" r="10" fill="#34e3c0"/><circle cx="90" cy="30" r="3.4" fill="#0a0d12"/>
+      <circle cx="30" cy="92" r="10" fill="#34e3c0"/><circle cx="30" cy="92" r="3.4" fill="#0a0d12"/>
+      <circle cx="90" cy="92" r="10" fill="#34e3c0"/><circle cx="90" cy="92" r="3.4" fill="#0a0d12"/>
+    </svg>
+    <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:18px;color:#f4f7fa;letter-spacing:-.01em">nunneri</span>
+  </a>
   <a href="#open-source">Open Source</a>
   <a href="#managed">Managed</a>
   <a href="#mission">Mission</a>
@@ -71,7 +80,7 @@
 
 <!-- ── Hero ─────────────────────────────────────────────────────────────── -->
 <section id="hero" class="hero">
-  <div>
+  <div class="hero-text">
     <div class="badge-row">
       <span class="badge cyan">Open Source</span>
       <span class="badge">Self-Hostable</span>
@@ -299,7 +308,15 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
 </main>
 
 <footer>
-  <strong>Nunneri</strong> — Open source. Self-hostable. Responsible AI for everyone.<br>
+  <span style="display:inline-flex;align-items:center;gap:7px;vertical-align:middle">
+    <svg width="18" height="18" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+      <path d="M30 92 L30 30 L90 92 L90 30" stroke="#34e3c0" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="30" cy="30" r="10" fill="#34e3c0"/><circle cx="90" cy="30" r="10" fill="#34e3c0"/>
+      <circle cx="30" cy="92" r="10" fill="#34e3c0"/><circle cx="90" cy="92" r="10" fill="#34e3c0"/>
+    </svg>
+    <strong style="font-family:'Schibsted Grotesk',sans-serif;color:#e2e8f0">nunneri</strong>
+  </span>
+  — Open source. Self-hostable. Responsible AI for everyone.<br>
   <span style="font-size:11px;margin-top:6px;display:inline-block">
     <a href="reference/CONTRIBUTING.md">Contribute</a> ·
     <a href="reference/RELEASE.md">Releases</a> ·
