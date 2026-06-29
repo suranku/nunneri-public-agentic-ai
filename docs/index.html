@@ -128,7 +128,7 @@
     </div>
     <div class="card" data-reveal>
       <div class="step-num">2</div>
-      <h3>Launch Graph Studio</h3>
+      <h3>Launch Nunneri Graph Studio</h3>
       <p>Open the browser UI — select an agent, attach your project, and watch the LangGraph DAG execute node by node with live streaming and human approval gates.</p>
     </div>
     <div class="card" data-reveal>
@@ -145,9 +145,9 @@
     <div>
       <span class="badge cyan" style="margin-bottom:16px;display:inline-block">Community Edition — Free Forever</span>
       <h2>Everything you need,<br>self-hosted.</h2>
-      <p>The full Nunneri platform — Graph Studio, agentic workflows, human oversight gates, and multi-tenant RBAC — available under an open-source license. Run it on a laptop or any cloud, no managed dependency.</p>
+      <p>The full Nunneri platform — Nunneri Graph Studio, agentic workflows, human oversight gates, and multi-tenant RBAC — available under an open-source license. Run it on a laptop or any cloud, no managed dependency.</p>
       <ul class="check-list" style="margin-top:20px">
-        <li>Graph Studio UI with live DAG visualisation and node streaming</li>
+        <li>Nunneri Graph Studio UI with live DAG visualisation and node streaming</li>
         <li>LangGraph stateful agentic workflows</li>
         <li>Human approval gates — pause, review, resume or reject</li>
         <li>PostgreSQL-backed run history, checkpoints, and error detail</li>
@@ -169,7 +169,7 @@
         </a>
         <a href="http://localhost:8000/ui" target="_blank" rel="noopener"
           style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:var(--cyan);color:#04101a;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none">
-          ⬡ Open Graph Studio
+          ⬡ Open Nunneri Graph Studio
         </a>
       </div>
     </div>
@@ -188,13 +188,13 @@ pip install -r api/requirements.txt
 uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
       <p style="font-size:12px;margin-top:12px">
         Open <code>http://localhost:8000</code> for the portal or
-        <code>http://localhost:8000/ui</code> for Graph Studio.<br>
+        <code>http://localhost:8000/ui</code> for Nunneri Graph Studio.<br>
         Requires <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a>
         running locally with at least one model pulled (e.g. <code>ollama pull mistral</code>).
       </p>
       <p style="font-size:12px;margin-top:12px">
         Full setup guide → <a href="reference/guides/api-server.md">Developer Guide</a> ·
-        <a href="reference/guides/graph-studio.md">Graph Studio User Guide</a>
+        <a href="reference/guides/graph-studio.md">Nunneri Graph Studio User Guide</a>
       </p>
     </div>
   </div>
@@ -226,7 +226,7 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
   <h2>Guides</h2>
   <div class="grid" id="guide-list">
     <div class="card">
-      <h3>Graph Studio</h3>
+      <h3>Nunneri Graph Studio</h3>
       <p>Running agents, thread history, node config, routing rules, and error debugging.</p>
       <a href="reference/guides/graph-studio.md">User guide →</a>
     </div>
