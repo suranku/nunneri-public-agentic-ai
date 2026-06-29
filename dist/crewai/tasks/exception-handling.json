@@ -1,0 +1,9 @@
+{
+  "runtime": "crewai",
+  "contract_source": "dist/nunneri-runtime/commands/exception-handling.json",
+  "task": {
+    "description": "Run exception handling audit and static scan",
+    "expected_output": "Nunneri command result with evidence, decision, and validation summary.",
+    "prompt": "# /exception-handling\n\n## What It Does\n\nRun exception handling audit and static scan. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `compliance-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: none.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/exception-handling [options]\n/exception-handling [options] --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+  }
+}

@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/python-bug-analyzer.md",
+  "contract_source": "dist/nunneri-runtime/agents/python-bug-analyzer.json",
   "node": {
     "id": "python_bug_analyzer",
     "type": "agent",

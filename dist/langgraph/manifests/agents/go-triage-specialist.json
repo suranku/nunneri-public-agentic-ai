@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/go-triage-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/go-triage-specialist.json",
   "node": {
     "id": "go_triage_specialist",
     "type": "agent",

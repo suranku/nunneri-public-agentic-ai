@@ -3,6 +3,7 @@
   "description": "Nine Phase Triage Workflow",
   "runtime": "langgraph",
   "source": "assets/workflows/triage-nine-phase.md",
+  "contract_source": "dist/nunneri-runtime/workflows/triage-nine-phase.json",
   "nodes": [
     {
       "id": "intake",
@@ -39,7 +40,15 @@
       "label": "Gate 1: RCA and Fix Plan Approval",
       "phase": 6,
       "type": "human_approval",
-      "approval_checkpoint": true
+      "approval_checkpoint": true,
+      "approval": {
+        "required": true,
+        "actions": [
+          "approve",
+          "reject"
+        ],
+        "on_reject": "cancel"
+      }
     },
     {
       "id": "test_first_fix",
@@ -58,7 +67,15 @@
       "label": "Gate 2: Summary and Release Impact",
       "phase": 9,
       "type": "human_approval",
-      "approval_checkpoint": true
+      "approval_checkpoint": true,
+      "approval": {
+        "required": true,
+        "actions": [
+          "approve",
+          "reject"
+        ],
+        "on_reject": "cancel"
+      }
     }
   ],
   "edges": [

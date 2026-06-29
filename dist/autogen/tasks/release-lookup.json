@@ -1,0 +1,9 @@
+{
+  "runtime": "autogen",
+  "contract_source": "dist/nunneri-runtime/commands/release-lookup.json",
+  "agentchat_task": {
+    "name": "release-lookup",
+    "description": "Compare module versions and latest releases",
+    "prompt": "# /release-lookup\n\n## What It Does\n\nCompare module versions and latest releases. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `operations-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: latest.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/release-lookup <latest>\n/release-lookup <latest> --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+  }
+}

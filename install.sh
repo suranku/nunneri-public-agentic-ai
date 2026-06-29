@@ -15,7 +15,7 @@ INCLUDE_GUIDES=1
 INCLUDE_CONTEXT=1
 
 usage() {
-  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--dry-run] [--skip-build] [filters]"
+  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime nunneri-runtime|langgraph|crewai|autogen|semantic-kernel|all] [--project] [--force] [--dry-run] [--skip-build] [filters]"
   echo "Filters: --agents-only --skills-only --commands-only --workflows-only --context-only --no-agents --no-skills --no-commands --no-workflows --no-guides --no-context"
 }
 
@@ -116,9 +116,9 @@ should_install() {
       [ "$INCLUDE_AGENTS" -eq 1 ] ;;
     skills/*)
       [ "$INCLUDE_SKILLS" -eq 1 ] ;;
-    commands/*|manifests/commands/*)
+    commands/*|manifests/commands/*|tasks/*|functions/*)
       [ "$INCLUDE_COMMANDS" -eq 1 ] ;;
-    workflows/*)
+    workflows/*|flows/*|orchestrations/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     graphs/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
@@ -126,7 +126,7 @@ should_install() {
       [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
-    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
+    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md|NUNNERI_RUNTIME.md|CREWAI.md|AUTOGEN.md|SEMANTIC_KERNEL.md|contract.json)
       [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     *)
       return 0 ;;
@@ -141,12 +141,20 @@ install_runtime() {
     exit 1
   fi
   case "$runtime" in
+    nunneri-runtime) target="$HOME/.nunneri-runtime" ;;
     langgraph) target="$HOME/.langgraph" ;;
+    crewai) target="$HOME/.crewai" ;;
+    autogen) target="$HOME/.autogen" ;;
+    semantic-kernel) target="$HOME/.semantic-kernel" ;;
     *) echo "Unsupported runtime: $runtime"; exit 1 ;;
   esac
   if [ "$PROJECT" -eq 1 ]; then
     case "$runtime" in
+      nunneri-runtime) target=".nunneri-runtime" ;;
       langgraph) target=".langgraph" ;;
+      crewai) target=".crewai" ;;
+      autogen) target=".autogen" ;;
+      semantic-kernel) target=".semantic-kernel" ;;
     esac
   fi
   count=0
@@ -246,7 +254,11 @@ elif [ -n "$PROVIDER" ]; then
 fi
 
 if [ "$RUNTIME" = "all" ]; then
+  install_runtime nunneri-runtime
   install_runtime langgraph
+  install_runtime crewai
+  install_runtime autogen
+  install_runtime semantic-kernel
 elif [ -n "$RUNTIME" ]; then
   install_runtime "$RUNTIME"
 fi

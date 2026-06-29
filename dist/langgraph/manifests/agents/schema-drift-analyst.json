@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/agents/analysis/schema-drift-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/schema-drift-analyst.json",
   "node": {
     "id": "schema_drift_analyst",
     "type": "agent",

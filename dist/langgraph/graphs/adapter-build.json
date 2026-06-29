@@ -3,6 +3,7 @@
   "description": "Provider Adapter Build Workflow",
   "runtime": "langgraph",
   "source": "assets/workflows/adapter-build.md",
+  "contract_source": "dist/nunneri-runtime/workflows/adapter-build.json",
   "nodes": [
     {
       "id": "adapter_build",
@@ -11,5 +12,6 @@
     }
   ],
   "edges": [],
+  "post_triage_actions": [],
   "body": "# Provider Adapter Build Workflow\n\nBuild Claude, Codex, Gemini, and open-source outputs from canonical assets."
 }

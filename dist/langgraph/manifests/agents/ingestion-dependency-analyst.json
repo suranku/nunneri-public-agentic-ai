@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/agents/analysis/ingestion-dependency-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/ingestion-dependency-analyst.json",
   "node": {
     "id": "ingestion_dependency_analyst",
     "type": "agent",

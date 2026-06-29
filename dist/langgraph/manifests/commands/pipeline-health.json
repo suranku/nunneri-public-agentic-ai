@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/commands/operations/pipeline-health.md",
+  "contract_source": "dist/nunneri-runtime/commands/pipeline-health.json",
   "entrypoint": {
     "id": "pipeline_health",
     "type": "command",

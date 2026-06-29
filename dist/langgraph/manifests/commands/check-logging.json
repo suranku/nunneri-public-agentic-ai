@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/commands/compliance/check-logging.md",
+  "contract_source": "dist/nunneri-runtime/commands/check-logging.json",
   "entrypoint": {
     "id": "check_logging",
     "type": "command",

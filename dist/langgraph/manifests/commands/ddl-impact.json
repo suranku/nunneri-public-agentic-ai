@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/commands/analysis/ddl-impact.md",
+  "contract_source": "dist/nunneri-runtime/commands/ddl-impact.json",
   "entrypoint": {
     "id": "ddl_impact",
     "type": "command",

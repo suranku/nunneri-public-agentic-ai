@@ -105,6 +105,19 @@ def check_langgraph_runtime_install() -> None:
         assert_exists(target / ".langgraph" / ".ai-assets-version")
 
 
+def check_neutral_runtime_contract_install() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-runtime-contract-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--runtime", "nunneri-runtime", "--project", "--force", "--skip-build")
+        assert_contains(output, "Summary for nunneri-runtime runtime")
+        assert_exists(target / ".nunneri-runtime" / "contract.json")
+        assert_exists(target / ".nunneri-runtime" / "workflows" / "triage-nine-phase.json")
+        assert_exists(target / ".nunneri-runtime" / "context" / "repo-agent-instructions.json")
+        assert_exists(target / ".nunneri-runtime" / ".ai-assets-version")
+
+
 def check_existing_context_skip() -> None:
     with tempfile.TemporaryDirectory(prefix="nunneri-consumer-skip-") as tmp:
         target = Path(tmp)
@@ -121,6 +134,7 @@ def main() -> int:
     check_context_only_dry_run()
     check_context_only_force()
     check_full_provider_install()
+    check_neutral_runtime_contract_install()
     check_langgraph_runtime_install()
     check_existing_context_skip()
     print("Consumer install smoke checks passed")

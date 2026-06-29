@@ -1,0 +1,36 @@
+{
+  "contract_version": "1.0",
+  "name": "impact-analysis",
+  "kind": "command",
+  "source": "assets/commands/analysis/impact-analysis.md",
+  "description": "Trace forward lineage from a table to downstream consumers",
+  "inputs": [],
+  "agents": [],
+  "commands": [
+    "impact-analysis"
+  ],
+  "nodes": [
+    {
+      "id": "impact_analysis",
+      "label": "impact-analysis",
+      "type": "command",
+      "prompt": "# /impact-analysis\n\n## What It Does\n\nTrace forward lineage from a table to downstream consumers. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `analysis-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: table, name.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/impact-analysis <table> <name>\n/impact-analysis <table> <name> --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+    }
+  ],
+  "edges": [],
+  "context": {
+    "injection_stage": "pre_dispatch",
+    "source": "assets/context/repo-agent-instructions.md"
+  },
+  "runtime_hints": {
+    "stateful": true,
+    "human_in_loop": true,
+    "observability": [
+      "events",
+      "runs",
+      "nodes"
+    ]
+  },
+  "body": "# /impact-analysis\n\n## What It Does\n\nTrace forward lineage from a table to downstream consumers. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `analysis-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: table, name.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/impact-analysis <table> <name>\n/impact-analysis <table> <name> --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests.",
+  "category": "analysis"
+}

@@ -91,15 +91,24 @@ dist/codex/AGENTS.md    includes only the Codex override
 dist/gemini/GEMINI.md   includes only the Gemini override
 ```
 
-## LangGraph Export Example
+## Runtime Export Example
 
 ```bash
 python3 scripts/build_adapters.py
+./install.sh --runtime nunneri-runtime --project --dry-run
 ./install.sh --runtime langgraph --project --dry-run
 ./install.sh --runtime langgraph --project --force
 ```
 
-The LangGraph export includes graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
+The neutral contract installs under `.nunneri-runtime/`. LangGraph installs graph definitions, command manifests, agent manifests, and pre-dispatch context under `.langgraph/`.
+
+Additional runtime exports are available for integration work without adding SDK dependencies:
+
+```bash
+./install.sh --runtime crewai --project --force
+./install.sh --runtime autogen --project --force
+./install.sh --runtime semantic-kernel --project --force
+```
 
 ## End-User LangGraph Setup
 

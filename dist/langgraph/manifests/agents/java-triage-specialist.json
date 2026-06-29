@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/java-triage-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/java-triage-specialist.json",
   "node": {
     "id": "java_triage_specialist",
     "type": "agent",

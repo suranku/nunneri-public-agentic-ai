@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/commands/triage/prodops-triage.md",
+  "contract_source": "dist/nunneri-runtime/commands/prodops-triage.json",
   "entrypoint": {
     "id": "prodops_triage",
     "type": "command",

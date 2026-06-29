@@ -2,7 +2,7 @@
 
 LangGraph support is provided as a runtime adapter, not as a model provider.
 
-Claude, Codex, and Gemini are provider adapters because they map prompts, skills, commands, and context into model-specific coding assistant surfaces. LangGraph is different: it is an orchestration runtime for stateful agent workflows. This repository exports graph metadata that can be consumed by a future LangGraph application without requiring LangGraph as a dependency in this repo.
+Claude, Codex, and Gemini are provider adapters because they map prompts, skills, commands, and context into model-specific coding assistant surfaces. LangGraph is different: it is an orchestration runtime for stateful agent workflows. This repository exports graph metadata from the neutral Nunneri Runtime Contract without requiring LangGraph as a dependency in this repo.
 
 ## Generated Outputs
 
@@ -15,6 +15,9 @@ python3 scripts/build_adapters.py
 Generated LangGraph files are written to:
 
 ```text
+dist/nunneri-runtime/
+  workflows/triage-nine-phase.json
+
 dist/langgraph/
   LANGGRAPH.md
   manifests/
@@ -25,7 +28,7 @@ dist/langgraph/
 
 ## Triage Graph Contract
 
-`dist/langgraph/graphs/triage-nine-phase.json` exports the canonical nine-phase triage workflow.
+`dist/nunneri-runtime/workflows/triage-nine-phase.json` is the neutral contract. `dist/langgraph/graphs/triage-nine-phase.json` is derived from that contract.
 
 Required nodes:
 
@@ -116,7 +119,8 @@ Run:
 
 ```bash
 python3 scripts/check_langgraph_exports.py
+python3 scripts/check_runtime_contract.py
 python3 scripts/check_user_setup_docs.py
 ```
 
-This verifies that the LangGraph export exists, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.
+This verifies that the neutral contract exists, the LangGraph export was generated from it, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.

@@ -1,0 +1,89 @@
+{
+  "contract_version": "1.0",
+  "name": "nunneri-runtime-contract",
+  "kind": "runtime_contract_index",
+  "description": "Provider- and framework-neutral Nunneri runtime export index.",
+  "generated_from": "assets",
+  "providers": [
+    "claude",
+    "codex",
+    "gemini",
+    "open-source"
+  ],
+  "runtimes": [
+    "nunneri-runtime",
+    "langgraph",
+    "crewai",
+    "autogen",
+    "semantic-kernel"
+  ],
+  "folders": {
+    "agents": "agents",
+    "commands": "commands",
+    "workflows": "workflows",
+    "context": "context"
+  },
+  "node_types": [
+    "agent",
+    "command",
+    "workflow",
+    "work",
+    "router",
+    "human_approval",
+    "terminal"
+  ],
+  "exports": {
+    "agents": [
+      "agents/column-lineage-analyst.json",
+      "agents/impact-analyst.json",
+      "agents/ingestion-dependency-analyst.json",
+      "agents/schema-drift-analyst.json",
+      "agents/agent-context-generator.json",
+      "agents/go-eh-specialist.json",
+      "agents/java-eh-specialist.json",
+      "agents/javascript-eh-specialist.json",
+      "agents/logging-standards-analyst.json",
+      "agents/nfr-governance-analyst.json",
+      "agents/python-eh-specialist.json",
+      "agents/changelog-analyst.json",
+      "agents/prodops-specialist.json",
+      "agents/release-ops-analyst.json",
+      "agents/report-bug-analyzer.json",
+      "agents/report-gap-analyst.json",
+      "agents/go-bug-analyzer.json",
+      "agents/go-triage-specialist.json",
+      "agents/java-bug-analyzer.json",
+      "agents/java-triage-specialist.json",
+      "agents/javascript-bug-analyzer.json",
+      "agents/javascript-triage-specialist.json",
+      "agents/python-bug-analyzer.json",
+      "agents/python-triage-specialist.json"
+    ],
+    "commands": [
+      "commands/column-trace.json",
+      "commands/ddl-impact.json",
+      "commands/impact-analysis.json",
+      "commands/schema-drift.json",
+      "commands/what-changed.json",
+      "commands/check-logging.json",
+      "commands/exception-handling.json",
+      "commands/generate-agent-context.json",
+      "commands/nfr-readiness.json",
+      "commands/ingestion-check.json",
+      "commands/pipeline-health.json",
+      "commands/release-lookup.json",
+      "commands/report-lineage.json",
+      "commands/devhub-fix.json",
+      "commands/prodops-triage.json",
+      "commands/triage.json"
+    ],
+    "workflows": [
+      "workflows/adapter-build.json",
+      "workflows/issue-to-release.json",
+      "workflows/triage-nine-phase.json"
+    ],
+    "context": [
+      "context/repo-agent-instructions.json"
+    ]
+  }
+}

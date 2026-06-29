@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/commands/analysis/schema-drift.md",
+  "contract_source": "dist/nunneri-runtime/commands/schema-drift.json",
   "entrypoint": {
     "id": "schema_drift",
     "type": "command",

@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/commands/analysis/column-trace.md",
+  "contract_source": "dist/nunneri-runtime/commands/column-trace.json",
   "entrypoint": {
     "id": "column_trace",
     "type": "command",

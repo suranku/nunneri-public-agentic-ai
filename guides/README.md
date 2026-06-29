@@ -4,7 +4,7 @@ This directory contains executive summaries and static interactive demos for Nun
 
 ## Setup and Installation
 
-- `platform-onboarding.md` — provider installs, root context files, LangGraph runtime exports, API server quick start, and release flow.
+- `platform-onboarding.md` — provider installs, root context files, neutral runtime contracts, LangGraph runtime exports, API server quick start, and release flow.
 - `end-user-langgraph-setup.md` — how a consuming repository installs provider context, adds `.langgraph/` runtime exports, keeps durable state, and chooses tracing.
 - `end-user-setup-demo.html` — interactive step-by-step setup walkthrough.
 

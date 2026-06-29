@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/python-triage-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/python-triage-specialist.json",
   "node": {
     "id": "python_triage_specialist",
     "type": "agent",

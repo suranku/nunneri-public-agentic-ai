@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/commands/operations/ingestion-check.md",
+  "contract_source": "dist/nunneri-runtime/commands/ingestion-check.json",
   "entrypoint": {
     "id": "ingestion_check",
     "type": "command",

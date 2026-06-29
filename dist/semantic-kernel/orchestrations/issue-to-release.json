@@ -1,0 +1,18 @@
+{
+  "runtime": "semantic-kernel",
+  "contract_source": "dist/nunneri-runtime/workflows/issue-to-release.json",
+  "orchestration": {
+    "name": "issue-to-release",
+    "description": "Issue to Release Workflow",
+    "steps": [
+      {
+        "id": "issue_to_release",
+        "label": "Issue to Release Workflow",
+        "type": "workflow",
+        "prompt": "# Issue to Release Workflow\n\nGitHub Issue -> triage labels -> accepted scope -> PR -> validation -> changelog -> release."
+      }
+    ],
+    "edges": [],
+    "human_agent_interaction": []
+  }
+}

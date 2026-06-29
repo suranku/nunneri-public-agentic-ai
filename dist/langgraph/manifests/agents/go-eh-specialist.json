@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/go-eh-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/go-eh-specialist.json",
   "node": {
     "id": "go_eh_specialist",
     "type": "agent",

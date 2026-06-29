@@ -1,0 +1,128 @@
+{
+  "runtime": "crewai",
+  "contract_source": "dist/nunneri-runtime/workflows/triage-nine-phase.json",
+  "flow": {
+    "name": "triage-nine-phase",
+    "description": "Nine Phase Triage Workflow",
+    "steps": [
+      {
+        "id": "intake",
+        "label": "Intake",
+        "phase": 1,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "context_load",
+        "label": "Context Load",
+        "phase": 2,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "classification",
+        "label": "Classification",
+        "phase": 3,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "evidence_collection",
+        "label": "Evidence Collection",
+        "phase": 4,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "root_cause_analysis",
+        "label": "Root Cause Analysis",
+        "phase": 5,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "gate_1",
+        "label": "Gate 1: RCA and Fix Plan Approval",
+        "phase": 6,
+        "type": "human_approval",
+        "prompt": "",
+        "approval": {
+          "required": true,
+          "actions": [
+            "approve",
+            "reject"
+          ],
+          "on_reject": "cancel"
+        }
+      },
+      {
+        "id": "test_first_fix",
+        "label": "Test-First Fix",
+        "phase": 7,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "validation",
+        "label": "Validation",
+        "phase": 8,
+        "type": "work",
+        "prompt": ""
+      },
+      {
+        "id": "gate_2",
+        "label": "Gate 2: Summary and Release Impact",
+        "phase": 9,
+        "type": "human_approval",
+        "prompt": "",
+        "approval": {
+          "required": true,
+          "actions": [
+            "approve",
+            "reject"
+          ],
+          "on_reject": "cancel"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "intake",
+        "to": "context_load"
+      },
+      {
+        "from": "context_load",
+        "to": "classification"
+      },
+      {
+        "from": "classification",
+        "to": "evidence_collection"
+      },
+      {
+        "from": "evidence_collection",
+        "to": "root_cause_analysis"
+      },
+      {
+        "from": "root_cause_analysis",
+        "to": "gate_1"
+      },
+      {
+        "from": "gate_1",
+        "to": "test_first_fix",
+        "condition": "approved"
+      },
+      {
+        "from": "test_first_fix",
+        "to": "validation"
+      },
+      {
+        "from": "validation",
+        "to": "gate_2"
+      }
+    ],
+    "human_in_loop": [
+      "gate_1",
+      "gate_2"
+    ]
+  }
+}

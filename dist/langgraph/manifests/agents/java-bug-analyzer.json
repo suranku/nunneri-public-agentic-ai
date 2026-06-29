@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/java-bug-analyzer.md",
+  "contract_source": "dist/nunneri-runtime/agents/java-bug-analyzer.json",
   "node": {
     "id": "java_bug_analyzer",
     "type": "agent",

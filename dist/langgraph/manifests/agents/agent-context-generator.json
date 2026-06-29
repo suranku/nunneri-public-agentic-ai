@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/agent-context-generator.md",
+  "contract_source": "dist/nunneri-runtime/agents/agent-context-generator.json",
   "node": {
     "id": "agent_context_generator",
     "type": "agent",

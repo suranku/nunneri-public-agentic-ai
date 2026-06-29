@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/nfr-governance-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/nfr-governance-analyst.json",
   "node": {
     "id": "nfr_governance_analyst",
     "type": "agent",

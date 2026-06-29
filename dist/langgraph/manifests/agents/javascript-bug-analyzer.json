@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/javascript-bug-analyzer.md",
+  "contract_source": "dist/nunneri-runtime/agents/javascript-bug-analyzer.json",
   "node": {
     "id": "javascript_bug_analyzer",
     "type": "agent",

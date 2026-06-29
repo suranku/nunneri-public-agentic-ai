@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/commands/compliance/nfr-readiness.md",
+  "contract_source": "dist/nunneri-runtime/commands/nfr-readiness.json",
   "entrypoint": {
     "id": "nfr_readiness",
     "type": "command",

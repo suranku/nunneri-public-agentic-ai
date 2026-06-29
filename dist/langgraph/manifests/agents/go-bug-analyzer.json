@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/agents/triage/go-bug-analyzer.md",
+  "contract_source": "dist/nunneri-runtime/agents/go-bug-analyzer.json",
   "node": {
     "id": "go_bug_analyzer",
     "type": "agent",

@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/commands/compliance/generate-agent-context.md",
+  "contract_source": "dist/nunneri-runtime/commands/generate-agent-context.json",
   "entrypoint": {
     "id": "generate_agent_context",
     "type": "command",

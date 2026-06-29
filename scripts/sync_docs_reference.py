@@ -21,6 +21,7 @@ ROOT_DOCS = [
 
 RENAMED_DOCS = {
     "LANGGRAPH_RUNTIME.md": "langgraph-runtime.md",
+    "NUNNERI_RUNTIME_CONTRACT.md": "nunneri-runtime-contract.md",
 }
 
 

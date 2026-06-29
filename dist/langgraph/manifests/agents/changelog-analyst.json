@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/agents/operations/changelog-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/changelog-analyst.json",
   "node": {
     "id": "changelog_analyst",
     "type": "agent",

@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/javascript-eh-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/javascript-eh-specialist.json",
   "node": {
     "id": "javascript_eh_specialist",
     "type": "agent",

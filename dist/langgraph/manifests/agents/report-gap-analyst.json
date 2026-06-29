@@ -4,6 +4,7 @@
   "category": "reporting",
   "runtime": "langgraph",
   "source": "assets/agents/reporting/report-gap-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/report-gap-analyst.json",
   "node": {
     "id": "report_gap_analyst",
     "type": "agent",

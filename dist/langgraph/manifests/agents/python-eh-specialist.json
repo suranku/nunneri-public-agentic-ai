@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/python-eh-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/python-eh-specialist.json",
   "node": {
     "id": "python_eh_specialist",
     "type": "agent",

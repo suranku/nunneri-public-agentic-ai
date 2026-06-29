@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/agents/operations/prodops-specialist.md",
+  "contract_source": "dist/nunneri-runtime/agents/prodops-specialist.json",
   "node": {
     "id": "prodops_specialist",
     "type": "agent",

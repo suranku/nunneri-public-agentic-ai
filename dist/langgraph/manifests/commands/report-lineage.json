@@ -4,6 +4,7 @@
   "category": "reporting",
   "runtime": "langgraph",
   "source": "assets/commands/reporting/report-lineage.md",
+  "contract_source": "dist/nunneri-runtime/commands/report-lineage.json",
   "entrypoint": {
     "id": "report_lineage",
     "type": "command",

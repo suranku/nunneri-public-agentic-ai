@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/agents/analysis/impact-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/impact-analyst.json",
   "node": {
     "id": "impact_analyst",
     "type": "agent",

@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/commands/analysis/impact-analysis.md",
+  "contract_source": "dist/nunneri-runtime/commands/impact-analysis.json",
   "entrypoint": {
     "id": "impact_analysis",
     "type": "command",

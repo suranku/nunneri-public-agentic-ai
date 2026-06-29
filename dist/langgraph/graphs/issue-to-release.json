@@ -3,6 +3,7 @@
   "description": "Issue to Release Workflow",
   "runtime": "langgraph",
   "source": "assets/workflows/issue-to-release.md",
+  "contract_source": "dist/nunneri-runtime/workflows/issue-to-release.json",
   "nodes": [
     {
       "id": "issue_to_release",
@@ -11,5 +12,6 @@
     }
   ],
   "edges": [],
+  "post_triage_actions": [],
   "body": "# Issue to Release Workflow\n\nGitHub Issue -> triage labels -> accepted scope -> PR -> validation -> changelog -> release."
 }

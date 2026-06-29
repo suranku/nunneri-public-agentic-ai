@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/commands/triage/devhub-fix.md",
+  "contract_source": "dist/nunneri-runtime/commands/devhub-fix.json",
   "entrypoint": {
     "id": "devhub_fix",
     "type": "command",

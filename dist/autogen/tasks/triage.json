@@ -1,0 +1,9 @@
+{
+  "runtime": "autogen",
+  "contract_source": "dist/nunneri-runtime/commands/triage.json",
+  "agentchat_task": {
+    "name": "triage",
+    "description": "Detect stack and dispatch to the right specialist",
+    "prompt": "# /triage\n\n## What It Does\n\nDetect stack and dispatch to the right specialist. It routes the request through the provider-neutral asset model and only applies provider-specific behavior at the adapter layer.\n\n## Activated Agents\n\n- Primary: `triage-specialist` where available\n- Supporting: `impact-analyst`, `release-ops-analyst`\n\n## Inputs\n\nRequired inputs: TICKET-ID, symptom.\n\nOptional flags: `--provider`, `--dry-run`, `--json`.\n\n## Examples\n\n```text\n/triage <TICKET-ID> <symptom>\n/triage <TICKET-ID> <symptom> --provider codex\n```\n\n## Expected Output\n\n- Request classification\n- Evidence gathered\n- Recommended next action\n- Approval gates\n- Validation plan\n\n## Provider Notes\n\nClaude uses slash command Markdown, Codex and Gemini use prompt/workflow invocation metadata, and open-source frameworks use exported manifests."
+  }
+}

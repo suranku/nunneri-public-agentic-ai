@@ -4,6 +4,7 @@
   "category": "reporting",
   "runtime": "langgraph",
   "source": "assets/agents/reporting/report-bug-analyzer.md",
+  "contract_source": "dist/nunneri-runtime/agents/report-bug-analyzer.json",
   "node": {
     "id": "report_bug_analyzer",
     "type": "agent",

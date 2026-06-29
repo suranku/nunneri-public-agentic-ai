@@ -67,7 +67,15 @@ providers:
       - shell
       - edit
 runtimes:
+  nunneri_runtime:
+    enabled: true
   langgraph:
+    enabled: true
+  crewai:
+    enabled: true
+  autogen:
+    enabled: true
+  semantic_kernel:
     enabled: true
 ---"""
 
@@ -143,7 +151,15 @@ providers:
   open_source:
     manifest_id: {name}
 runtimes:
+  nunneri_runtime:
+    enabled: true
   langgraph:
+    enabled: true
+  crewai:
+    enabled: true
+  autogen:
+    enabled: true
+  semantic_kernel:
     enabled: true
 ---"""
 
@@ -205,7 +221,15 @@ providers:
   open_source:
     enabled: true
 runtimes:
+  nunneri_runtime:
+    enabled: true
   langgraph:
+    enabled: true
+  crewai:
+    enabled: true
+  autogen:
+    enabled: true
+  semantic_kernel:
     enabled: true
 ---
 
@@ -230,7 +254,15 @@ providers:
   open_source:
     enabled: true
 runtimes:
+  nunneri_runtime:
+    enabled: true
   langgraph:
+    enabled: true
+  crewai:
+    enabled: true
+  autogen:
+    enabled: true
+  semantic_kernel:
     enabled: true
 ---
 
@@ -1143,28 +1175,47 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROVIDERS = ("claude", "codex", "gemini", "open-source")
-RUNTIMES = ("langgraph",)
+RUNTIMES = ("nunneri-runtime", "langgraph", "crewai", "autogen", "semantic-kernel")
+CONTRACT_VERSION = "1.0"
 PROVIDER_OVERRIDE_HEADINGS = {
     "claude": "### Claude Code",
     "codex": "### Codex",
     "gemini": "### Gemini",
 }
 
-TRIAGE_NINE_PHASE_GRAPH = {
+TRIAGE_NINE_PHASE_CONTRACT = {
+    "contract_version": CONTRACT_VERSION,
     "name": "triage-nine-phase",
+    "kind": "workflow",
     "description": "Nine Phase Triage Workflow",
-    "runtime": "langgraph",
     "source": "assets/workflows/triage-nine-phase.md",
+    "inputs": [],
+    "agents": [],
+    "commands": [],
     "nodes": [
-        {"id": "intake", "label": "Intake", "phase": 1, "type": "work"},
-        {"id": "context_load", "label": "Context Load", "phase": 2, "type": "work"},
-        {"id": "classification", "label": "Classification", "phase": 3, "type": "work"},
-        {"id": "evidence_collection", "label": "Evidence Collection", "phase": 4, "type": "work"},
-        {"id": "root_cause_analysis", "label": "Root Cause Analysis", "phase": 5, "type": "work"},
-        {"id": "gate_1", "label": "Gate 1: RCA and Fix Plan Approval", "phase": 6, "type": "human_approval", "approval_checkpoint": True},
-        {"id": "test_first_fix", "label": "Test-First Fix", "phase": 7, "type": "work"},
-        {"id": "validation", "label": "Validation", "phase": 8, "type": "work"},
-        {"id": "gate_2", "label": "Gate 2: Summary and Release Impact", "phase": 9, "type": "human_approval", "approval_checkpoint": True},
+        {"id": "intake", "label": "Intake", "phase": 1, "type": "work", "prompt": ""},
+        {"id": "context_load", "label": "Context Load", "phase": 2, "type": "work", "prompt": ""},
+        {"id": "classification", "label": "Classification", "phase": 3, "type": "work", "prompt": ""},
+        {"id": "evidence_collection", "label": "Evidence Collection", "phase": 4, "type": "work", "prompt": ""},
+        {"id": "root_cause_analysis", "label": "Root Cause Analysis", "phase": 5, "type": "work", "prompt": ""},
+        {
+            "id": "gate_1",
+            "label": "Gate 1: RCA and Fix Plan Approval",
+            "phase": 6,
+            "type": "human_approval",
+            "prompt": "",
+            "approval": {"required": True, "actions": ["approve", "reject"], "on_reject": "cancel"},
+        },
+        {"id": "test_first_fix", "label": "Test-First Fix", "phase": 7, "type": "work", "prompt": ""},
+        {"id": "validation", "label": "Validation", "phase": 8, "type": "work", "prompt": ""},
+        {
+            "id": "gate_2",
+            "label": "Gate 2: Summary and Release Impact",
+            "phase": 9,
+            "type": "human_approval",
+            "prompt": "",
+            "approval": {"required": True, "actions": ["approve", "reject"], "on_reject": "cancel"},
+        },
     ],
     "edges": [
         {"from": "intake", "to": "context_load"},
@@ -1177,12 +1228,16 @@ TRIAGE_NINE_PHASE_GRAPH = {
         {"from": "validation", "to": "gate_2"},
     ],
     "post_triage_actions": ["commit", "push", "pull_request", "release_tag", "publish"],
+    "context": {"injection_stage": "pre_dispatch", "source": "assets/context/repo-agent-instructions.md"},
+    "runtime_hints": {"stateful": True, "human_in_loop": True, "observability": ["events", "runs", "nodes"]},
 }
 
 
 def frontmatter_and_body(path: Path) -> tuple[dict[str, str], str]:
     text = path.read_text(encoding="utf-8")
     end = text.find("\n---", 4)
+    if end == -1:
+        raise ValueError(f"{path}: unterminated YAML frontmatter")
     data: dict[str, str] = {}
     for line in text[4:end].splitlines():
         if ":" in line and not line.startswith(" "):
@@ -1247,16 +1302,21 @@ def build_context() -> None:
 {provider_body}
 """
         write(ROOT / f"dist/{provider}" / filename, content)
+    structured = structured_override_block(body)
     payload = {
         "name": data["name"],
         "description": data["description"],
         "category": data.get("category", "context"),
         "source": str(src.relative_to(ROOT)),
         "body": body,
-        "structured_overrides": structured_override_block(body),
+        "structured_overrides": structured,
     }
     write(ROOT / "dist/open-source/manifests/context/repo-agent-instructions.json", json.dumps(payload, indent=2))
     write(ROOT / "dist/langgraph/context/repo-agent-instructions.json", json.dumps({**payload, "runtime": "langgraph", "injection_stage": "pre_dispatch"}, indent=2))
+    neutral = build_neutral_context(src, data, body, structured)
+    write(ROOT / "dist/crewai/context/repo-agent-instructions.json", json.dumps({**neutral, "runtime": "crewai"}, indent=2))
+    write(ROOT / "dist/autogen/context/repo-agent-instructions.json", json.dumps({**neutral, "runtime": "autogen"}, indent=2))
+    write(ROOT / "dist/semantic-kernel/context/repo-agent-instructions.json", json.dumps({**neutral, "runtime": "semantic-kernel"}, indent=2))
 
 
 def reset_dist() -> None:
@@ -1265,6 +1325,131 @@ def reset_dist() -> None:
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True, exist_ok=True)
+
+
+def neutral_base(src: Path, data: dict[str, str], body: str, kind: str) -> dict:
+    return {
+        "contract_version": CONTRACT_VERSION,
+        "name": data["name"],
+        "kind": kind,
+        "source": str(src.relative_to(ROOT)),
+        "description": data["description"],
+        "inputs": [],
+        "agents": [],
+        "commands": [],
+        "nodes": [],
+        "edges": [],
+        "context": {
+            "injection_stage": "pre_dispatch",
+            "source": "assets/context/repo-agent-instructions.md",
+        },
+        "runtime_hints": {
+            "stateful": True,
+            "human_in_loop": "approval" in body.lower() or "gate" in body.lower(),
+            "observability": ["events", "runs", "nodes"],
+        },
+        "body": body,
+    }
+
+
+def write_neutral_contract(payload: dict) -> None:
+    folder = {
+        "agent": "agents",
+        "command": "commands",
+        "workflow": "workflows",
+        "context": "context",
+    }[payload["kind"]]
+    write(ROOT / f"dist/nunneri-runtime/{folder}" / f"{payload['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_neutral_agent(src: Path, data: dict[str, str], body: str) -> dict:
+    payload = neutral_base(src, data, body, "agent")
+    payload["category"] = data.get("category")
+    payload["nodes"] = [{
+        "id": data["name"].replace("-", "_"),
+        "label": data["name"],
+        "type": "agent",
+        "prompt": body,
+    }]
+    write_neutral_contract(payload)
+    return payload
+
+
+def build_neutral_command(src: Path, data: dict[str, str], body: str) -> dict:
+    payload = neutral_base(src, data, body, "command")
+    payload["category"] = data.get("category", "command")
+    payload["commands"] = [data["name"]]
+    payload["nodes"] = [{
+        "id": data["name"].replace("-", "_"),
+        "label": data["name"],
+        "type": "command",
+        "prompt": body,
+    }]
+    write_neutral_contract(payload)
+    return payload
+
+
+def build_neutral_workflow(src: Path, data: dict[str, str], body: str) -> dict:
+    if data["name"] == "triage-nine-phase":
+        payload = {**TRIAGE_NINE_PHASE_CONTRACT, "body": body}
+    else:
+        payload = neutral_base(src, data, body, "workflow")
+        payload["nodes"] = [{
+            "id": data["name"].replace("-", "_"),
+            "label": data["description"],
+            "type": "workflow",
+            "prompt": body,
+        }]
+    write_neutral_contract(payload)
+    return payload
+
+
+def build_runtime_contract_index(agent_names: list[str], command_names: list[str], workflow_names: list[str]) -> None:
+    payload = {
+        "contract_version": CONTRACT_VERSION,
+        "name": "nunneri-runtime-contract",
+        "kind": "runtime_contract_index",
+        "description": "Provider- and framework-neutral Nunneri runtime export index.",
+        "generated_from": "assets",
+        "providers": list(PROVIDERS),
+        "runtimes": ["nunneri-runtime", "langgraph", "crewai", "autogen", "semantic-kernel"],
+        "folders": {
+            "agents": "agents",
+            "commands": "commands",
+            "workflows": "workflows",
+            "context": "context",
+        },
+        "node_types": ["agent", "command", "workflow", "work", "router", "human_approval", "terminal"],
+        "exports": {
+            "agents": [f"agents/{name}.json" for name in agent_names],
+            "commands": [f"commands/{name}.json" for name in command_names],
+            "workflows": [f"workflows/{name}.json" for name in workflow_names],
+            "context": ["context/repo-agent-instructions.json"],
+        },
+    }
+    write(ROOT / "dist/nunneri-runtime/contract.json", json.dumps(payload, indent=2))
+
+
+def build_neutral_context(src: Path, data: dict[str, str], body: str, structured: str) -> dict:
+    payload = {
+        "contract_version": CONTRACT_VERSION,
+        "name": data["name"],
+        "kind": "context",
+        "source": str(src.relative_to(ROOT)),
+        "description": data["description"],
+        "category": data.get("category", "context"),
+        "inputs": [],
+        "agents": [],
+        "commands": [],
+        "nodes": [],
+        "edges": [],
+        "context": {"injection_stage": "pre_dispatch", "source": str(src.relative_to(ROOT))},
+        "runtime_hints": {"stateful": False, "human_in_loop": False, "observability": ["events"]},
+        "body": body,
+        "structured_overrides": structured,
+    }
+    write_neutral_contract(payload)
+    return payload
 
 
 def build_claude_agent(src: Path, data: dict[str, str], body: str) -> None:
@@ -1299,53 +1484,189 @@ def build_command(src: Path, data: dict[str, str], body: str) -> None:
             write(ROOT / f"dist/{provider}/{target_dir}" / f"{data['name']}{suffix}", f"> Generated from `{src.relative_to(ROOT)}`.\n\n{body}")
 
 
-def build_langgraph_agent(src: Path, data: dict[str, str], body: str) -> None:
+def build_langgraph_agent(contract: dict) -> None:
+    node = contract["nodes"][0]
     payload = {
-        "name": data["name"],
-        "description": data["description"],
-        "category": data.get("category"),
+        "name": contract["name"],
+        "description": contract["description"],
+        "category": contract.get("category"),
         "runtime": "langgraph",
-        "source": str(src.relative_to(ROOT)),
+        "source": contract["source"],
+        "contract_source": f"dist/nunneri-runtime/agents/{contract['name']}.json",
         "node": {
-            "id": data["name"].replace("-", "_"),
+            "id": node["id"],
             "type": "agent",
-            "body": body,
+            "body": node["prompt"],
         },
     }
-    write(ROOT / "dist/langgraph/manifests/agents" / f"{data['name']}.json", json.dumps(payload, indent=2))
+    write(ROOT / "dist/langgraph/manifests/agents" / f"{contract['name']}.json", json.dumps(payload, indent=2))
 
 
-def build_langgraph_command(src: Path, data: dict[str, str], body: str) -> None:
+def build_langgraph_command(contract: dict) -> None:
+    node = contract["nodes"][0]
     payload = {
-        "name": data["name"],
-        "description": data["description"],
-        "category": data.get("category", "command"),
+        "name": contract["name"],
+        "description": contract["description"],
+        "category": contract.get("category", "command"),
         "runtime": "langgraph",
-        "source": str(src.relative_to(ROOT)),
+        "source": contract["source"],
+        "contract_source": f"dist/nunneri-runtime/commands/{contract['name']}.json",
         "entrypoint": {
-            "id": data["name"].replace("-", "_"),
+            "id": node["id"],
             "type": "command",
-            "body": body,
+            "body": node["prompt"],
         },
     }
-    write(ROOT / "dist/langgraph/manifests/commands" / f"{data['name']}.json", json.dumps(payload, indent=2))
+    write(ROOT / "dist/langgraph/manifests/commands" / f"{contract['name']}.json", json.dumps(payload, indent=2))
 
 
-def build_langgraph_workflow(src: Path, data: dict[str, str], body: str) -> None:
-    if data["name"] == "triage-nine-phase":
-        payload = TRIAGE_NINE_PHASE_GRAPH
-        payload = {**payload, "body": body}
-    else:
-        payload = {
-            "name": data["name"],
-            "description": data["description"],
-            "runtime": "langgraph",
-            "source": str(src.relative_to(ROOT)),
-            "nodes": [{"id": data["name"].replace("-", "_"), "label": data["description"], "type": "workflow"}],
-            "edges": [],
-            "body": body,
-        }
-    write(ROOT / "dist/langgraph/graphs" / f"{data['name']}.json", json.dumps(payload, indent=2))
+def build_langgraph_workflow(contract: dict) -> None:
+    nodes = []
+    for node in contract["nodes"]:
+        out = {k: v for k, v in node.items() if k not in {"prompt", "approval"}}
+        if node.get("type") == "human_approval":
+            out["approval_checkpoint"] = True
+            out["approval"] = node.get("approval", {})
+        nodes.append(out)
+    payload = {
+        "name": contract["name"],
+        "description": contract["description"],
+        "runtime": "langgraph",
+        "source": contract["source"],
+        "contract_source": f"dist/nunneri-runtime/workflows/{contract['name']}.json",
+        "nodes": nodes,
+        "edges": contract["edges"],
+        "post_triage_actions": contract.get("post_triage_actions", []),
+        "body": contract["body"],
+    }
+    write(ROOT / "dist/langgraph/graphs" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_crewai_agent(contract: dict) -> None:
+    node = contract["nodes"][0]
+    payload = {
+        "runtime": "crewai",
+        "contract_source": f"dist/nunneri-runtime/agents/{contract['name']}.json",
+        "agent": {
+            "role": contract["name"],
+            "goal": contract["description"],
+            "backstory": node["prompt"],
+            "allow_delegation": False,
+        },
+    }
+    write(ROOT / "dist/crewai/agents" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_crewai_command(contract: dict) -> None:
+    payload = {
+        "runtime": "crewai",
+        "contract_source": f"dist/nunneri-runtime/commands/{contract['name']}.json",
+        "task": {
+            "description": contract["description"],
+            "expected_output": "Nunneri command result with evidence, decision, and validation summary.",
+            "prompt": contract["body"],
+        },
+    }
+    write(ROOT / "dist/crewai/tasks" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_crewai_workflow(contract: dict) -> None:
+    payload = {
+        "runtime": "crewai",
+        "contract_source": f"dist/nunneri-runtime/workflows/{contract['name']}.json",
+        "flow": {
+            "name": contract["name"],
+            "description": contract["description"],
+            "steps": contract["nodes"],
+            "edges": contract["edges"],
+            "human_in_loop": [n["id"] for n in contract["nodes"] if n.get("type") == "human_approval"],
+        },
+    }
+    write(ROOT / "dist/crewai/flows" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_autogen_agent(contract: dict) -> None:
+    node = contract["nodes"][0]
+    payload = {
+        "runtime": "autogen",
+        "contract_source": f"dist/nunneri-runtime/agents/{contract['name']}.json",
+        "agent": {
+            "name": contract["name"].replace("-", "_"),
+            "description": contract["description"],
+            "system_message": node["prompt"],
+        },
+    }
+    write(ROOT / "dist/autogen/agents" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_autogen_command(contract: dict) -> None:
+    payload = {
+        "runtime": "autogen",
+        "contract_source": f"dist/nunneri-runtime/commands/{contract['name']}.json",
+        "agentchat_task": {
+            "name": contract["name"],
+            "description": contract["description"],
+            "prompt": contract["body"],
+        },
+    }
+    write(ROOT / "dist/autogen/tasks" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_autogen_workflow(contract: dict) -> None:
+    payload = {
+        "runtime": "autogen",
+        "contract_source": f"dist/nunneri-runtime/workflows/{contract['name']}.json",
+        "group_orchestration": {
+            "name": contract["name"],
+            "participants": contract.get("agents", []),
+            "nodes": contract["nodes"],
+            "edges": contract["edges"],
+            "human_approval_nodes": [n["id"] for n in contract["nodes"] if n.get("type") == "human_approval"],
+        },
+    }
+    write(ROOT / "dist/autogen/workflows" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_semantic_kernel_agent(contract: dict) -> None:
+    node = contract["nodes"][0]
+    payload = {
+        "runtime": "semantic-kernel",
+        "contract_source": f"dist/nunneri-runtime/agents/{contract['name']}.json",
+        "agent": {
+            "name": contract["name"].replace("-", "_"),
+            "description": contract["description"],
+            "instructions": node["prompt"],
+        },
+    }
+    write(ROOT / "dist/semantic-kernel/agents" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_semantic_kernel_command(contract: dict) -> None:
+    payload = {
+        "runtime": "semantic-kernel",
+        "contract_source": f"dist/nunneri-runtime/commands/{contract['name']}.json",
+        "function": {
+            "name": contract["name"].replace("-", "_"),
+            "description": contract["description"],
+            "instructions": contract["body"],
+        },
+    }
+    write(ROOT / "dist/semantic-kernel/functions" / f"{contract['name']}.json", json.dumps(payload, indent=2))
+
+
+def build_semantic_kernel_workflow(contract: dict) -> None:
+    payload = {
+        "runtime": "semantic-kernel",
+        "contract_source": f"dist/nunneri-runtime/workflows/{contract['name']}.json",
+        "orchestration": {
+            "name": contract["name"],
+            "description": contract["description"],
+            "steps": contract["nodes"],
+            "edges": contract["edges"],
+            "human_agent_interaction": [n["id"] for n in contract["nodes"] if n.get("type") == "human_approval"],
+        },
+    }
+    write(ROOT / "dist/semantic-kernel/orchestrations" / f"{contract['name']}.json", json.dumps(payload, indent=2))
 
 
 def copy_skill(src: Path) -> None:
@@ -1360,17 +1681,30 @@ def copy_skill(src: Path) -> None:
 def build() -> None:
     reset_dist()
     build_context()
+    agent_names: list[str] = []
+    command_names: list[str] = []
+    workflow_names: list[str] = []
     for src in sorted(path for path in (ROOT / "assets/agents").glob("**/*.md") if path.name != "README.md"):
         data, body = frontmatter_and_body(src)
+        contract = build_neutral_agent(src, data, body)
+        agent_names.append(contract["name"])
         build_claude_agent(src, data, body)
         for provider in ("codex", "gemini"):
             write(ROOT / f"dist/{provider}/prompts/agents" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{body}")
         write(ROOT / "dist/open-source/manifests/agents" / f"{data['name']}.json", json.dumps({"name": data["name"], "description": data["description"], "category": data.get("category"), "source": str(src.relative_to(ROOT)), "body": body}, indent=2))
-        build_langgraph_agent(src, data, body)
+        build_langgraph_agent(contract)
+        build_crewai_agent(contract)
+        build_autogen_agent(contract)
+        build_semantic_kernel_agent(contract)
     for src in sorted(path for path in (ROOT / "assets/commands").glob("**/*.md") if path.name != "README.md"):
         data, body = frontmatter_and_body(src)
+        contract = build_neutral_command(src, data, body)
+        command_names.append(contract["name"])
         build_command(src, data, body)
-        build_langgraph_command(src, data, body)
+        build_langgraph_command(contract)
+        build_crewai_command(contract)
+        build_autogen_command(contract)
+        build_semantic_kernel_command(contract)
     for src in sorted((ROOT / "assets/skills").glob("*/SKILL.md")):
         copy_skill(src)
     for src in sorted((ROOT / "assets/workflows").glob("*.md")):
@@ -1379,13 +1713,23 @@ def build() -> None:
                 write(ROOT / f"dist/{provider}/workflows" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
             continue
         data, body = frontmatter_and_body(src)
-        build_langgraph_workflow(src, data, body)
+        contract = build_neutral_workflow(src, data, body)
+        workflow_names.append(contract["name"])
+        build_langgraph_workflow(contract)
+        build_crewai_workflow(contract)
+        build_autogen_workflow(contract)
+        build_semantic_kernel_workflow(contract)
         for provider in PROVIDERS:
             folder = "workflows" if provider != "open-source" else "workflows"
             write(ROOT / f"dist/{provider}/{folder}" / src.name, f"> Generated from `{src.relative_to(ROOT)}`.\n\n{src.read_text(encoding='utf-8')}")
+    build_runtime_contract_index(agent_names, command_names, workflow_names)
     write(ROOT / "dist/open-source/AGENT_MANIFEST.md", "# Open Source Manifest\n\nGenerated from provider-neutral assets. Context metadata is available in `manifests/context/repo-agent-instructions.json`.")
     write(ROOT / "dist/langgraph/LANGGRAPH.md", "# LangGraph Runtime\n\nGenerated graph and runtime manifests from provider-neutral assets. LangGraph is an orchestration runtime, not a model provider. Pre-dispatch context is available in `context/repo-agent-instructions.json`.")
-    print("Built provider adapters: claude, codex, gemini, open-source; runtime adapters: langgraph")
+    write(ROOT / "dist/nunneri-runtime/NUNNERI_RUNTIME.md", "# Nunneri Runtime Contract\n\nGenerated provider- and framework-neutral runtime contracts. Runtime adapters should consume these files instead of provider-specific exports.")
+    write(ROOT / "dist/crewai/CREWAI.md", "# CrewAI Runtime Adapter\n\nGenerated CrewAI-compatible JSON manifests from `dist/nunneri-runtime/`. These are export contracts only; CrewAI SDK dependencies are optional for consumers.")
+    write(ROOT / "dist/autogen/AUTOGEN.md", "# AutoGen Runtime Adapter\n\nGenerated Microsoft AutoGen-compatible JSON manifests from `dist/nunneri-runtime/`. These are export contracts only; AutoGen SDK dependencies are optional for consumers.")
+    write(ROOT / "dist/semantic-kernel/SEMANTIC_KERNEL.md", "# Semantic Kernel Runtime Adapter\n\nGenerated Microsoft Semantic Kernel-compatible JSON manifests from `dist/nunneri-runtime/`. These are export contracts only; Semantic Kernel dependencies are optional for consumers.")
+    print("Built provider adapters: claude, codex, gemini, open-source; runtime adapters: nunneri-runtime, langgraph, crewai, autogen, semantic-kernel")
 
 
 if __name__ == "__main__":
@@ -1442,7 +1786,7 @@ def main() -> None:
         for path in sorted((ROOT / "guides").glob("*.html"))
     ]
     manifest = {
-        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "context": len(context), "providers": 4, "runtimes": 1, "guides": len(guides)},
+        "counts": {"agents": len(agents), "commands": len(commands), "skills": len(skills), "workflows": len(workflows), "context": len(context), "providers": 4, "runtimes": 5, "guides": len(guides)},
         "agents": agents,
         "commands": commands,
         "skills": skills,
@@ -1483,6 +1827,7 @@ ROOT_DOCS = [
 
 RENAMED_DOCS = {
     "LANGGRAPH_RUNTIME.md": "langgraph-runtime.md",
+    "NUNNERI_RUNTIME_CONTRACT.md": "nunneri-runtime-contract.md",
 }
 
 
@@ -1741,6 +2086,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TRIAGE_GRAPH = ROOT / "dist/langgraph/graphs/triage-nine-phase.json"
+TRIAGE_CONTRACT = ROOT / "dist/nunneri-runtime/workflows/triage-nine-phase.json"
 
 
 def main() -> int:
@@ -1749,6 +2095,13 @@ def main() -> int:
     if not (ROOT / "dist/langgraph").is_dir():
         failures.append("dist/langgraph is missing")
 
+    if not TRIAGE_CONTRACT.exists():
+        failures.append("dist/nunneri-runtime/workflows/triage-nine-phase.json is missing")
+
+    contract = {}
+    if TRIAGE_CONTRACT.exists():
+        contract = json.loads(TRIAGE_CONTRACT.read_text(encoding="utf-8"))
+
     if not TRIAGE_GRAPH.exists():
         failures.append("dist/langgraph/graphs/triage-nine-phase.json is missing")
     else:
@@ -1756,6 +2109,11 @@ def main() -> int:
         nodes = graph.get("nodes", [])
         edges = graph.get("edges", [])
         approval_nodes = [node for node in nodes if node.get("approval_checkpoint") is True]
+        contract_nodes = contract.get("nodes", [])
+        contract_edges = contract.get("edges", [])
+
+        if graph.get("contract_source") != "dist/nunneri-runtime/workflows/triage-nine-phase.json":
+            failures.append("triage-nine-phase LangGraph export must point to the neutral contract source")
 
         if len(nodes) != 9:
             failures.append(f"triage-nine-phase must export exactly 9 nodes, found {len(nodes)}")
@@ -1774,10 +2132,16 @@ def main() -> int:
         actual_ids = [node.get("id") for node in nodes]
         if actual_ids != expected_ids:
             failures.append(f"triage-nine-phase node order mismatch: {actual_ids}")
+        if contract_nodes and actual_ids != [node.get("id") for node in contract_nodes]:
+            failures.append("triage-nine-phase LangGraph node order does not match neutral contract")
 
         approval_ids = sorted(node.get("id") for node in approval_nodes)
         if approval_ids != ["gate_1", "gate_2"]:
             failures.append(f"approval checkpoints must be gate_1 and gate_2, found {approval_ids}")
+        for node in approval_nodes:
+            approval = node.get("approval", {})
+            if approval.get("on_reject") != "cancel":
+                failures.append(f"{node.get('id')} approval rejection policy must be cancel")
 
         expected_edges = [
             ("intake", "context_load"),
@@ -1792,6 +2156,8 @@ def main() -> int:
         actual_edges = [(edge.get("from"), edge.get("to")) for edge in edges]
         if actual_edges != expected_edges:
             failures.append(f"triage-nine-phase edge order mismatch: {actual_edges}")
+        if contract_edges and actual_edges != [(edge.get("from"), edge.get("to")) for edge in contract_edges]:
+            failures.append("triage-nine-phase LangGraph edges do not match neutral contract")
 
     if failures:
         for failure in failures:
@@ -1866,7 +2232,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--local-only", action="store_true")
-    parser.parse_args()
+    args = parser.parse_args()
+    # args.local_only reserved for future remote-only gate differentiation
     required = [
         "CHANGELOG.md",
         "RELEASE.md",
@@ -1877,6 +2244,10 @@ def main() -> int:
         "examples/consumer-repo/README.md",
         "scripts/check_consumer_install.py",
         "scripts/check_user_setup_docs.py",
+        "scripts/check_runtime_contract.py",
+        "scripts/check_human_gates.py",
+        "schemas/nunneri-runtime-contract.schema.json",
+        "NUNNERI_RUNTIME_CONTRACT.md",
         "guides/end-user-langgraph-setup.md",
         "guides/end-user-setup-demo.html",
         "scripts/package_release.py",
@@ -2006,6 +2377,19 @@ def check_langgraph_runtime_install() -> None:
         assert_exists(target / ".langgraph" / ".ai-assets-version")
 
 
+def check_neutral_runtime_contract_install() -> None:
+    with tempfile.TemporaryDirectory(prefix="nunneri-consumer-runtime-contract-") as tmp:
+        target = Path(tmp)
+        stage_payload(target)
+        write_consumer_repo(target)
+        output = run_install(target, "--runtime", "nunneri-runtime", "--project", "--force", "--skip-build")
+        assert_contains(output, "Summary for nunneri-runtime runtime")
+        assert_exists(target / ".nunneri-runtime" / "contract.json")
+        assert_exists(target / ".nunneri-runtime" / "workflows" / "triage-nine-phase.json")
+        assert_exists(target / ".nunneri-runtime" / "context" / "repo-agent-instructions.json")
+        assert_exists(target / ".nunneri-runtime" / ".ai-assets-version")
+
+
 def check_existing_context_skip() -> None:
     with tempfile.TemporaryDirectory(prefix="nunneri-consumer-skip-") as tmp:
         target = Path(tmp)
@@ -2022,6 +2406,7 @@ def main() -> int:
     check_context_only_dry_run()
     check_context_only_force()
     check_full_provider_install()
+    check_neutral_runtime_contract_install()
     check_langgraph_runtime_install()
     check_existing_context_skip()
     print("Consumer install smoke checks passed")
@@ -2342,6 +2727,294 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ''', True)
 
+    write("schemas/nunneri-runtime-contract.schema.json", r'''{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nunneri.suranku.com/schemas/nunneri-runtime-contract.schema.json",
+  "title": "Nunneri Runtime Contract",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "name",
+    "kind",
+    "source",
+    "description",
+    "inputs",
+    "agents",
+    "commands",
+    "nodes",
+    "edges",
+    "context",
+    "runtime_hints"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["agent", "command", "workflow", "context"]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "array"
+    },
+    "agents": {
+      "type": "array"
+    },
+    "commands": {
+      "type": "array"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "enum": ["agent", "command", "workflow", "work", "router", "human_approval", "terminal"]
+          },
+          "phase": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "approval": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "enum": ["approve", "reject"]
+                }
+              },
+              "on_reject": {
+                "enum": ["cancel"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["injection_stage", "source"],
+      "properties": {
+        "injection_stage": {
+          "enum": ["pre_dispatch"]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "runtime_hints": {
+      "type": "object",
+      "required": ["stateful", "human_in_loop", "observability"],
+      "properties": {
+        "stateful": {
+          "type": "boolean"
+        },
+        "human_in_loop": {
+          "type": "boolean"
+        },
+        "observability": {
+          "type": "array",
+          "items": {
+            "enum": ["events", "runs", "nodes"]
+          }
+        }
+      }
+    }
+  }
+}
+''')
+
+    write("scripts/check_runtime_contract.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CONTRACT_ROOT = ROOT / "dist/nunneri-runtime"
+SCHEMA = ROOT / "schemas/nunneri-runtime-contract.schema.json"
+ALLOWED_KINDS = {"agent", "command", "workflow", "context"}
+ALLOWED_NODE_TYPES = {"agent", "command", "workflow", "work", "router", "human_approval", "terminal"}
+RUNTIME_SMOKE_PATHS = [
+    "dist/crewai/agents",
+    "dist/crewai/tasks",
+    "dist/crewai/flows",
+    "dist/autogen/agents",
+    "dist/autogen/tasks",
+    "dist/autogen/workflows",
+    "dist/semantic-kernel/agents",
+    "dist/semantic-kernel/functions",
+    "dist/semantic-kernel/orchestrations",
+]
+
+
+def generated_name(src: Path) -> str:
+    text = src.read_text(encoding="utf-8")
+    end = text.find("\n---", 4)
+    if not text.startswith("---\n") or end == -1:
+        raise ValueError(f"{src}: missing frontmatter")
+    for line in text[4:end].splitlines():
+        if line.startswith("name:"):
+            return line.split(":", 1)[1].strip()
+    raise ValueError(f"{src}: missing name frontmatter")
+
+
+def require(condition: bool, message: str, failures: list[str]) -> None:
+    if not condition:
+        failures.append(message)
+
+
+def load_json(path: Path, failures: list[str]) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001 - validation script should report all JSON failures.
+        failures.append(f"{path.relative_to(ROOT)} is not valid JSON: {exc}")
+        return {}
+
+
+def validate_contract(path: Path, failures: list[str]) -> dict:
+    payload = load_json(path, failures)
+    if not payload:
+        return {}
+    rel = path.relative_to(ROOT)
+    required = [
+        "contract_version",
+        "name",
+        "kind",
+        "source",
+        "description",
+        "inputs",
+        "agents",
+        "commands",
+        "nodes",
+        "edges",
+        "context",
+        "runtime_hints",
+    ]
+    for key in required:
+        require(key in payload, f"{rel} missing required field {key}", failures)
+    require(payload.get("contract_version") == "1.0", f"{rel} contract_version must be 1.0", failures)
+    require(payload.get("kind") in ALLOWED_KINDS, f"{rel} has invalid kind {payload.get('kind')}", failures)
+    require(isinstance(payload.get("nodes"), list), f"{rel} nodes must be a list", failures)
+    require(isinstance(payload.get("edges"), list), f"{rel} edges must be a list", failures)
+    for node in payload.get("nodes", []):
+        node_type = node.get("type")
+        require(node.get("id") is not None, f"{rel} has a node without id", failures)
+        require(node_type in ALLOWED_NODE_TYPES, f"{rel} has invalid node type {node_type}", failures)
+        if node_type == "human_approval":
+            approval = node.get("approval", {})
+            require(approval.get("required") is True, f"{rel} approval node {node.get('id')} must require approval", failures)
+            require(approval.get("actions") == ["approve", "reject"], f"{rel} approval node {node.get('id')} must allow approve/reject", failures)
+            require(approval.get("on_reject") == "cancel", f"{rel} approval node {node.get('id')} must cancel on rejection", failures)
+    for edge in payload.get("edges", []):
+        require(edge.get("from") is not None and edge.get("to") is not None, f"{rel} has an edge without from/to", failures)
+    return payload
+
+
+def expected_exports(folder: str) -> list[str]:
+    asset_root = ROOT / "assets" / folder
+    if not asset_root.exists():
+        return []
+    return [generated_name(src) for src in sorted(asset_root.glob("**/*.md")) if src.name != "README.md"]
+
+
+def main() -> int:
+    failures: list[str] = []
+
+    require(SCHEMA.exists(), "schemas/nunneri-runtime-contract.schema.json is missing", failures)
+    require(CONTRACT_ROOT.is_dir(), "dist/nunneri-runtime is missing", failures)
+    require((CONTRACT_ROOT / "contract.json").exists(), "dist/nunneri-runtime/contract.json is missing", failures)
+
+    for folder in ("agents", "commands", "workflows"):
+        for name in expected_exports(folder):
+            path = CONTRACT_ROOT / folder / f"{name}.json"
+            require(path.exists(), f"missing neutral {folder[:-1]} export: {path.relative_to(ROOT)}", failures)
+
+    require((CONTRACT_ROOT / "context/repo-agent-instructions.json").exists(), "missing neutral context export", failures)
+
+    for path in sorted(CONTRACT_ROOT.glob("*/*.json")):
+        validate_contract(path, failures)
+
+    triage_path = CONTRACT_ROOT / "workflows/triage-nine-phase.json"
+    if triage_path.exists():
+        triage = validate_contract(triage_path, failures)
+        nodes = triage.get("nodes", [])
+        require(len(nodes) == 9, f"triage-nine-phase must have exactly 9 nodes, found {len(nodes)}", failures)
+        by_id = {node.get("id"): node for node in nodes}
+        for gate_id in ("gate_1", "gate_2"):
+            gate = by_id.get(gate_id, {})
+            require(gate.get("type") == "human_approval", f"{gate_id} must be human_approval", failures)
+            require(gate.get("approval", {}).get("on_reject") == "cancel", f"{gate_id} rejection policy must be cancel", failures)
+
+    for path in RUNTIME_SMOKE_PATHS:
+        full = ROOT / path
+        require(full.is_dir(), f"{path} is missing", failures)
+        if full.is_dir():
+            require(any(full.glob("*.json")), f"{path} has no generated JSON files", failures)
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+
+    print("Runtime contract checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
+
 
 def create_installers() -> None:
     write("install.sh", r'''#!/usr/bin/env bash
@@ -2361,7 +3034,7 @@ INCLUDE_GUIDES=1
 INCLUDE_CONTEXT=1
 
 usage() {
-  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime langgraph|all] [--project] [--force] [--dry-run] [--skip-build] [filters]"
+  echo "Usage: ./install.sh [--provider claude|codex|gemini|open-source|all] [--runtime nunneri-runtime|langgraph|crewai|autogen|semantic-kernel|all] [--project] [--force] [--dry-run] [--skip-build] [filters]"
   echo "Filters: --agents-only --skills-only --commands-only --workflows-only --context-only --no-agents --no-skills --no-commands --no-workflows --no-guides --no-context"
 }
 
@@ -2462,9 +3135,9 @@ should_install() {
       [ "$INCLUDE_AGENTS" -eq 1 ] ;;
     skills/*)
       [ "$INCLUDE_SKILLS" -eq 1 ] ;;
-    commands/*|manifests/commands/*)
+    commands/*|manifests/commands/*|tasks/*|functions/*)
       [ "$INCLUDE_COMMANDS" -eq 1 ] ;;
-    workflows/*)
+    workflows/*|flows/*|orchestrations/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
     graphs/*)
       [ "$INCLUDE_WORKFLOWS" -eq 1 ] ;;
@@ -2472,7 +3145,7 @@ should_install() {
       [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     guides/*|reference/*|docs/*)
       [ "$INCLUDE_GUIDES" -eq 1 ] ;;
-    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md)
+    CLAUDE.md|AGENTS.md|GEMINI.md|AGENT_MANIFEST.md|LANGGRAPH.md|NUNNERI_RUNTIME.md|CREWAI.md|AUTOGEN.md|SEMANTIC_KERNEL.md|contract.json)
       [ "$INCLUDE_CONTEXT" -eq 1 ] ;;
     *)
       return 0 ;;
@@ -2487,12 +3160,20 @@ install_runtime() {
     exit 1
   fi
   case "$runtime" in
+    nunneri-runtime) target="$HOME/.nunneri-runtime" ;;
     langgraph) target="$HOME/.langgraph" ;;
+    crewai) target="$HOME/.crewai" ;;
+    autogen) target="$HOME/.autogen" ;;
+    semantic-kernel) target="$HOME/.semantic-kernel" ;;
     *) echo "Unsupported runtime: $runtime"; exit 1 ;;
   esac
   if [ "$PROJECT" -eq 1 ]; then
     case "$runtime" in
+      nunneri-runtime) target=".nunneri-runtime" ;;
       langgraph) target=".langgraph" ;;
+      crewai) target=".crewai" ;;
+      autogen) target=".autogen" ;;
+      semantic-kernel) target=".semantic-kernel" ;;
     esac
   fi
   count=0
@@ -2592,7 +3273,11 @@ elif [ -n "$PROVIDER" ]; then
 fi
 
 if [ "$RUNTIME" = "all" ]; then
+  install_runtime nunneri-runtime
   install_runtime langgraph
+  install_runtime crewai
+  install_runtime autogen
+  install_runtime semantic-kernel
 elif [ -n "$RUNTIME" ]; then
   install_runtime "$RUNTIME"
 fi
@@ -2656,11 +3341,11 @@ echo "Removed AI asset version marker from $target. Review provider files manual
 
 
 def create_docs() -> None:
-    write("AI_ASSETS.md", f"""# {PLATFORM}
+    write("AI_ASSETS.md", r'''# Nunneri AI Assets
 
 ## What This Is
 
-{PLATFORM} is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for {ORG}.
+Nunneri AI Assets is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for Nunneri Engineering.
 
 ## Provider-Neutral Source of Truth
 
@@ -2695,9 +3380,15 @@ Example:
 
 ## Runtime Adapters
 
+- Nunneri Runtime Contract: `dist/nunneri-runtime`
 - LangGraph: `dist/langgraph`
+- CrewAI: `dist/crewai`
+- AutoGen: `dist/autogen`
+- Semantic Kernel: `dist/semantic-kernel`
 
-LangGraph is an orchestration runtime export, not a model provider.
+Runtime adapters are orchestration/runtime exports, not model providers. LangGraph is the first runnable runtime in Nunneri Graph Studio; CrewAI, AutoGen, and Semantic Kernel are generated export contracts only in this step.
+
+Runtime adapters consume `dist/nunneri-runtime/` instead of provider-specific files. This preserves one neutral source of truth for approval gates, workflow nodes, dispatch context, and observability hints.
 
 ## Commands
 
@@ -2731,15 +3422,16 @@ python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
 python3 scripts/check_context_exports.py
+python3 scripts/check_runtime_contract.py
 python3 scripts/check_langgraph_exports.py
 ```
 
 ## NFR Compliance Overrides
 
 N/A. This is a Markdown, HTML, and script repository.
-""")
+''')
 
-    write("README.md", f"""# {PLATFORM}
+    write("README.md", r'''# Nunneri AI Assets
 
 Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agent frameworks.
 
@@ -2753,7 +3445,8 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Workflows | `assets/workflows/` |
 | Repository context | `assets/context/` |
 | Guides | `guides/` |
-| Runtime adapters | `dist/langgraph/` |
+| Runtime contract | `dist/nunneri-runtime/` |
+| Runtime adapters | `dist/langgraph/`, `dist/crewai/`, `dist/autogen/`, `dist/semantic-kernel/` |
 
 ## Supported Providers
 
@@ -2762,9 +3455,13 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 - Google Gemini / Gemini CLI
 - Open-source agent frameworks
 
-## Supported Runtimes
+## Supported Runtime Exports
 
-- LangGraph runtime export for stateful workflow orchestration
+- Nunneri Runtime Contract: neutral export layer consumed by runtime adapters
+- LangGraph: first runnable runtime export for stateful workflow orchestration
+- CrewAI: export contract for agents, tasks, flows, memory, and human-in-the-loop mapping
+- Microsoft AutoGen: export contract for AgentChat/Core orchestration mapping
+- Microsoft Semantic Kernel: export contract for agent and orchestration manifests
 
 ## Quick Start
 
@@ -2835,16 +3532,24 @@ Example provider-specific override:
 ./install.sh --provider open-source --force
 ```
 
-## Export for LangGraph
+## Export Runtime Contracts
 
 ```bash
 python3 scripts/build_adapters.py
+./install.sh --runtime nunneri-runtime --project --force
 ./install.sh --runtime langgraph --project --force
+./install.sh --runtime crewai --project --force
+./install.sh --runtime autogen --project --force
+./install.sh --runtime semantic-kernel --project --force
 ```
 
-LangGraph exports are runtime manifests for stateful orchestration. They do not install LangGraph, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+Runtime exports are generated from the neutral Nunneri contract in `dist/nunneri-runtime/`. They do not install LangGraph, CrewAI, AutoGen, Semantic Kernel, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+
+See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rules.
 
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
+
+The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`.
 
 Recommended portable runtime configuration:
 
@@ -2858,7 +3563,7 @@ Use `NUNNERI_TRACE_MODE=langsmith` and `LANGSMITH_API_KEY` only when the consumi
 
 ## Install Into a Consumer Repository
 
-Use `examples/consumer-repo/` as the reference flow for installing {PLATFORM} into another GitHub repository.
+Use `examples/consumer-repo/` as the reference flow for installing Nunneri AI Assets into another GitHub repository.
 
 ```bash
 python3 scripts/check_consumer_install.py
@@ -2877,6 +3582,7 @@ git checkout -b release/v0.1.0
 python3 scripts/package_release.py
 python3 scripts/check_release_package.py
 git tag v0.1.0
+git push origin v0.1.0
 ```
 
 See `RELEASE.md` for the full branch strategy and release checklist.
@@ -2888,13 +3594,13 @@ See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
 ## Contributing
 
 Use GitHub Issues first. See `CONTRIBUTING.md`.
-""")
+''')
 
-    write("LANGGRAPH_RUNTIME.md", """# LangGraph Runtime Adapter
+    write("LANGGRAPH_RUNTIME.md", r'''# LangGraph Runtime Adapter
 
 LangGraph support is provided as a runtime adapter, not as a model provider.
 
-Claude, Codex, and Gemini are provider adapters because they map prompts, skills, commands, and context into model-specific coding assistant surfaces. LangGraph is different: it is an orchestration runtime for stateful agent workflows. This repository exports graph metadata that can be consumed by a future LangGraph application without requiring LangGraph as a dependency in this repo.
+Claude, Codex, and Gemini are provider adapters because they map prompts, skills, commands, and context into model-specific coding assistant surfaces. LangGraph is different: it is an orchestration runtime for stateful agent workflows. This repository exports graph metadata from the neutral Nunneri Runtime Contract without requiring LangGraph as a dependency in this repo.
 
 ## Generated Outputs
 
@@ -2907,6 +3613,9 @@ python3 scripts/build_adapters.py
 Generated LangGraph files are written to:
 
 ```text
+dist/nunneri-runtime/
+  workflows/triage-nine-phase.json
+
 dist/langgraph/
   LANGGRAPH.md
   manifests/
@@ -2917,7 +3626,7 @@ dist/langgraph/
 
 ## Triage Graph Contract
 
-`dist/langgraph/graphs/triage-nine-phase.json` exports the canonical nine-phase triage workflow.
+`dist/nunneri-runtime/workflows/triage-nine-phase.json` is the neutral contract. `dist/langgraph/graphs/triage-nine-phase.json` is derived from that contract.
 
 Required nodes:
 
@@ -2934,6 +3643,29 @@ gate_2
 ```
 
 `gate_1` and `gate_2` are marked as human approval checkpoints.
+
+## Human-Blocking Gate Runtime
+
+When the API server runs a LangGraph workflow, human approval checkpoints use LangGraph `interrupt()` and durable checkpoint state. A gate does not auto-pass.
+
+Runtime behavior:
+
+- The graph pauses at the gate and stores the checkpoint under the same `thread_id`.
+- SSE emits `gate_waiting` with a JSON approval payload.
+- `nunneri_runs.status` becomes `waiting_approval`.
+- The gate's `nunneri_run_nodes.status` becomes `waiting_approval`.
+- The graph resumes only through an explicit decision endpoint.
+
+Resume endpoints:
+
+```text
+POST /threads/{thread_id}/gates/{gate_id}/approve
+POST /threads/{thread_id}/gates/{gate_id}/reject
+```
+
+Approval resumes the checkpoint with `Command(resume={"approved": true, ...})` and continues downstream. Rejection resumes with `approved: false`, marks the gate `rejected`, emits `run_rejected`, and routes to a terminal cancellation node instead of executing downstream work.
+
+The legacy `/agents/{name}/invoke/trace` path is only a simulated trace. It stops at a gate with `gate_waiting` and does not imply real approval.
 
 ## Installation
 
@@ -2985,11 +3717,12 @@ Run:
 
 ```bash
 python3 scripts/check_langgraph_exports.py
+python3 scripts/check_runtime_contract.py
 python3 scripts/check_user_setup_docs.py
 ```
 
-This verifies that the LangGraph export exists, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.
-""")
+This verifies that the neutral contract exists, the LangGraph export was generated from it, the triage graph has exactly nine nodes, the edge order follows the canonical workflow, and both approval gates are marked.
+''')
 
     write("CONTRIBUTING.md", f"""# Contributing
 
@@ -3193,6 +3926,91 @@ __pycache__/
     write("adapters/codex/AGENTS.md", "# Codex Adapter\n\nGenerated Codex outputs are built into `dist/codex/`.")
     write("adapters/gemini/GEMINI.md", "# Gemini Adapter\n\nGenerated Gemini outputs are built into `dist/gemini/`.")
     write("adapters/langgraph/README.md", "# LangGraph Runtime Adapter\n\nLangGraph is treated as an orchestration runtime, not as a model provider.\n\nGenerated runtime files are written to `dist/langgraph/` by `scripts/build_adapters.py`.")
+    write("NUNNERI_RUNTIME_CONTRACT.md", r'''# Nunneri Runtime Contract
+
+The Nunneri Runtime Contract is the provider- and framework-neutral export layer between canonical assets and runtime adapters.
+
+Authors edit `assets/`. The build step generates `dist/nunneri-runtime/` first, then derives runtime-specific exports for LangGraph, CrewAI, Microsoft AutoGen, and Microsoft Semantic Kernel.
+
+## Generated Contract
+
+```text
+dist/nunneri-runtime/
+  contract.json
+  agents/*.json
+  commands/*.json
+  workflows/*.json
+  context/repo-agent-instructions.json
+```
+
+Each individual contract file uses `contract_version: "1.0"` and includes:
+
+- asset identity, source, and description
+- provider-neutral inputs, agents, commands, nodes, and edges
+- context injection metadata
+- runtime hints for state, human-in-the-loop behavior, and observability
+
+## Runtime Mapping
+
+- LangGraph maps workflow nodes and edges into graph JSON. `human_approval` nodes become interrupt-capable approval checkpoints.
+- CrewAI maps agents into agent manifests, commands into task manifests, and workflows into flow manifests.
+- AutoGen maps agents into AgentChat/Core agent specs and workflows into group orchestration manifests.
+- Semantic Kernel maps agents into SK agent definitions and workflows into orchestration manifests.
+
+Runtime-specific SDK fields belong in generated runtime adapter output, not in canonical `assets/`.
+
+## Approval Semantics
+
+Runtime adapters must preserve `human_approval` semantics:
+
+- approval is required before downstream implementation work
+- allowed actions are `approve` and `reject`
+- rejection policy is `cancel`
+- rejection must not continue to downstream implementation nodes
+
+## Install
+
+Install the neutral contract itself:
+
+```bash
+./install.sh --runtime nunneri-runtime --project --force
+```
+
+Install a runtime adapter export:
+
+```bash
+./install.sh --runtime langgraph --project --force
+./install.sh --runtime crewai --project --force
+./install.sh --runtime autogen --project --force
+./install.sh --runtime semantic-kernel --project --force
+```
+
+No runtime SDK dependencies are installed by this repository.
+''')
+    write("adapters/crewai/README.md", r'''# CrewAI Runtime Adapter
+
+CrewAI is treated as a runtime adapter target, not a model provider.
+
+Generated files in `dist/crewai/` are derived from `dist/nunneri-runtime/` and map neutral Nunneri agents, commands, workflows, and approval gates into portable CrewAI-oriented JSON manifests.
+
+This repository does not install CrewAI SDK dependencies. Consumers can use these manifests as an integration contract when they add a runnable CrewAI application.
+''')
+    write("adapters/autogen/README.md", r'''# AutoGen Runtime Adapter
+
+Microsoft AutoGen is treated as a runtime adapter target, not a model provider.
+
+Generated files in `dist/autogen/` are derived from `dist/nunneri-runtime/` and map neutral Nunneri agents, commands, workflows, and approval gates into portable AutoGen-oriented JSON manifests.
+
+This repository does not install AutoGen SDK dependencies. Consumers can use these manifests as an integration contract when they add AgentChat, Core, Studio, extensions, or distributed-runtime implementations.
+''')
+    write("adapters/semantic-kernel/README.md", r'''# Semantic Kernel Runtime Adapter
+
+Microsoft Semantic Kernel is treated as a runtime adapter target, not a model provider.
+
+Generated files in `dist/semantic-kernel/` are derived from `dist/nunneri-runtime/` and map neutral Nunneri agents, commands, workflows, and approval gates into portable Semantic Kernel-oriented JSON manifests.
+
+This repository does not install Semantic Kernel dependencies. Consumers can use these manifests as an integration contract when they add runnable agent orchestration.
+''')
     write("adapters/open-source/AGENT_MANIFEST.md", "# Open Source Adapter\n\nGenerated open-source manifests are built into `dist/open-source/`.")
 
 
@@ -3897,7 +4715,7 @@ Required for portal or guide changes.
 - [ ] No
 - [ ] Yes
 """)
-    write(".github/workflows/validate.yml", """name: Validate
+    write(".github/workflows/validate.yml", r'''name: Validate
 
 on:
   push:
@@ -3913,7 +4731,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate frontmatter
         run: python3 scripts/validate.py
       - name: Build adapters
@@ -3926,8 +4744,12 @@ jobs:
         run: python3 scripts/check_docs_links.py
       - name: Check context exports
         run: python3 scripts/check_context_exports.py
+      - name: Check runtime contract
+        run: python3 scripts/check_runtime_contract.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
+      - name: Check human-blocking gates
+        run: python3 scripts/check_human_gates.py
       - name: Check consumer install
         run: python3 scripts/check_consumer_install.py
       - name: Check end-user setup docs
@@ -3940,7 +4762,7 @@ jobs:
           bash -n uninstall.sh
       - name: Ensure generated files are committed
         run: git diff --exit-code
-""")
+''')
     write(".github/workflows/release.yml", """name: Internal Dist Release
 
 on:

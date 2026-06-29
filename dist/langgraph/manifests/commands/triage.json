@@ -4,6 +4,7 @@
   "category": "triage",
   "runtime": "langgraph",
   "source": "assets/commands/triage/triage.md",
+  "contract_source": "dist/nunneri-runtime/commands/triage.json",
   "entrypoint": {
     "id": "triage",
     "type": "command",

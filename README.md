@@ -12,7 +12,8 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 | Workflows | `assets/workflows/` |
 | Repository context | `assets/context/` |
 | Guides | `guides/` |
-| Runtime adapters | `dist/langgraph/` |
+| Runtime contract | `dist/nunneri-runtime/` |
+| Runtime adapters | `dist/langgraph/`, `dist/crewai/`, `dist/autogen/`, `dist/semantic-kernel/` |
 
 ## Supported Providers
 
@@ -21,9 +22,13 @@ Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agen
 - Google Gemini / Gemini CLI
 - Open-source agent frameworks
 
-## Supported Runtimes
+## Supported Runtime Exports
 
-- LangGraph runtime export for stateful workflow orchestration
+- Nunneri Runtime Contract: neutral export layer consumed by runtime adapters
+- LangGraph: first runnable runtime export for stateful workflow orchestration
+- CrewAI: export contract for agents, tasks, flows, memory, and human-in-the-loop mapping
+- Microsoft AutoGen: export contract for AgentChat/Core orchestration mapping
+- Microsoft Semantic Kernel: export contract for agent and orchestration manifests
 
 ## Quick Start
 
@@ -94,14 +99,20 @@ Example provider-specific override:
 ./install.sh --provider open-source --force
 ```
 
-## Export for LangGraph
+## Export Runtime Contracts
 
 ```bash
 python3 scripts/build_adapters.py
+./install.sh --runtime nunneri-runtime --project --force
 ./install.sh --runtime langgraph --project --force
+./install.sh --runtime crewai --project --force
+./install.sh --runtime autogen --project --force
+./install.sh --runtime semantic-kernel --project --force
 ```
 
-LangGraph exports are runtime manifests for stateful orchestration. They do not install LangGraph, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+Runtime exports are generated from the neutral Nunneri contract in `dist/nunneri-runtime/`. They do not install LangGraph, CrewAI, AutoGen, Semantic Kernel, LangSmith, OpenTelemetry, or any model-provider SDK as root dependencies.
+
+See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rules.
 
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
 

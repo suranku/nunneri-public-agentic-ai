@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/commands/operations/release-lookup.md",
+  "contract_source": "dist/nunneri-runtime/commands/release-lookup.json",
   "entrypoint": {
     "id": "release_lookup",
     "type": "command",

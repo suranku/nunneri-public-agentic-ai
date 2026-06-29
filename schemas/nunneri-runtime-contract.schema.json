@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nunneri.suranku.com/schemas/nunneri-runtime-contract.schema.json",
+  "title": "Nunneri Runtime Contract",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "name",
+    "kind",
+    "source",
+    "description",
+    "inputs",
+    "agents",
+    "commands",
+    "nodes",
+    "edges",
+    "context",
+    "runtime_hints"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["agent", "command", "workflow", "context"]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "array"
+    },
+    "agents": {
+      "type": "array"
+    },
+    "commands": {
+      "type": "array"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "enum": ["agent", "command", "workflow", "work", "router", "human_approval", "terminal"]
+          },
+          "phase": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "approval": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "enum": ["approve", "reject"]
+                }
+              },
+              "on_reject": {
+                "enum": ["cancel"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["injection_stage", "source"],
+      "properties": {
+        "injection_stage": {
+          "enum": ["pre_dispatch"]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "runtime_hints": {
+      "type": "object",
+      "required": ["stateful", "human_in_loop", "observability"],
+      "properties": {
+        "stateful": {
+          "type": "boolean"
+        },
+        "human_in_loop": {
+          "type": "boolean"
+        },
+        "observability": {
+          "type": "array",
+          "items": {
+            "enum": ["events", "runs", "nodes"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -27,6 +27,8 @@ jobs:
         run: python3 scripts/check_docs_links.py
       - name: Check context exports
         run: python3 scripts/check_context_exports.py
+      - name: Check runtime contract
+        run: python3 scripts/check_runtime_contract.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
       - name: Check human-blocking gates

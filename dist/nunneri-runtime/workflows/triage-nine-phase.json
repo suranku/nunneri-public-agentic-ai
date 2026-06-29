@@ -1,0 +1,147 @@
+{
+  "contract_version": "1.0",
+  "name": "triage-nine-phase",
+  "kind": "workflow",
+  "description": "Nine Phase Triage Workflow",
+  "source": "assets/workflows/triage-nine-phase.md",
+  "inputs": [],
+  "agents": [],
+  "commands": [],
+  "nodes": [
+    {
+      "id": "intake",
+      "label": "Intake",
+      "phase": 1,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "context_load",
+      "label": "Context Load",
+      "phase": 2,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "classification",
+      "label": "Classification",
+      "phase": 3,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "evidence_collection",
+      "label": "Evidence Collection",
+      "phase": 4,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "root_cause_analysis",
+      "label": "Root Cause Analysis",
+      "phase": 5,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "gate_1",
+      "label": "Gate 1: RCA and Fix Plan Approval",
+      "phase": 6,
+      "type": "human_approval",
+      "prompt": "",
+      "approval": {
+        "required": true,
+        "actions": [
+          "approve",
+          "reject"
+        ],
+        "on_reject": "cancel"
+      }
+    },
+    {
+      "id": "test_first_fix",
+      "label": "Test-First Fix",
+      "phase": 7,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "validation",
+      "label": "Validation",
+      "phase": 8,
+      "type": "work",
+      "prompt": ""
+    },
+    {
+      "id": "gate_2",
+      "label": "Gate 2: Summary and Release Impact",
+      "phase": 9,
+      "type": "human_approval",
+      "prompt": "",
+      "approval": {
+        "required": true,
+        "actions": [
+          "approve",
+          "reject"
+        ],
+        "on_reject": "cancel"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake",
+      "to": "context_load"
+    },
+    {
+      "from": "context_load",
+      "to": "classification"
+    },
+    {
+      "from": "classification",
+      "to": "evidence_collection"
+    },
+    {
+      "from": "evidence_collection",
+      "to": "root_cause_analysis"
+    },
+    {
+      "from": "root_cause_analysis",
+      "to": "gate_1"
+    },
+    {
+      "from": "gate_1",
+      "to": "test_first_fix",
+      "condition": "approved"
+    },
+    {
+      "from": "test_first_fix",
+      "to": "validation"
+    },
+    {
+      "from": "validation",
+      "to": "gate_2"
+    }
+  ],
+  "post_triage_actions": [
+    "commit",
+    "push",
+    "pull_request",
+    "release_tag",
+    "publish"
+  ],
+  "context": {
+    "injection_stage": "pre_dispatch",
+    "source": "assets/context/repo-agent-instructions.md"
+  },
+  "runtime_hints": {
+    "stateful": true,
+    "human_in_loop": true,
+    "observability": [
+      "events",
+      "runs",
+      "nodes"
+    ]
+  },
+  "body": "# Nine Phase Triage Workflow\n\nUse this workflow for bug reports, incidents that may require code changes, and governance findings such as `/devhub-fix`.\n\nThe workflow has exactly nine phases. Keep the phase count stable so teams can teach, audit, and compare triage runs consistently. Add detail as substeps inside phases instead of adding new top-level phases.\n\n## Phase 1 - Intake\n\nCapture the request, ticket or incident id, affected environment, symptom, expected behavior, actual behavior, user impact, and any error text.\n\nOutput:\n\n- Triage summary\n- Known facts\n- Missing information\n- Initial severity guess\n\n## Phase 2 - Context Load\n\nRead the repo context and provider context before inspecting code. Prefer provider-neutral context first, then provider-specific context when relevant.\n\nContext order:\n\n1. `AI_ASSETS.md`\n2. Provider context such as `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md`\n3. Project README and build/test documentation\n4. Relevant command, skill, or workflow assets\n\nOutput:\n\n- Applicable provider\n- Applicable stack\n- Relevant local conventions\n- Constraints that affect the fix\n\n## Phase 3 - Classification\n\nClassify the issue before changing files.\n\nClassification options:\n\n- Code\n- Configuration\n- Data\n- Schema\n- Infrastructure\n- Dependency\n- Framework or runtime\n- Documentation or asset metadata\n- Unknown\n\nOutput:\n\n- Primary classification\n- Secondary classification, if any\n- Why other likely classifications were ruled out\n\n## Phase 4 - Evidence Collection\n\nGather enough evidence to support or reject a root cause. Do not implement a fix in this phase.\n\nEvidence sources:\n\n- Stack traces and logs\n- Failing tests or reproduction steps\n- Code search\n- Git history\n- Configuration and environment differences\n- Schema or contract changes\n- Provider adapter output, if the bug is asset-related\n\nOutput:\n\n- Evidence table\n- Files inspected\n- Commands run\n- Reproduction status\n\n## Phase 5 - Root Cause Analysis\n\nState the root cause as a testable claim. Separate confirmed evidence from assumptions.\n\nOutput:\n\n- Root cause\n- Confidence level\n- Blast radius\n- Proposed fix\n- Proposed validation\n- Risks and rollback notes\n\n## Phase 6 - Gate 1: RCA and Fix Plan Approval\n\nStop and wait for explicit human approval before changing implementation files, provider assets, generated outputs, or release metadata.\n\nThe approval request must include:\n\n- Root cause\n- Evidence\n- Fix plan\n- Test plan\n- Files expected to change\n- Risks\n\nAllowed before approval:\n\n- Read files\n- Search\n- Run non-mutating diagnostics\n- Draft a plan\n\nNot allowed before approval:\n\n- Edit files\n- Commit\n- Push\n- Open a PR\n- Tag or publish a release\n\n## Phase 7 - Test-First Fix\n\nAfter approval, create or update a failing test, assertion, fixture, or validation case that demonstrates the bug. If a failing test is not feasible, document why and use the smallest equivalent validation.\n\nThen implement the smallest correct fix.\n\nOutput:\n\n- Test or validation added\n- Fix implemented\n- Files changed\n- Any deviation from test-first workflow\n\n## Phase 8 - Validation\n\nRun the relevant checks for the stack and asset type.\n\nCommon checks:\n\n- Unit or integration tests\n- Static analysis or linting\n- Coverage check, when available\n- `python3 scripts/validate.py` for this asset repo\n- `python3 scripts/build_adapters.py` when canonical assets changed\n- `python3 scripts/build_portal_manifest.py` when portal data changed\n- `python3 scripts/sync_docs_reference.py` when public docs changed\n\nOutput:\n\n- Commands run\n- Results\n- Coverage or quality gate status\n- Remaining risk\n\n## Phase 9 - Gate 2: Summary and Release Impact\n\nStop and present the final validation summary before committing, pushing, opening a PR, tagging, or publishing.\n\nThe summary must include:\n\n- What changed\n- Validation results\n- Release impact\n- Provider impact\n- Backward compatibility notes\n- Recommended commit message\n- Recommended PR body or changelog entry\n\n## Post-Triage Actions\n\nCommit, push, PR creation, release tagging, and publishing are outside the nine phases. They require explicit human confirmation even when Phase 9 passes.\n\n## Read-Only Mode\n\nFor read-only triage, complete phases 1 through 6 and stop after Gate 1 with an RCA and recommended plan. Do not run phases 7 through 9 unless the user explicitly approves a fix."
+}

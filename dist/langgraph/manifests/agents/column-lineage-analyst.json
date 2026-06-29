@@ -4,6 +4,7 @@
   "category": "analysis",
   "runtime": "langgraph",
   "source": "assets/agents/analysis/column-lineage-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/column-lineage-analyst.json",
   "node": {
     "id": "column_lineage_analyst",
     "type": "agent",

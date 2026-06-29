@@ -37,9 +37,15 @@ Example:
 
 ## Runtime Adapters
 
+- Nunneri Runtime Contract: `dist/nunneri-runtime`
 - LangGraph: `dist/langgraph`
+- CrewAI: `dist/crewai`
+- AutoGen: `dist/autogen`
+- Semantic Kernel: `dist/semantic-kernel`
 
-LangGraph is an orchestration runtime export, not a model provider.
+Runtime adapters are orchestration/runtime exports, not model providers. LangGraph is the first runnable runtime in Nunneri Graph Studio; CrewAI, AutoGen, and Semantic Kernel are generated export contracts only in this step.
+
+Runtime adapters consume `dist/nunneri-runtime/` instead of provider-specific files. This preserves one neutral source of truth for approval gates, workflow nodes, dispatch context, and observability hints.
 
 ## Commands
 
@@ -73,6 +79,7 @@ python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
 python3 scripts/check_context_exports.py
+python3 scripts/check_runtime_contract.py
 python3 scripts/check_langgraph_exports.py
 ```
 

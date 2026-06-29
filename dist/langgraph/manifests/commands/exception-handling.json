@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/commands/compliance/exception-handling.md",
+  "contract_source": "dist/nunneri-runtime/commands/exception-handling.json",
   "entrypoint": {
     "id": "exception_handling",
     "type": "command",

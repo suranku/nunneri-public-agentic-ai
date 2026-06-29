@@ -4,6 +4,7 @@
   "category": "compliance",
   "runtime": "langgraph",
   "source": "assets/agents/compliance/logging-standards-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/logging-standards-analyst.json",
   "node": {
     "id": "logging_standards_analyst",
     "type": "agent",

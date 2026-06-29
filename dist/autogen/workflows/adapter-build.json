@@ -1,0 +1,18 @@
+{
+  "runtime": "autogen",
+  "contract_source": "dist/nunneri-runtime/workflows/adapter-build.json",
+  "group_orchestration": {
+    "name": "adapter-build",
+    "participants": [],
+    "nodes": [
+      {
+        "id": "adapter_build",
+        "label": "Provider Adapter Build Workflow",
+        "type": "workflow",
+        "prompt": "# Provider Adapter Build Workflow\n\nBuild Claude, Codex, Gemini, and open-source outputs from canonical assets."
+      }
+    ],
+    "edges": [],
+    "human_approval_nodes": []
+  }
+}

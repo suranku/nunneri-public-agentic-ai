@@ -4,6 +4,7 @@
   "category": "operations",
   "runtime": "langgraph",
   "source": "assets/agents/operations/release-ops-analyst.md",
+  "contract_source": "dist/nunneri-runtime/agents/release-ops-analyst.json",
   "node": {
     "id": "release_ops_analyst",
     "type": "agent",

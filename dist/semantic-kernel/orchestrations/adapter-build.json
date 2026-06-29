@@ -1,0 +1,18 @@
+{
+  "runtime": "semantic-kernel",
+  "contract_source": "dist/nunneri-runtime/workflows/adapter-build.json",
+  "orchestration": {
+    "name": "adapter-build",
+    "description": "Provider Adapter Build Workflow",
+    "steps": [
+      {
+        "id": "adapter_build",
+        "label": "Provider Adapter Build Workflow",
+        "type": "workflow",
+        "prompt": "# Provider Adapter Build Workflow\n\nBuild Claude, Codex, Gemini, and open-source outputs from canonical assets."
+      }
+    ],
+    "edges": [],
+    "human_agent_interaction": []
+  }
+}
