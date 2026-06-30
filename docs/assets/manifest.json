@@ -7,7 +7,7 @@
     "context": 1,
     "providers": 4,
     "runtimes": 5,
-    "guides": 9
+    "guides": 10
   },
   "agents": [
     {
@@ -365,6 +365,12 @@
       "title": "Reporting Demo",
       "description": "Interactive provider-neutral guide.",
       "href": "reference/guides/reporting-demo.html"
+    },
+    {
+      "name": "runtime-contract-demo.html",
+      "title": "Runtime Contract Demo",
+      "description": "Interactive provider-neutral guide.",
+      "href": "reference/guides/runtime-contract-demo.html"
     },
     {
       "name": "schema-lineage-demo.html",

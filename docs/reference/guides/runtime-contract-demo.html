@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nunneri Runtime Contract Demo</title>
+<style>
+:root{
+  --bg:#0b0d10;--panel:#151922;--panel2:#1d2430;--line:#2a3444;--text:#e7edf6;
+  --muted:#8a96a8;--accent:#4f8cff;--cyan:#2dd4bf;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.45}
+a{color:#9cc2ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.shell{max-width:1180px;margin:0 auto;padding:28px 20px 44px}
+.top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:22px;align-items:end;margin-bottom:22px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);font-weight:800;margin-bottom:8px}
+h1{font-size:36px;line-height:1.05;margin:0 0 12px;letter-spacing:0}
+.lead{color:var(--muted);font-size:15px;max-width:760px;margin:0}
+.status{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.status-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+.status-row:last-child{border-bottom:0}
+.status-row span:first-child{color:var(--muted)}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px}
+.steps{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;position:sticky;top:16px;align-self:start}
+.step{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0;color:var(--muted);
+  padding:10px;border-radius:6px;cursor:pointer;font:inherit;font-size:13px}
+.step:hover{background:var(--panel2);color:var(--text)}
+.step.active{background:#20304a;color:var(--text)}
+.num{width:24px;height:24px;border-radius:999px;background:var(--panel2);display:grid;place-items:center;color:var(--muted);font-size:11px;font-weight:800}
+.step.active .num{background:var(--accent);color:white}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:620px;overflow:hidden}
+.stage-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.stage-hd h2{font-size:18px;margin:0;letter-spacing:0}
+.pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:var(--panel2)}
+.panel{display:none;padding:18px}
+.panel.active{display:block;animation:fade .22s ease-out}
+@keyframes fade{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:14px}
+.card h3{font-size:14px;margin:0 0 8px}
+.card p{color:var(--muted);font-size:13px;margin:0 0 8px}
+.workflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.phase{border:1px solid var(--line);background:#121722;border-radius:8px;padding:10px;min-height:86px;position:relative;transition:transform .18s,border-color .18s}
+.phase:hover{transform:translateY(-2px);border-color:#4f8cff99}
+.phase .p{font-size:10px;color:var(--muted);font-weight:800}
+.phase .name{font-size:13px;font-weight:800;margin:4px 0}
+.phase .meta{font-size:11px;color:var(--muted)}
+.phase.gate{border-color:#f59e0b66;background:#211b0c}
+.phase.gate:after{content:"Human gate";position:absolute;right:8px;top:8px;font-size:10px;color:var(--yellow)}
+.adapter-row{display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 0}
+.adapter-row:last-child{border-bottom:0}
+.adapter-name{font-weight:800}
+.adapter-desc{color:var(--muted);font-size:13px}
+pre{margin:10px 0 0;background:#090b0f;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;color:#c8d5e6;font-size:12px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.gate-preview{border:1px solid #f59e0b66;background:#211b0c;border-radius:8px;padding:12px;margin-top:12px}
+.gate-preview strong{color:var(--yellow)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:6px;padding:7px 10px;cursor:pointer}
+.actions button.approve{border-color:#22c55e77;color:var(--green)}
+.actions button.reject{border-color:#ef444477;color:var(--red)}
+.result{margin-top:10px;color:var(--muted);font-size:13px}
+@media (max-width:840px){
+  .top,.layout{grid-template-columns:1fr}
+  .steps{position:relative;top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid,.workflow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="top">
+    <div>
+      <div class="eyebrow">Neutral runtime setup</div>
+      <h1>Nunneri Runtime Contract to stateful agent workflows</h1>
+      <p class="lead">
+        This interactive guide shows how one provider-neutral contract becomes LangGraph, CrewAI,
+        AutoGen, and Semantic Kernel exports while preserving human approval gates and project context.
+      </p>
+    </div>
+    <aside class="status" aria-label="Contract summary">
+      <div class="status-row"><span>Contract</span><strong>triage-nine-phase</strong></div>
+      <div class="status-row"><span>Phases</span><strong>9</strong></div>
+      <div class="status-row"><span>Human gates</span><strong>gate_1, gate_2</strong></div>
+      <div class="status-row"><span>Validators</span><strong>contract + Studio + examples</strong></div>
+    </aside>
+  </section>
+
+  <section class="layout">
+    <nav class="steps" aria-label="Demo steps">
+      <button class="step active" data-step="1"><span class="num">1</span>Select provider context</button>
+      <button class="step" data-step="2"><span class="num">2</span>Load neutral contract</button>
+      <button class="step" data-step="3"><span class="num">3</span>Inspect workflow phases</button>
+      <button class="step" data-step="4"><span class="num">4</span>Review human gates</button>
+      <button class="step" data-step="5"><span class="num">5</span>Project to runtimes</button>
+      <button class="step" data-step="6"><span class="num">6</span>Validate setup</button>
+    </nav>
+
+    <section class="stage">
+      <div class="stage-hd">
+        <h2 id="stage-title">Select provider context</h2>
+        <span class="pill" id="stage-pill">Provider-neutral assets</span>
+      </div>
+
+      <article class="panel active" data-panel="1">
+        <div class="grid">
+          <div class="card">
+            <h3>Install repo instructions</h3>
+            <p>Provider files stay at the consuming repository root while assets remain under provider folders.</p>
+            <pre><code>./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider codex --project --context-only --dry-run
+./install.sh --provider gemini --project --context-only --dry-run</code></pre>
+          </div>
+          <div class="card">
+            <h3>Provider-specific overrides</h3>
+            <p>Claude, Codex, and Gemini can each receive native guidance without changing the neutral workflow contract.</p>
+            <pre><code>assets/context/repo-agent-instructions.md
+dist/claude/CLAUDE.md
+dist/codex/AGENTS.md
+dist/gemini/GEMINI.md</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="2">
+        <div class="card">
+          <h3>Neutral contract is the shared export layer</h3>
+          <p>Runtime adapters consume <code>dist/nunneri-runtime/</code> instead of reading provider-specific files.</p>
+          <pre><code>python3 scripts/build_adapters.py
+cat dist/nunneri-runtime/workflows/triage-nine-phase.json
+cat dist/nunneri-runtime/context/repo-agent-instructions.json</code></pre>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="3">
+        <div class="workflow" aria-label="Nine phase workflow">
+          <div class="phase"><div class="p">P1</div><div class="name">Intake</div><div class="meta">Problem and scope</div></div>
+          <div class="phase"><div class="p">P2</div><div class="name">Context Load</div><div class="meta">Repo context</div></div>
+          <div class="phase"><div class="p">P3</div><div class="name">Classification</div><div class="meta">Code, config, runtime, docs</div></div>
+          <div class="phase"><div class="p">P4</div><div class="name">Evidence Collection</div><div class="meta">Commands and failures</div></div>
+          <div class="phase"><div class="p">P5</div><div class="name">Root Cause Analysis</div><div class="meta">Cause and plan</div></div>
+          <div class="phase gate"><div class="p">P6</div><div class="name">gate_1</div><div class="meta">Approve RCA and fix plan</div></div>
+          <div class="phase"><div class="p">P7</div><div class="name">Test-First Fix</div><div class="meta">Checks before change</div></div>
+          <div class="phase"><div class="p">P8</div><div class="name">Validation</div><div class="meta">Run checks</div></div>
+          <div class="phase gate"><div class="p">P9</div><div class="name">gate_2</div><div class="meta">Approve release impact</div></div>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="4">
+        <div class="gate-preview">
+          <strong>gate_1</strong>
+          <p>Approve the root cause analysis and fix plan before implementation?</p>
+          <div class="actions">
+            <button class="approve" data-action="approve">Approve</button>
+            <button class="reject" data-action="reject">Reject</button>
+          </div>
+          <div class="result" id="gate-result">A LangGraph runtime pauses here with interrupt/resume. Rejection cancels downstream work.</div>
+        </div>
+        <pre><code>{
+  "id": "gate_1",
+  "type": "human_approval",
+  "approval": {
+    "actions": ["approve", "reject"],
+    "on_reject": "cancel"
+  }
+}</code></pre>
+      </article>
+
+      <article class="panel" data-panel="5">
+        <div class="adapter-row"><div class="adapter-name">LangGraph</div><div class="adapter-desc">Graph JSON with checkpointed interrupts and approval gates.</div></div>
+        <div class="adapter-row"><div class="adapter-name">CrewAI</div><div class="adapter-desc">Agent and flow manifests derived from the same contract.</div></div>
+        <div class="adapter-row"><div class="adapter-name">AutoGen</div><div class="adapter-desc">AgentChat/Core style specs for orchestration experiments.</div></div>
+        <div class="adapter-row"><div class="adapter-name">Semantic Kernel</div><div class="adapter-desc">Agent and orchestration manifests with approval metadata.</div></div>
+        <pre><code>./install.sh --runtime nunneri-runtime --project --dry-run --skip-build
+./install.sh --runtime langgraph --project --dry-run --skip-build
+./install.sh --runtime crewai --project --dry-run --skip-build</code></pre>
+      </article>
+
+      <article class="panel" data-panel="6">
+        <div class="grid">
+          <div class="card">
+            <h3>Contract and Studio checks</h3>
+            <pre><code>python3 scripts/check_runtime_contract.py
+python3 scripts/check_graph_studio_contract.py
+python3 scripts/check_langgraph_exports.py</code></pre>
+          </div>
+          <div class="card">
+            <h3>Consumer example checks</h3>
+            <pre><code>python3 scripts/check_runtime_examples.py
+python3 examples/runtime-contract-consumer/consume_runtime_contract.py \
+  --workflow dist/nunneri-runtime/workflows/triage-nine-phase.json</code></pre>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+</main>
+<script>
+const titles = {
+  1:["Select provider context","Provider-neutral assets"],
+  2:["Load neutral contract","dist/nunneri-runtime"],
+  3:["Inspect workflow phases","9 phase triage"],
+  4:["Review human gates","gate_1 and gate_2"],
+  5:["Project to runtimes","Adapters, not providers"],
+  6:["Validate setup","Release-ready checks"]
+};
+document.querySelectorAll("[data-step]").forEach(button => {
+  button.addEventListener("click", () => {
+    const step = button.dataset.step;
+    document.querySelectorAll("[data-step]").forEach(el => el.classList.toggle("active", el === button));
+    document.querySelectorAll("[data-panel]").forEach(el => el.classList.toggle("active", el.dataset.panel === step));
+    document.getElementById("stage-title").textContent = titles[step][0];
+    document.getElementById("stage-pill").textContent = titles[step][1];
+  });
+});
+document.querySelectorAll("[data-action]").forEach(button => {
+  button.addEventListener("click", () => {
+    const result = document.getElementById("gate-result");
+    if (button.dataset.action === "approve") {
+      result.textContent = "Approved: the runtime resumes with Command(resume={approved: true}) and continues to Test-First Fix.";
+      result.style.color = "var(--green)";
+    } else {
+      result.textContent = "Rejected: the runtime resumes with approved: false and cancels downstream implementation nodes.";
+      result.style.color = "var(--red)";
+    }
+  });
+});
+</script>
+</body>
+</html>

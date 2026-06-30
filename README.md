@@ -114,9 +114,13 @@ Runtime exports are generated from the neutral Nunneri contract in `dist/nunneri
 
 See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rules.
 
+For a dependency-free consumer example that reads the neutral contract and projects `triage-nine-phase` into a CrewAI-style flow shape, see `examples/runtime-contract-consumer/`.
+
+For an interactive walkthrough of provider context, neutral workflow phases, human gates, and runtime adapter projections, open `guides/runtime-contract-demo.html`.
+
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
 
-The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`.
+The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`. Nunneri Graph Studio reads the same runtime contract to show workflow phase config, classification options, edge conditions, and approval-gate context.
 
 Recommended portable runtime configuration:
 
@@ -137,6 +141,8 @@ python3 scripts/check_consumer_install.py
 ```
 
 The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
+
+Use `examples/runtime-contract-consumer/` to see a direct runtime contract consumer that does not import any runtime SDK.
 
 ## Internal Releases
 

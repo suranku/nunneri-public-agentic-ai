@@ -31,6 +31,8 @@ Each individual contract file uses `contract_version: "1.0"` and includes:
 
 Runtime-specific SDK fields belong in generated runtime adapter output, not in canonical `assets/`.
 
+Graph Studio also consumes the contract projection exposed by the API. The UI names these executable steps **workflow phases** for users, while the JSON and runtime adapters continue to use the technical `nodes` field.
+
 ## Approval Semantics
 
 Runtime adapters must preserve `human_approval` semantics:
@@ -58,3 +60,23 @@ Install a runtime adapter export:
 ```
 
 No runtime SDK dependencies are installed by this repository.
+
+## Consumer Example
+
+`examples/runtime-contract-consumer/` contains a dependency-free Python example that reads `dist/nunneri-runtime/contract.json`, loads `triage-nine-phase`, and projects it into a CrewAI-style flow shape while preserving approval gates.
+
+Validate it with:
+
+```bash
+python3 scripts/check_runtime_examples.py
+```
+
+## Interactive Demo
+
+Open `guides/runtime-contract-demo.html` for a step-by-step walkthrough covering provider context files, `triage-nine-phase`, `gate_1`, `gate_2`, LangGraph, CrewAI, AutoGen, Semantic Kernel, and the validation checks that keep the exports aligned.
+
+```bash
+python3 scripts/check_runtime_contract.py
+python3 scripts/check_graph_studio_contract.py
+python3 scripts/check_runtime_examples.py
+```

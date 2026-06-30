@@ -606,7 +606,7 @@ NUNNERI_TRACE_MODE=otel</code></pre>
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/guides/runtime-contract-demo.html">Runtime Contract Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
@@ -1193,28 +1193,124 @@ TRIAGE_NINE_PHASE_CONTRACT = {
     "agents": [],
     "commands": [],
     "nodes": [
-        {"id": "intake", "label": "Intake", "phase": 1, "type": "work", "prompt": ""},
-        {"id": "context_load", "label": "Context Load", "phase": 2, "type": "work", "prompt": ""},
-        {"id": "classification", "label": "Classification", "phase": 3, "type": "work", "prompt": ""},
-        {"id": "evidence_collection", "label": "Evidence Collection", "phase": 4, "type": "work", "prompt": ""},
-        {"id": "root_cause_analysis", "label": "Root Cause Analysis", "phase": 5, "type": "work", "prompt": ""},
+        {
+            "id": "intake",
+            "label": "Intake",
+            "phase": 1,
+            "type": "work",
+            "prompt": "",
+            "description": "Capture the reported issue, requested outcome, environment, and constraints.",
+            "instructions": "Normalize the request into a clear problem statement and list missing information without starting implementation.",
+            "expected_outputs": ["problem_statement", "scope", "missing_context"],
+        },
+        {
+            "id": "context_load",
+            "label": "Context Load",
+            "phase": 2,
+            "type": "work",
+            "prompt": "",
+            "description": "Load repository context, previous decisions, relevant docs, and current workspace state.",
+            "instructions": "Read the smallest useful set of files and summarize repository conventions before choosing an approach.",
+            "expected_outputs": ["relevant_files", "repo_conventions", "current_state"],
+        },
+        {
+            "id": "classification",
+            "label": "Classification",
+            "phase": 3,
+            "type": "work",
+            "prompt": "",
+            "description": "Classify the request so the workflow can dispatch the right agent, command, or runtime path.",
+            "instructions": "Identify the primary work category, risk level, affected runtime/provider, and whether human approval is needed.",
+            "classification_options": [
+                "code",
+                "configuration",
+                "data",
+                "schema",
+                "infrastructure",
+                "dependency",
+                "framework_or_runtime",
+                "documentation_or_asset_metadata",
+                "unknown",
+            ],
+            "expected_outputs": ["category", "risk", "runtime_or_provider", "approval_required"],
+        },
+        {
+            "id": "evidence_collection",
+            "label": "Evidence Collection",
+            "phase": 4,
+            "type": "work",
+            "prompt": "",
+            "description": "Gather concrete evidence before proposing root cause or changes.",
+            "instructions": "Use local validation, logs, generated artifacts, and source references to support the diagnosis.",
+            "expected_outputs": ["evidence", "commands_run", "observed_failures"],
+        },
+        {
+            "id": "root_cause_analysis",
+            "label": "Root Cause Analysis",
+            "phase": 5,
+            "type": "work",
+            "prompt": "",
+            "description": "Explain the root cause and produce a focused implementation plan.",
+            "instructions": "Tie each proposed change to evidence and state what will not be changed.",
+            "expected_outputs": ["root_cause", "fix_plan", "non_goals"],
+        },
         {
             "id": "gate_1",
             "label": "Gate 1: RCA and Fix Plan Approval",
             "phase": 6,
             "type": "human_approval",
             "prompt": "",
-            "approval": {"required": True, "actions": ["approve", "reject"], "on_reject": "cancel"},
+            "description": "Human review checkpoint before implementation changes begin.",
+            "instructions": "Pause the runtime and wait for an explicit approve or reject decision.",
+            "expected_outputs": ["approval_decision", "reviewer_reason"],
+            "approval": {
+                "required": True,
+                "actions": ["approve", "reject"],
+                "on_reject": "cancel",
+                "question": "Approve the root cause analysis and fix plan before implementation?",
+                "required_context": ["root_cause", "fix_plan", "evidence"],
+                "allowed_before_approval": ["read_context", "collect_evidence", "draft_plan"],
+                "blocked_before_approval": ["edit_files", "run_release", "publish"],
+            },
         },
-        {"id": "test_first_fix", "label": "Test-First Fix", "phase": 7, "type": "work", "prompt": ""},
-        {"id": "validation", "label": "Validation", "phase": 8, "type": "work", "prompt": ""},
+        {
+            "id": "test_first_fix",
+            "label": "Test-First Fix",
+            "phase": 7,
+            "type": "work",
+            "prompt": "",
+            "description": "Create or update focused validation before applying the implementation change.",
+            "instructions": "Add the smallest meaningful test or check, then make the implementation pass it.",
+            "expected_outputs": ["test_or_check", "implementation_change", "files_changed"],
+        },
+        {
+            "id": "validation",
+            "label": "Validation",
+            "phase": 8,
+            "type": "work",
+            "prompt": "",
+            "description": "Run the required checks and summarize remaining risk.",
+            "instructions": "Execute repository validation commands and explain any skipped checks with reasons.",
+            "expected_outputs": ["validation_commands", "results", "residual_risk"],
+        },
         {
             "id": "gate_2",
             "label": "Gate 2: Summary and Release Impact",
             "phase": 9,
             "type": "human_approval",
             "prompt": "",
-            "approval": {"required": True, "actions": ["approve", "reject"], "on_reject": "cancel"},
+            "description": "Human review checkpoint before release-impact actions.",
+            "instructions": "Pause the runtime before commit, push, pull request, tagging, or publish actions.",
+            "expected_outputs": ["approval_decision", "release_impact_summary"],
+            "approval": {
+                "required": True,
+                "actions": ["approve", "reject"],
+                "on_reject": "cancel",
+                "question": "Approve the validation summary and release-impact actions?",
+                "required_context": ["validation_results", "files_changed", "release_impact"],
+                "allowed_before_approval": ["summarize_validation", "draft_release_notes"],
+                "blocked_before_approval": ["commit", "push", "pull_request", "release_tag", "publish"],
+            },
         },
     ],
     "edges": [
@@ -2242,7 +2338,12 @@ def main() -> int:
         ".github/labels.yml",
         ".github/workflows/release.yml",
         "examples/consumer-repo/README.md",
+        "examples/runtime-contract-consumer/README.md",
+        "examples/runtime-contract-consumer/consume_runtime_contract.py",
         "scripts/check_consumer_install.py",
+        "scripts/check_runtime_examples.py",
+        "scripts/check_runtime_contract_demo.py",
+        "scripts/check_graph_studio_contract.py",
         "scripts/check_user_setup_docs.py",
         "scripts/check_runtime_contract.py",
         "scripts/check_human_gates.py",
@@ -2250,6 +2351,7 @@ def main() -> int:
         "NUNNERI_RUNTIME_CONTRACT.md",
         "guides/end-user-langgraph-setup.md",
         "guides/end-user-setup-demo.html",
+        "guides/runtime-contract-demo.html",
         "scripts/package_release.py",
         "scripts/check_release_package.py",
     ]
@@ -2994,6 +3096,18 @@ def main() -> int:
             gate = by_id.get(gate_id, {})
             require(gate.get("type") == "human_approval", f"{gate_id} must be human_approval", failures)
             require(gate.get("approval", {}).get("on_reject") == "cancel", f"{gate_id} rejection policy must be cancel", failures)
+            require(bool(gate.get("approval", {}).get("question")), f"{gate_id} must include an approval question", failures)
+            require(
+                bool(gate.get("approval", {}).get("required_context")),
+                f"{gate_id} must include required approval context",
+                failures,
+            )
+        classification = by_id.get("classification", {})
+        require(
+            bool(classification.get("classification_options")),
+            "classification node must include classification_options",
+            failures,
+        )
 
     for path in RUNTIME_SMOKE_PATHS:
         full = ROOT / path
@@ -3014,6 +3128,165 @@ if __name__ == "__main__":
     sys.exit(main())
 ''', True)
 
+
+    write("scripts/check_runtime_examples.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+EXAMPLE = ROOT / "examples/runtime-contract-consumer/consume_runtime_contract.py"
+
+
+def main() -> int:
+    failures: list[str] = []
+
+    if not EXAMPLE.exists():
+        failures.append("examples/runtime-contract-consumer/consume_runtime_contract.py is missing")
+    else:
+        completed = subprocess.run(
+            [sys.executable, str(EXAMPLE), "--repo-root", str(ROOT)],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
+        if completed.returncode != 0:
+            failures.append(f"runtime contract consumer example failed:\n{completed.stdout}")
+        else:
+            try:
+                payload = json.loads(completed.stdout)
+            except json.JSONDecodeError as exc:
+                failures.append(f"runtime contract consumer output is not JSON: {exc}")
+                payload = {}
+            if payload:
+                if payload.get("contract_version") != "1.0":
+                    failures.append("example must report contract_version 1.0")
+                if payload.get("workflow_name") != "triage-nine-phase":
+                    failures.append("example must load triage-nine-phase by default")
+                if payload.get("node_count") != 9:
+                    failures.append(f"example must report 9 workflow nodes, found {payload.get('node_count')}")
+                if payload.get("approval_gates") != ["gate_1", "gate_2"]:
+                    failures.append(f"example approval gates mismatch: {payload.get('approval_gates')}")
+                crewai_flow = payload.get("crewai_flow", {})
+                if crewai_flow.get("human_in_loop") != ["gate_1", "gate_2"]:
+                    failures.append(f"CrewAI-style flow must preserve approval gates, found {crewai_flow.get('human_in_loop')}")
+                if len(crewai_flow.get("steps", [])) != 9:
+                    failures.append("CrewAI-style flow must contain 9 steps")
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+
+    print("Runtime example checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
+
+    write("scripts/check_graph_studio_contract.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def require(condition: bool, message: str, failures: list[str]) -> None:
+    if not condition:
+        failures.append(message)
+
+
+def main() -> int:
+    failures: list[str] = []
+    api = (ROOT / "api/main.py").read_text(encoding="utf-8")
+    ui = (ROOT / "api/ui.html").read_text(encoding="utf-8")
+    triage = json.loads((ROOT / "dist/nunneri-runtime/workflows/triage-nine-phase.json").read_text(encoding="utf-8"))
+
+    require("/agents/{agent_name}/graph-definition" in api, "api/main.py must expose graph-definition endpoint", failures)
+    require("load_graph_definition" in api, "api/main.py must load graph definitions from runtime exports", failures)
+    require("graph-definition" in ui, "api/ui.html must fetch graph-definition", failures)
+    require("Phase Config" in ui, "api/ui.html must label the right panel as Phase Config", failures)
+    require("renderContractDefaults" in ui, "api/ui.html must render contract defaults in the phase panel", failures)
+    require("edge-label" in ui, "api/ui.html must render edge condition labels", failures)
+    require("loadGraphDefinition" in ui, "api/ui.html must use loadGraphDefinition for selected assets", failures)
+
+    nodes = {node["id"]: node for node in triage.get("nodes", [])}
+    require(bool(nodes.get("classification", {}).get("classification_options")), "classification phase needs contract options", failures)
+    for gate_id in ("gate_1", "gate_2"):
+        approval = nodes.get(gate_id, {}).get("approval", {})
+        require(bool(approval.get("question")), f"{gate_id} needs an approval question", failures)
+        require(bool(approval.get("required_context")), f"{gate_id} needs required approval context", failures)
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+    print("Graph Studio contract checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
+    write("scripts/check_runtime_contract_demo.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+GUIDE = ROOT / "guides/runtime-contract-demo.html"
+REFERENCE = ROOT / "docs/reference/guides/runtime-contract-demo.html"
+
+
+def require(condition: bool, message: str, failures: list[str]) -> None:
+    if not condition:
+        failures.append(message)
+
+
+def main() -> int:
+    failures: list[str] = []
+    require(GUIDE.exists(), "guides/runtime-contract-demo.html is missing", failures)
+    require(REFERENCE.exists(), "docs/reference/guides/runtime-contract-demo.html is missing; run sync_docs_reference.py", failures)
+    if GUIDE.exists():
+        text = GUIDE.read_text(encoding="utf-8")
+        for term in (
+            "triage-nine-phase",
+            "gate_1",
+            "gate_2",
+            "LangGraph",
+            "CrewAI",
+            "AutoGen",
+            "Semantic Kernel",
+            "scripts/check_runtime_examples.py",
+            "scripts/check_graph_studio_contract.py",
+        ):
+            require(term in text, f"runtime contract demo must mention {term}", failures)
+        require(text.count("data-step=") >= 6, "runtime contract demo must include at least six interactive steps", failures)
+        require("addEventListener" in text, "runtime contract demo must include interactive JavaScript", failures)
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+    print("Runtime contract demo checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
 
 
 def create_installers() -> None:
@@ -3547,9 +3820,13 @@ Runtime exports are generated from the neutral Nunneri contract in `dist/nunneri
 
 See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rules.
 
+For a dependency-free consumer example that reads the neutral contract and projects `triage-nine-phase` into a CrewAI-style flow shape, see `examples/runtime-contract-consumer/`.
+
+For an interactive walkthrough of provider context, neutral workflow phases, human gates, and runtime adapter projections, open `guides/runtime-contract-demo.html`.
+
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
 
-The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`.
+The API server's LangGraph runner uses human-blocking approval gates. Gate nodes pause with `interrupt()`, persist through the configured checkpointer, emit `gate_waiting`, and resume only through `POST /threads/{thread_id}/gates/{gate_id}/approve` or `/reject`. Nunneri Graph Studio reads the same runtime contract to show workflow phase config, classification options, edge conditions, and approval-gate context.
 
 Recommended portable runtime configuration:
 
@@ -3570,6 +3847,8 @@ python3 scripts/check_consumer_install.py
 ```
 
 The smoke check stages a temporary consumer repo and verifies context-only dry runs, root `CLAUDE.md` installs, provider assets under `.claude/`, LangGraph exports under `.langgraph/`, and skip behavior when a root context file already exists.
+
+Use `examples/runtime-contract-consumer/` to see a direct runtime contract consumer that does not import any runtime SDK.
 
 ## Internal Releases
 
@@ -3959,6 +4238,8 @@ Each individual contract file uses `contract_version: "1.0"` and includes:
 
 Runtime-specific SDK fields belong in generated runtime adapter output, not in canonical `assets/`.
 
+Graph Studio also consumes the contract projection exposed by the API. The UI names these executable steps **workflow phases** for users, while the JSON and runtime adapters continue to use the technical `nodes` field.
+
 ## Approval Semantics
 
 Runtime adapters must preserve `human_approval` semantics:
@@ -3986,6 +4267,26 @@ Install a runtime adapter export:
 ```
 
 No runtime SDK dependencies are installed by this repository.
+
+## Consumer Example
+
+`examples/runtime-contract-consumer/` contains a dependency-free Python example that reads `dist/nunneri-runtime/contract.json`, loads `triage-nine-phase`, and projects it into a CrewAI-style flow shape while preserving approval gates.
+
+Validate it with:
+
+```bash
+python3 scripts/check_runtime_examples.py
+```
+
+## Interactive Demo
+
+Open `guides/runtime-contract-demo.html` for a step-by-step walkthrough covering provider context files, `triage-nine-phase`, `gate_1`, `gate_2`, LangGraph, CrewAI, AutoGen, Semantic Kernel, and the validation checks that keep the exports aligned.
+
+```bash
+python3 scripts/check_runtime_contract.py
+python3 scripts/check_graph_studio_contract.py
+python3 scripts/check_runtime_examples.py
+```
 ''')
     write("adapters/crewai/README.md", r'''# CrewAI Runtime Adapter
 
@@ -4183,20 +4484,29 @@ guides/end-user-setup-demo.html
 This setup does not add a Python LangGraph application, SDK dependency, hosted monitoring dependency, or provider SDK dependency. It defines the portable install and runtime contract first.
 """)
 
-    write("guides/README.md", """# Guides
+    write("guides/README.md", r'''# Guides
 
 This directory contains executive summaries and static interactive demos for Nunneri AI Assets.
 
-## Setup
+## Setup and Installation
 
-- `platform-onboarding.md` explains provider installs, root context files, LangGraph runtime exports, and release flow.
-- `end-user-langgraph-setup.md` explains how a consuming repository can install provider context, add `.langgraph/` runtime exports, keep durable state outside the LLM context, and choose `otel`, `langsmith`, or `none` tracing.
-- `end-user-setup-demo.html` is the step-by-step interactive setup walkthrough for end users.
+- `platform-onboarding.md` — provider installs, root context files, neutral runtime contracts, LangGraph runtime exports, API server quick start, and release flow.
+- `end-user-langgraph-setup.md` — how a consuming repository installs provider context, adds `.langgraph/` runtime exports, keeps durable state, and chooses tracing.
+- `end-user-setup-demo.html` — interactive step-by-step setup walkthrough.
+- `runtime-contract-demo.html` — interactive walkthrough of the neutral contract, workflow phases, human gates, and runtime adapter projections.
+
+## Graph Studio (Users)
+
+- `graph-studio.md` — how to use the browser UI: running assets, reading thread history, configuring workflow phase behavior, and understanding error states.
+
+## API Server (Developers)
+
+- `api-server.md` — setting up and running the FastAPI server locally, environment variables, LLM providers (Ollama, Gemini, Claude), database schema, key endpoints, and troubleshooting.
 
 ## Demos
 
 Open the HTML files directly or through the GitHub Pages portal under `docs/index.html`.
-""")
+''')
 
     write("guides/platform-onboarding.md", f"""# Platform Onboarding
 
@@ -4401,6 +4711,454 @@ python3 scripts/check_release_package.py
 Tags must match `VERSION` exactly. Tag `v0.1.0` requires `VERSION` to contain `0.1.0`.
 """)
 
+    write("guides/runtime-contract-demo.html", r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nunneri Runtime Contract Demo</title>
+<style>
+:root{
+  --bg:#0b0d10;--panel:#151922;--panel2:#1d2430;--line:#2a3444;--text:#e7edf6;
+  --muted:#8a96a8;--accent:#4f8cff;--cyan:#2dd4bf;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.45}
+a{color:#9cc2ff;text-decoration:none}
+a:hover{text-decoration:underline}
+.shell{max-width:1180px;margin:0 auto;padding:28px 20px 44px}
+.top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:22px;align-items:end;margin-bottom:22px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);font-weight:800;margin-bottom:8px}
+h1{font-size:36px;line-height:1.05;margin:0 0 12px;letter-spacing:0}
+.lead{color:var(--muted);font-size:15px;max-width:760px;margin:0}
+.status{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.status-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+.status-row:last-child{border-bottom:0}
+.status-row span:first-child{color:var(--muted)}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px}
+.steps{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;position:sticky;top:16px;align-self:start}
+.step{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0;color:var(--muted);
+  padding:10px;border-radius:6px;cursor:pointer;font:inherit;font-size:13px}
+.step:hover{background:var(--panel2);color:var(--text)}
+.step.active{background:#20304a;color:var(--text)}
+.num{width:24px;height:24px;border-radius:999px;background:var(--panel2);display:grid;place-items:center;color:var(--muted);font-size:11px;font-weight:800}
+.step.active .num{background:var(--accent);color:white}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:620px;overflow:hidden}
+.stage-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.stage-hd h2{font-size:18px;margin:0;letter-spacing:0}
+.pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:var(--panel2)}
+.panel{display:none;padding:18px}
+.panel.active{display:block;animation:fade .22s ease-out}
+@keyframes fade{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:14px}
+.card h3{font-size:14px;margin:0 0 8px}
+.card p{color:var(--muted);font-size:13px;margin:0 0 8px}
+.workflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.phase{border:1px solid var(--line);background:#121722;border-radius:8px;padding:10px;min-height:86px;position:relative;transition:transform .18s,border-color .18s}
+.phase:hover{transform:translateY(-2px);border-color:#4f8cff99}
+.phase .p{font-size:10px;color:var(--muted);font-weight:800}
+.phase .name{font-size:13px;font-weight:800;margin:4px 0}
+.phase .meta{font-size:11px;color:var(--muted)}
+.phase.gate{border-color:#f59e0b66;background:#211b0c}
+.phase.gate:after{content:"Human gate";position:absolute;right:8px;top:8px;font-size:10px;color:var(--yellow)}
+.adapter-row{display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 0}
+.adapter-row:last-child{border-bottom:0}
+.adapter-name{font-weight:800}
+.adapter-desc{color:var(--muted);font-size:13px}
+pre{margin:10px 0 0;background:#090b0f;border:1px solid var(--line);border-radius:8px;padding:12px;overflow:auto;color:#c8d5e6;font-size:12px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.gate-preview{border:1px solid #f59e0b66;background:#211b0c;border-radius:8px;padding:12px;margin-top:12px}
+.gate-preview strong{color:var(--yellow)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:6px;padding:7px 10px;cursor:pointer}
+.actions button.approve{border-color:#22c55e77;color:var(--green)}
+.actions button.reject{border-color:#ef444477;color:var(--red)}
+.result{margin-top:10px;color:var(--muted);font-size:13px}
+@media (max-width:840px){
+  .top,.layout{grid-template-columns:1fr}
+  .steps{position:relative;top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid,.workflow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="top">
+    <div>
+      <div class="eyebrow">Neutral runtime setup</div>
+      <h1>Nunneri Runtime Contract to stateful agent workflows</h1>
+      <p class="lead">
+        This interactive guide shows how one provider-neutral contract becomes LangGraph, CrewAI,
+        AutoGen, and Semantic Kernel exports while preserving human approval gates and project context.
+      </p>
+    </div>
+    <aside class="status" aria-label="Contract summary">
+      <div class="status-row"><span>Contract</span><strong>triage-nine-phase</strong></div>
+      <div class="status-row"><span>Phases</span><strong>9</strong></div>
+      <div class="status-row"><span>Human gates</span><strong>gate_1, gate_2</strong></div>
+      <div class="status-row"><span>Validators</span><strong>contract + Studio + examples</strong></div>
+    </aside>
+  </section>
+
+  <section class="layout">
+    <nav class="steps" aria-label="Demo steps">
+      <button class="step active" data-step="1"><span class="num">1</span>Select provider context</button>
+      <button class="step" data-step="2"><span class="num">2</span>Load neutral contract</button>
+      <button class="step" data-step="3"><span class="num">3</span>Inspect workflow phases</button>
+      <button class="step" data-step="4"><span class="num">4</span>Review human gates</button>
+      <button class="step" data-step="5"><span class="num">5</span>Project to runtimes</button>
+      <button class="step" data-step="6"><span class="num">6</span>Validate setup</button>
+    </nav>
+
+    <section class="stage">
+      <div class="stage-hd">
+        <h2 id="stage-title">Select provider context</h2>
+        <span class="pill" id="stage-pill">Provider-neutral assets</span>
+      </div>
+
+      <article class="panel active" data-panel="1">
+        <div class="grid">
+          <div class="card">
+            <h3>Install repo instructions</h3>
+            <p>Provider files stay at the consuming repository root while assets remain under provider folders.</p>
+            <pre><code>./install.sh --provider claude --project --context-only --dry-run
+./install.sh --provider codex --project --context-only --dry-run
+./install.sh --provider gemini --project --context-only --dry-run</code></pre>
+          </div>
+          <div class="card">
+            <h3>Provider-specific overrides</h3>
+            <p>Claude, Codex, and Gemini can each receive native guidance without changing the neutral workflow contract.</p>
+            <pre><code>assets/context/repo-agent-instructions.md
+dist/claude/CLAUDE.md
+dist/codex/AGENTS.md
+dist/gemini/GEMINI.md</code></pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="2">
+        <div class="card">
+          <h3>Neutral contract is the shared export layer</h3>
+          <p>Runtime adapters consume <code>dist/nunneri-runtime/</code> instead of reading provider-specific files.</p>
+          <pre><code>python3 scripts/build_adapters.py
+cat dist/nunneri-runtime/workflows/triage-nine-phase.json
+cat dist/nunneri-runtime/context/repo-agent-instructions.json</code></pre>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="3">
+        <div class="workflow" aria-label="Nine phase workflow">
+          <div class="phase"><div class="p">P1</div><div class="name">Intake</div><div class="meta">Problem and scope</div></div>
+          <div class="phase"><div class="p">P2</div><div class="name">Context Load</div><div class="meta">Repo context</div></div>
+          <div class="phase"><div class="p">P3</div><div class="name">Classification</div><div class="meta">Code, config, runtime, docs</div></div>
+          <div class="phase"><div class="p">P4</div><div class="name">Evidence Collection</div><div class="meta">Commands and failures</div></div>
+          <div class="phase"><div class="p">P5</div><div class="name">Root Cause Analysis</div><div class="meta">Cause and plan</div></div>
+          <div class="phase gate"><div class="p">P6</div><div class="name">gate_1</div><div class="meta">Approve RCA and fix plan</div></div>
+          <div class="phase"><div class="p">P7</div><div class="name">Test-First Fix</div><div class="meta">Checks before change</div></div>
+          <div class="phase"><div class="p">P8</div><div class="name">Validation</div><div class="meta">Run checks</div></div>
+          <div class="phase gate"><div class="p">P9</div><div class="name">gate_2</div><div class="meta">Approve release impact</div></div>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="4">
+        <div class="gate-preview">
+          <strong>gate_1</strong>
+          <p>Approve the root cause analysis and fix plan before implementation?</p>
+          <div class="actions">
+            <button class="approve" data-action="approve">Approve</button>
+            <button class="reject" data-action="reject">Reject</button>
+          </div>
+          <div class="result" id="gate-result">A LangGraph runtime pauses here with interrupt/resume. Rejection cancels downstream work.</div>
+        </div>
+        <pre><code>{
+  "id": "gate_1",
+  "type": "human_approval",
+  "approval": {
+    "actions": ["approve", "reject"],
+    "on_reject": "cancel"
+  }
+}</code></pre>
+      </article>
+
+      <article class="panel" data-panel="5">
+        <div class="adapter-row"><div class="adapter-name">LangGraph</div><div class="adapter-desc">Graph JSON with checkpointed interrupts and approval gates.</div></div>
+        <div class="adapter-row"><div class="adapter-name">CrewAI</div><div class="adapter-desc">Agent and flow manifests derived from the same contract.</div></div>
+        <div class="adapter-row"><div class="adapter-name">AutoGen</div><div class="adapter-desc">AgentChat/Core style specs for orchestration experiments.</div></div>
+        <div class="adapter-row"><div class="adapter-name">Semantic Kernel</div><div class="adapter-desc">Agent and orchestration manifests with approval metadata.</div></div>
+        <pre><code>./install.sh --runtime nunneri-runtime --project --dry-run --skip-build
+./install.sh --runtime langgraph --project --dry-run --skip-build
+./install.sh --runtime crewai --project --dry-run --skip-build</code></pre>
+      </article>
+
+      <article class="panel" data-panel="6">
+        <div class="grid">
+          <div class="card">
+            <h3>Contract and Studio checks</h3>
+            <pre><code>python3 scripts/check_runtime_contract.py
+python3 scripts/check_graph_studio_contract.py
+python3 scripts/check_langgraph_exports.py</code></pre>
+          </div>
+          <div class="card">
+            <h3>Consumer example checks</h3>
+            <pre><code>python3 scripts/check_runtime_examples.py
+python3 examples/runtime-contract-consumer/consume_runtime_contract.py \
+  --workflow dist/nunneri-runtime/workflows/triage-nine-phase.json</code></pre>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+</main>
+<script>
+const titles = {
+  1:["Select provider context","Provider-neutral assets"],
+  2:["Load neutral contract","dist/nunneri-runtime"],
+  3:["Inspect workflow phases","9 phase triage"],
+  4:["Review human gates","gate_1 and gate_2"],
+  5:["Project to runtimes","Adapters, not providers"],
+  6:["Validate setup","Release-ready checks"]
+};
+document.querySelectorAll("[data-step]").forEach(button => {
+  button.addEventListener("click", () => {
+    const step = button.dataset.step;
+    document.querySelectorAll("[data-step]").forEach(el => el.classList.toggle("active", el === button));
+    document.querySelectorAll("[data-panel]").forEach(el => el.classList.toggle("active", el.dataset.panel === step));
+    document.getElementById("stage-title").textContent = titles[step][0];
+    document.getElementById("stage-pill").textContent = titles[step][1];
+  });
+});
+document.querySelectorAll("[data-action]").forEach(button => {
+  button.addEventListener("click", () => {
+    const result = document.getElementById("gate-result");
+    if (button.dataset.action === "approve") {
+      result.textContent = "Approved: the runtime resumes with Command(resume={approved: true}) and continues to Test-First Fix.";
+      result.style.color = "var(--green)";
+    } else {
+      result.textContent = "Rejected: the runtime resumes with approved: false and cancels downstream implementation nodes.";
+      result.style.color = "var(--red)";
+    }
+  });
+});
+</script>
+</body>
+</html>
+''')
+
+    write("guides/graph-studio.md", r'''# Graph Studio
+
+Graph Studio is the browser-based UI for running Nunneri assets, inspecting execution state in real time,
+and reviewing run history. It is served by the Nunneri API server at `/ui`.
+
+## Prerequisites
+
+| Requirement | Default |
+|---|---|
+| API server running | `http://localhost:8000` |
+| Ollama running | `http://localhost:11434` |
+| At least one Ollama model pulled | `ollama pull mistral` |
+| PostgreSQL | `postgresql://nunneri:nunneri@localhost:5432/nunneri` |
+
+See [api-server.md](api-server.md) for setup instructions.
+
+---
+
+## Opening the Studio
+
+Navigate to `http://localhost:8000/ui`.
+
+The header shows:
+- **Ollama ✓ · N models** — Ollama is reachable and the model count is shown. Red means Ollama is offline.
+- **Queue badge** — appears yellow when Ollama slots are busy, red when requests are waiting.
+
+## Resizing the Workspace
+
+Graph Studio panes are resizable:
+
+| Area | Drag target |
+|---|---|
+| Left navigation | Border between the navigation pane and graph canvas |
+| Right inspector / phase config | Border between the graph canvas and inspector pane |
+| Bottom output | Border above the output transcript |
+
+Pane sizes are saved in browser local storage so the workspace reopens with the same proportions.
+
+---
+
+## Selecting an Asset
+
+The left panel lists all available agents and commands loaded from `dist/langgraph/manifests/`.
+
+- **Agents** run multi-phase agentic workflows (intake → analysis → gate → output).
+- **Commands** run targeted single-purpose workflows (dispatch → execute → summarize).
+- **Workflow phases** are the user-facing steps shown on the graph canvas.
+- **Nodes** are the technical IDs used by the JSON contract, API, and runtime adapters.
+
+Click any item to select it. The graph canvas updates from the runtime contract projection exposed by `/agents/{name}/graph-definition`, including phase metadata, edge conditions, and approval-gate context.
+
+---
+
+## Running an Asset
+
+1. Select an agent or command from the left panel.
+2. (Optional) Enter a local path or git URL in the **Project Path** field. The server will inject the
+   repository structure and key files as context for the LLM.
+3. Type your message in the input field and press **Enter** or click **▶ Run**.
+
+The graph canvas activates and workflow phases light up as execution progresses:
+
+| Colour | Meaning |
+|---|---|
+| Blue pulse | Phase is active (LLM call in progress) |
+| Green | Phase completed |
+| Diamond / teal | Approval gate passed |
+| Red | Phase errored |
+
+The **Transcript** panel below the canvas shows token-by-token output as each node produces it.
+
+### Queue position
+
+If Ollama is busy, a **Queued** banner appears in the transcript showing your position and estimated wait.
+
+### Routing rules
+
+If a routing rule matched on a phase, a `⤳ Rule match: from → to` line appears and the target phase briefly flashes cyan. Static edge conditions such as `approved` are shown directly on the graph.
+
+### Context trimming
+
+If older messages were dropped to fit within the model's context window, a yellow warning appears in the transcript.
+
+---
+
+## Thread History
+
+Every run is attached to a **thread** — a persistent conversation context. The left panel's
+**Threads** tab lists all threads, most recent first.
+
+Click a thread to:
+- Restore the graph view with node completion states from the last run.
+- Show the run output and error details in the transcript.
+- See the full run ID and model in the transcript header (click either to copy to clipboard).
+
+Thread IDs are shown in full and are click-to-copy for debugging and support.
+
+### Run status indicators
+
+| Indicator | Meaning |
+|---|---|
+| `✓ Run complete` | The run finished successfully. |
+| `Waiting for approval` | The graph is paused at a human approval gate and is waiting for Approve or Reject. |
+| `✕ Run rejected` | A human rejected a gate; downstream execution was cancelled. |
+| `✕ Run failed` + error detail | The run errored. The exact exception is shown in red. |
+| `⚠ Run appears stuck` | Status is still "running" but started more than 2 minutes ago — the server or browser disconnected mid-run. |
+
+Stuck runs are automatically closed with `status=error` on the next server restart if they are older than 1 hour. You can also open the thread and click **Cancel run** to mark a stale running run as `cancelled` immediately.
+
+If the run is complete but the header still shows an active Ollama slot, click **Reset** in the queue badge. This resets only the in-memory queue counter; it does not change persisted runs or checkpoints.
+
+### Approval gates
+
+Human approval phases are real LangGraph interrupts, not visual markers. When a run reaches a gate, Graph Studio shows an approval card in the transcript and keeps downstream phases pending.
+
+Available actions:
+
+| Action | Result |
+|---|---|
+| Approve and resume | Calls `POST /threads/{thread_id}/gates/{gate_id}/approve`, then streams the resumed run from the same checkpoint. |
+| Reject and stop | Calls `POST /threads/{thread_id}/gates/{gate_id}/reject`, marks the gate rejected, and prevents downstream work. |
+
+The legacy trace fallback is simulated only. It can show where a gate would occur, but it cannot approve or resume because no durable checkpoint exists for that path.
+
+---
+
+## Phase Configuration
+
+Click any workflow phase in the graph to open the **Phase Config** tab on the right panel.
+
+The top of the panel shows contract defaults generated from `dist/nunneri-runtime/`, including phase descriptions, expected outputs, classification options, approval questions, required approval context, and outgoing routes. The editable fields below are project-specific overrides.
+
+| Field | Purpose |
+|---|---|
+| Instructions Override | Override the contract/default instructions for this phase only. |
+| Classification Labels | Comma-separated labels; the LLM is instructed to classify output into one of these. |
+| Routing Overrides | Conditions that determine which node the graph routes to after this phase exits. |
+| Notes | Free-text notes for your team. |
+
+### Routing rules
+
+Each rule has a condition, a match value, and a target node ID:
+
+| Condition | Matches when |
+|---|---|
+| `contains` | Output contains the value (case-insensitive). |
+| `starts_with` | Output starts with the value. |
+| `ends_with` | Output ends with the value. |
+| `regex` | Output matches the regular expression. |
+| `always` | Always routes to this target (use as a default/fallback). |
+
+Rules are evaluated in priority order (lowest number first). The first match wins.
+Click **Save** to persist. Phase configs are stored in PostgreSQL and applied to every run of that agent.
+
+---
+
+## Stopping a Run
+
+Click **■ Stop** to abort the current browser stream. If Graph Studio has received the run id, it also calls `POST /runs/{run_id}/cancel` so the database no longer shows the run as active.
+
+For an already-stuck historical run:
+
+1. Open the thread.
+2. Click **Cancel run**.
+3. Click **Rerun as new thread** to retry the same agent, model, project path, and message without reusing the stuck checkpoint.
+
+Runs that do not complete within **10 minutes** are aborted automatically and a timeout message appears in the transcript.
+
+---
+
+## State Inspector
+
+The right panel **State** tab shows:
+
+| Field | Value |
+|---|---|
+| Thread | Current thread UUID (click to copy) |
+| Phase | Last node that ran |
+| Output | Tail of the last node's output |
+| Checkpoints | Phase breadcrumb trail for the current run |
+
+---
+
+## Errors and Debugging
+
+If a run errors, the transcript shows a red block with the exception class and message, for example:
+
+```
+✕ Error
+TimeoutError: Ollama queue timeout after 300s (0 still waiting, 2 active)
+```
+
+The same detail is stored on the run record in PostgreSQL and is shown when you reload the thread
+from history. To query it directly:
+
+```sql
+SELECT id, agent, status, error_detail, started_at
+FROM nunneri_runs
+WHERE status = 'error'
+ORDER BY started_at DESC
+LIMIT 10;
+```
+
+Common errors:
+
+| Error | Likely cause |
+|---|---|
+| `TimeoutError: Ollama queue timeout` | Too many concurrent runs; increase `OLLAMA_MAX_CONCURRENT` or wait. |
+| `ConnectionRefusedError` connecting to Ollama | Ollama is not running. Start it with `ollama serve`. |
+| `model not found` from Ollama | The selected model has not been pulled. Run `ollama pull <model>`. |
+| `asyncio.CancelledError` | The browser disconnected mid-run. The run will be marked error on the next server start. |
+''')
+
 
 def create_examples() -> None:
     write("examples/consumer-repo/README.md", f"""# Consumer Repository Example
@@ -4495,6 +5253,114 @@ python3 scripts/check_consumer_install.py
 
 The check stages a temporary consumer repository, runs the installer in dry-run, context-only, full provider, LangGraph, and existing-file scenarios, and verifies the expected files.
 """)
+    write("examples/runtime-contract-consumer/README.md", r'''# Runtime Contract Consumer Example
+
+This example shows how a consuming tool can read the neutral Nunneri Runtime Contract without depending on LangGraph, CrewAI, AutoGen, Semantic Kernel, or any model-provider SDK.
+
+## What This Example Proves
+
+- `dist/nunneri-runtime/contract.json` is usable as the runtime export index.
+- Workflow contracts can be loaded directly from `dist/nunneri-runtime/workflows/`.
+- Human approval nodes are visible through the neutral `human_approval` node type.
+- A framework adapter can map the neutral workflow into a CrewAI-style flow shape without reading provider-specific files.
+
+## Run
+
+```bash
+python3 examples/runtime-contract-consumer/consume_runtime_contract.py
+```
+
+The script prints JSON with:
+
+- the neutral contract version
+- the selected workflow name
+- total node and edge counts
+- approval gate IDs
+- a dependency-free CrewAI-style flow projection
+
+## Expected Signals
+
+For `triage-nine-phase`, the output should report:
+
+```text
+workflow_name: triage-nine-phase
+node_count: 9
+approval_gates: gate_1, gate_2
+crewai_flow.human_in_loop: gate_1, gate_2
+```
+
+## Automated Verification
+
+Run from the repository root:
+
+```bash
+python3 scripts/check_runtime_examples.py
+```
+
+The check runs this example and verifies that it preserves the neutral contract's human approval semantics.
+''')
+    write("examples/runtime-contract-consumer/consume_runtime_contract.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def crewai_flow_from_workflow(workflow: dict) -> dict:
+    approval_nodes = [node["id"] for node in workflow["nodes"] if node.get("type") == "human_approval"]
+    return {
+        "name": workflow["name"],
+        "description": workflow["description"],
+        "steps": [
+            {
+                "id": node["id"],
+                "label": node.get("label", node["id"]),
+                "kind": "human_input" if node.get("type") == "human_approval" else "task",
+                "approval": node.get("approval"),
+            }
+            for node in workflow["nodes"]
+        ],
+        "edges": workflow["edges"],
+        "human_in_loop": approval_nodes,
+    }
+
+
+def summarize_contract(repo_root: Path, workflow_name: str) -> dict:
+    contract_root = repo_root / "dist/nunneri-runtime"
+    index = load_json(contract_root / "contract.json")
+    workflow = load_json(contract_root / "workflows" / f"{workflow_name}.json")
+    approval_gates = [node["id"] for node in workflow["nodes"] if node.get("type") == "human_approval"]
+    return {
+        "contract_version": index["contract_version"],
+        "workflow_name": workflow["name"],
+        "workflow_source": workflow["source"],
+        "node_count": len(workflow["nodes"]),
+        "edge_count": len(workflow["edges"]),
+        "approval_gates": approval_gates,
+        "runtime_hints": workflow.get("runtime_hints", {}),
+        "crewai_flow": crewai_flow_from_workflow(workflow),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Read a Nunneri neutral runtime contract and project it into a CrewAI-style flow.")
+    parser.add_argument("--repo-root", default=Path(__file__).resolve().parents[2], type=Path)
+    parser.add_argument("--workflow", default="triage-nine-phase")
+    args = parser.parse_args()
+    payload = summarize_contract(args.repo_root.resolve(), args.workflow)
+    print(json.dumps(payload, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
     write("examples/consumer-repo/expected/README.md", """# Expected Install Artifacts
 
 These files document the key artifacts a consumer repository should see after installing Nunneri AI Assets.
@@ -4748,6 +5614,12 @@ jobs:
         run: python3 scripts/check_runtime_contract.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
+      - name: Check runtime examples
+        run: python3 scripts/check_runtime_examples.py
+      - name: Check runtime contract demo
+        run: python3 scripts/check_runtime_contract_demo.py
+      - name: Check Graph Studio contract wiring
+        run: python3 scripts/check_graph_studio_contract.py
       - name: Check human-blocking gates
         run: python3 scripts/check_human_gates.py
       - name: Check consumer install

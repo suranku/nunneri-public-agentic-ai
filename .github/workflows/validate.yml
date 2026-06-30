@@ -31,6 +31,12 @@ jobs:
         run: python3 scripts/check_runtime_contract.py
       - name: Check LangGraph exports
         run: python3 scripts/check_langgraph_exports.py
+      - name: Check runtime examples
+        run: python3 scripts/check_runtime_examples.py
+      - name: Check runtime contract demo
+        run: python3 scripts/check_runtime_contract_demo.py
+      - name: Check Graph Studio contract wiring
+        run: python3 scripts/check_graph_studio_contract.py
       - name: Check human-blocking gates
         run: python3 scripts/check_human_gates.py
       - name: Check consumer install

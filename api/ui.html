@@ -144,7 +144,7 @@ body.resizing-y{user-select:none;cursor:row-resize}
   letter-spacing:.3px;transition:all .15s}
 .right-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 #right-content{flex:1;overflow-y:auto;padding:12px 14px}
-/* Node config panel */
+/* Phase config panel */
 #nc-panel{flex:1;overflow-y:auto;padding:12px 14px;display:none;flex-direction:column;gap:0}
 #nc-panel.open{display:flex}
 .nc-node-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
@@ -156,6 +156,14 @@ body.resizing-y{user-select:none;cursor:row-resize}
 .nc-section{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);
   text-transform:uppercase;margin:10px 0 5px}
 .nc-section:first-of-type{margin-top:0}
+.nc-contract{background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  padding:8px 10px;margin-bottom:8px;color:var(--text);font-size:11px;line-height:1.45}
+.nc-contract .muted{color:var(--muted)}
+.nc-contract ul{margin:5px 0 0 16px;color:var(--muted)}
+.nc-contract li{margin:2px 0}
+.nc-route{display:inline-flex;align-items:center;gap:5px;margin:3px 4px 0 0;
+  padding:2px 6px;border:1px solid var(--border);border-radius:999px;
+  background:var(--surface3);color:var(--muted);font-size:10px}
 .nc-textarea{width:100%;box-sizing:border-box;background:var(--surface2);
   border:1px solid var(--border);border-radius:6px;color:var(--text);
   font-family:var(--font);font-size:12px;padding:8px 10px;resize:vertical;
@@ -254,6 +262,8 @@ body.resizing-y{user-select:none;cursor:row-resize}
 .node-rejected .node-text,.node-cancelled .node-text{fill:var(--red)}
 .edge-path{fill:none;stroke:var(--border);stroke-width:1.5;marker-end:url(#arrow)}
 .edge-path.done{stroke:#22c55e44;stroke-width:2}
+.edge-label{fill:var(--muted);font-family:var(--font);font-size:10px;
+  pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 .node-active{animation:pulse 1.4s ease-in-out infinite}
 
@@ -324,12 +334,12 @@ body.resizing-y{user-select:none;cursor:row-resize}
   <!-- Left panel -->
   <div id="left">
     <div id="left-tabs">
-      <button class="lt-btn active" onclick="switchLt('agents')">Agents</button>
+      <button class="lt-btn active" onclick="switchLt('agents')">Assets</button>
       <button class="lt-btn" onclick="switchLt('threads')">Threads</button>
     </div>
     <div id="left-content">
       <div id="lp-agents">
-        <input id="agent-search" placeholder="Search agents &amp; commands&#8230;"
+        <input id="agent-search" placeholder="Search assets, agents &amp; commands&#8230;"
                oninput="filterItems(this.value)"/>
         <span id="agent-count"></span>
         <div id="agent-list"></div>
@@ -356,7 +366,7 @@ body.resizing-y{user-select:none;cursor:row-resize}
       <div id="no-graph-msg">
         <div class="ng-icon">&#11041;</div>
         <div class="ng-text">No graph selected</div>
-        <div class="ng-sub">Select an agent or command from the left panel to visualize its execution graph</div>
+        <div class="ng-sub">Select an asset from the left panel to visualize its workflow phases</div>
       </div>
     </div>
     <div id="transcript-wrap">
@@ -365,12 +375,12 @@ body.resizing-y{user-select:none;cursor:row-resize}
         Output
         <button onclick="clearTranscript()">Clear</button>
       </div>
-      <div id="transcript"><span class="si-empty">Run an agent to see output&#8230;</span></div>
+      <div id="transcript"><span class="si-empty">Run an asset to see output&#8230;</span></div>
     </div>
   </div>
   <div id="right-resize" class="resize-handle vertical" title="Drag to resize inspector"></div>
 
-  <!-- Right panel: State Inspector + Node Config -->
+  <!-- Right panel: State Inspector + Phase Config -->
   <div id="right">
     <div id="right-header">
       <div id="right-header-top">
@@ -379,7 +389,7 @@ body.resizing-y{user-select:none;cursor:row-resize}
       </div>
       <div class="right-tabs">
         <div class="right-tab active" id="tab-inspector" onclick="switchRightTab('inspector')">State</div>
-        <div class="right-tab" id="tab-nodeconfig" onclick="switchRightTab('nodeconfig')">Node Config</div>
+        <div class="right-tab" id="tab-nodeconfig" onclick="switchRightTab('nodeconfig')">Phase Config</div>
       </div>
     </div>
     <div id="right-content">
@@ -392,19 +402,21 @@ body.resizing-y{user-select:none;cursor:row-resize}
       <div class="si-label">Thread ID</div>
       <div class="si-value" id="si-thread"><span class="si-empty">No active thread</span></div>
     </div>
-    <!-- Node Config panel -->
+    <!-- Phase Config panel -->
     <div id="nc-panel">
       <div class="nc-node-header">
         <span class="nc-node-id" id="nc-node-id">—</span>
         <span class="nc-type-badge work" id="nc-type-badge">work</span>
       </div>
-      <div class="nc-section">Instructions</div>
+      <div class="nc-section">Contract Default</div>
+      <div class="nc-contract" id="nc-contract"><span class="muted">Select a workflow phase.</span></div>
+      <div class="nc-section">Instructions Override</div>
       <textarea class="nc-textarea" id="nc-prompt"
-        placeholder="What should this node do? Leave blank to use the agent's global system prompt."></textarea>
-      <div class="nc-section">Classification Labels</div>
+        placeholder="Override what this workflow phase should do. Leave blank to use the contract default."></textarea>
+      <div class="nc-section">Classification Override</div>
       <input class="nc-input" id="nc-labels"
         placeholder="bug, feature, question, other  (comma-separated)"/>
-      <div class="nc-section">Routing Rules
+      <div class="nc-section">Routing Overrides
         <span style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;font-size:10px">
           — if output matches condition → route to node</span>
       </div>
@@ -450,6 +462,7 @@ let selModel = 'mistral';
 let selThreadId = null;
 let liveNodes = [];        // node defs from most recent graph_start/selection
 let liveEdges = [];        // synthesized edges
+let graphDefinition = null; // backend runtime-contract projection for selected asset
 let nodeState = {};        // id -> pending|active|done|approved|waiting_approval|rejected|cancelled
 let nodePos = {};          // id -> {x, y}  current canvas positions (mutable by drag)
 let abortCtrl = null;
@@ -699,13 +712,37 @@ async function selectAgent(name, category, isCmd) {
   // Refresh list to update active highlight without losing search state
   filterItems(document.getElementById('agent-search').value);
   document.getElementById('run-btn').disabled = false;
-  const nodes = getNodeDefs(category, isCmd);
-  const edges = linearEdges(nodes);
-  liveNodes = nodes; liveEdges = edges;
+  const definition = await loadGraphDefinition(name, category, isCmd);
+  liveNodes = definition.nodes; liveEdges = definition.edges;
   nodeState = {};
   nodePos = {};  // reset positions for new agent
-  nodes.forEach(n => { nodeState[n.id] = 'pending'; });
-  renderDAG(nodes, edges);
+  liveNodes.forEach(n => { nodeState[n.id] = 'pending'; });
+  renderDAG(liveNodes, liveEdges);
+}
+
+async function loadGraphDefinition(name, category, isCmd) {
+  try {
+    const r = await fetch('/agents/' + encodeURIComponent(name) + '/graph-definition');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    graphDefinition = {
+      ...d,
+      nodes: d.nodes && d.nodes.length ? d.nodes : getNodeDefs(category, isCmd),
+      edges: d.edges || [],
+    };
+    if (!graphDefinition.edges.length) graphDefinition.edges = linearEdges(graphDefinition.nodes);
+    return graphDefinition;
+  } catch (e) {
+    const nodes = getNodeDefs(category, isCmd);
+    graphDefinition = {
+      asset: {name, kind: isCmd ? 'command' : 'agent', category},
+      runtime: 'fallback',
+      nodes,
+      edges: linearEdges(nodes),
+    };
+    appendTranscript('error', 'Graph definition fallback: ' + e.message);
+    return graphDefinition;
+  }
 }
 
 function getNodeDefs(category, isCmd) {
@@ -805,8 +842,11 @@ async function loadRunForThread(thread) {
 
     const isCmd = lastRun.kind === 'command';
     const category = selAgent ? selAgent.category : '';
-    const nodes = getNodeDefs(category, isCmd);
-    const edges = linearEdges(nodes);
+    const definition = selAgent
+      ? await loadGraphDefinition(selAgent.name, category, isCmd)
+      : {nodes: getNodeDefs(category, isCmd), edges: linearEdges(getNodeDefs(category, isCmd))};
+    const nodes = definition.nodes;
+    const edges = definition.edges;
     liveNodes = nodes; liveEdges = edges;
     nodeState = {}; nodePos = {};
     nodes.forEach(n => { nodeState[n.id] = 'pending'; });
@@ -1040,6 +1080,22 @@ function drawEdge(container, e) {
     container.appendChild(p);
   }
   p.setAttribute('d',d);
+  const labelId = 'edge-label-' + e.from + '-' + e.to;
+  let label = document.getElementById(labelId);
+  if (e.condition) {
+    if (!label) {
+      label = svgEl('text');
+      label.setAttribute('class','edge-label');
+      label.id = labelId;
+      container.appendChild(label);
+    }
+    label.setAttribute('x', (x1+x2)/2);
+    label.setAttribute('y', cy-5);
+    label.setAttribute('text-anchor','middle');
+    label.textContent = e.condition;
+  } else if (label) {
+    label.remove();
+  }
 }
 
 function redrawEdgesFor(nodeId) {
@@ -1144,7 +1200,7 @@ function setEdgeDone(fromId, toId) {
 function focusNodeTranscript(id) {
   const sec = document.getElementById('ts-'+id);
   if (sec) sec.scrollIntoView({behavior:'smooth',block:'center'});
-  // Also open node config for this node
+  // Also open phase config for this workflow phase
   openNodeConfig(id);
 }
 
@@ -1158,10 +1214,43 @@ function switchRightTab(tab) {
   ncPanel.classList.toggle('open', tab==='nodeconfig');
 }
 
-// ── Node Config panel ──────────────────────────────────────────────────────
+// ── Phase Config panel ─────────────────────────────────────────────────────
 
 let _ncNodeId = null;   // currently loaded node_id
 let _ncRules = [];      // array of {condition, value, target_node}
+
+function renderContractDefaults(node) {
+  const routes = liveEdges.filter(e => e.from === node.id);
+  const approval = node.approval || {};
+  const expected = node.expected_outputs || [];
+  const classes = node.classification_options || [];
+  const parts = [];
+  parts.push('<div><strong>Phase ' + esc(node.phase || '') + '</strong>' +
+    (node.description ? ' <span class="muted">· ' + esc(node.description) + '</span>' : '') + '</div>');
+  if (node.instructions) parts.push('<div class="muted">' + esc(node.instructions) + '</div>');
+  if (expected.length) {
+    parts.push('<div><span class="muted">Expected outputs</span><ul>' +
+      expected.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>');
+  }
+  if (classes.length) {
+    parts.push('<div><span class="muted">Classification options</span><ul>' +
+      classes.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>');
+  }
+  if (approval.required) {
+    parts.push('<div><span class="muted">Approval question</span><br/>' +
+      esc(approval.question || 'Approval required') + '</div>');
+    if (approval.required_context && approval.required_context.length) {
+      parts.push('<div><span class="muted">Required context</span><ul>' +
+        approval.required_context.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul></div>');
+    }
+  }
+  if (routes.length) {
+    parts.push('<div><span class="muted">Outgoing routes</span><br/>' +
+      routes.map(r => '<span class="nc-route">' + esc(r.condition || 'always') + ' -> ' + esc(r.to) + '</span>').join('') +
+      '</div>');
+  }
+  document.getElementById('nc-contract').innerHTML = parts.join('');
+}
 
 async function openNodeConfig(nodeId) {
   const node = liveNodes.find(n => n.id === nodeId);
@@ -1175,8 +1264,9 @@ async function openNodeConfig(nodeId) {
   badge.className = 'nc-type-badge ' + (isGate ? 'gate' : 'work');
 
   // Clear form
-  document.getElementById('nc-prompt').value = '';
-  document.getElementById('nc-labels').value = '';
+  renderContractDefaults(node);
+  document.getElementById('nc-prompt').value = node.instructions || node.prompt || '';
+  document.getElementById('nc-labels').value = (node.classification_options || []).join(', ');
   document.getElementById('nc-notes').value = '';
   _ncRules = [];
   renderRules();
@@ -1289,12 +1379,13 @@ async function handleRun() {
   }, 10 * 60 * 1000);
 
   // Reset visuals
-  const nodes = getNodeDefs(selAgent.category, selAgent.isCmd);
-  const edges = linearEdges(nodes);
-  liveNodes = nodes; liveEdges = edges;
+  const definition = graphDefinition && graphDefinition.asset && graphDefinition.asset.name === selAgent.name
+    ? graphDefinition
+    : await loadGraphDefinition(selAgent.name, selAgent.category, selAgent.isCmd);
+  liveNodes = definition.nodes; liveEdges = definition.edges;
   nodeState = {}; nodePos = {};
-  nodes.forEach(n => { nodeState[n.id]='pending'; });
-  renderDAG(nodes, edges);
+  liveNodes.forEach(n => { nodeState[n.id]='pending'; });
+  renderDAG(liveNodes, liveEdges);
   clearTranscript();
   checkpoints = [];
   renderCheckpoints([]);
@@ -1613,7 +1704,7 @@ function scrollTranscript() {
 }
 function clearTranscript() {
   document.getElementById('transcript').innerHTML =
-    '<span class="si-empty">Run an agent to see output…</span>';
+    '<span class="si-empty">Run an asset to see output…</span>';
 }
 
 // ── Checkpoints ────────────────────────────────────────────────────────────

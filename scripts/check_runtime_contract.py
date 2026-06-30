@@ -120,6 +120,18 @@ def main() -> int:
             gate = by_id.get(gate_id, {})
             require(gate.get("type") == "human_approval", f"{gate_id} must be human_approval", failures)
             require(gate.get("approval", {}).get("on_reject") == "cancel", f"{gate_id} rejection policy must be cancel", failures)
+            require(bool(gate.get("approval", {}).get("question")), f"{gate_id} must include an approval question", failures)
+            require(
+                bool(gate.get("approval", {}).get("required_context")),
+                f"{gate_id} must include required approval context",
+                failures,
+            )
+        classification = by_id.get("classification", {})
+        require(
+            bool(classification.get("classification_options")),
+            "classification node must include classification_options",
+            failures,
+        )
 
     for path in RUNTIME_SMOKE_PATHS:
         full = ROOT / path

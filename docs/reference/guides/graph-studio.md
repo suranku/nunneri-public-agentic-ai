@@ -1,6 +1,6 @@
 # Graph Studio
 
-Graph Studio is the browser-based UI for running AI agents, inspecting execution state in real time,
+Graph Studio is the browser-based UI for running Nunneri assets, inspecting execution state in real time,
 and reviewing run history. It is served by the Nunneri API server at `/ui`.
 
 ## Prerequisites
@@ -31,39 +31,41 @@ Graph Studio panes are resizable:
 | Area | Drag target |
 |---|---|
 | Left navigation | Border between the navigation pane and graph canvas |
-| Right inspector / node config | Border between the graph canvas and inspector pane |
+| Right inspector / phase config | Border between the graph canvas and inspector pane |
 | Bottom output | Border above the output transcript |
 
 Pane sizes are saved in browser local storage so the workspace reopens with the same proportions.
 
 ---
 
-## Selecting an Agent or Command
+## Selecting an Asset
 
 The left panel lists all available agents and commands loaded from `dist/langgraph/manifests/`.
 
 - **Agents** run multi-phase agentic workflows (intake → analysis → gate → output).
 - **Commands** run targeted single-purpose workflows (dispatch → execute → summarize).
+- **Workflow phases** are the user-facing steps shown on the graph canvas.
+- **Nodes** are the technical IDs used by the JSON contract, API, and runtime adapters.
 
-Click any item to select it. The graph canvas updates to show the node layout for that agent.
+Click any item to select it. The graph canvas updates from the runtime contract projection exposed by `/agents/{name}/graph-definition`, including phase metadata, edge conditions, and approval-gate context.
 
 ---
 
-## Running an Agent
+## Running an Asset
 
 1. Select an agent or command from the left panel.
 2. (Optional) Enter a local path or git URL in the **Project Path** field. The server will inject the
    repository structure and key files as context for the LLM.
 3. Type your message in the input field and press **Enter** or click **▶ Run**.
 
-The graph canvas activates and nodes light up as execution progresses:
+The graph canvas activates and workflow phases light up as execution progresses:
 
 | Colour | Meaning |
 |---|---|
-| Blue pulse | Node is active (LLM call in progress) |
-| Green | Node completed |
-| Diamond / teal | Gate node passed |
-| Red | Node errored |
+| Blue pulse | Phase is active (LLM call in progress) |
+| Green | Phase completed |
+| Diamond / teal | Approval gate passed |
+| Red | Phase errored |
 
 The **Transcript** panel below the canvas shows token-by-token output as each node produces it.
 
@@ -73,7 +75,7 @@ If Ollama is busy, a **Queued** banner appears in the transcript showing your po
 
 ### Routing rules
 
-If a routing rule matched on a node, a `⤳ Rule match: from → to` line appears and the target node briefly flashes cyan.
+If a routing rule matched on a phase, a `⤳ Rule match: from → to` line appears and the target phase briefly flashes cyan. Static edge conditions such as `approved` are shown directly on the graph.
 
 ### Context trimming
 
@@ -109,7 +111,7 @@ If the run is complete but the header still shows an active Ollama slot, click *
 
 ### Approval gates
 
-Human approval nodes are real LangGraph interrupts, not visual markers. When a run reaches a gate, Graph Studio shows an approval card in the transcript and keeps downstream nodes pending.
+Human approval phases are real LangGraph interrupts, not visual markers. When a run reaches a gate, Graph Studio shows an approval card in the transcript and keeps downstream phases pending.
 
 Available actions:
 
@@ -122,16 +124,18 @@ The legacy trace fallback is simulated only. It can show where a gate would occu
 
 ---
 
-## Node Configuration
+## Phase Configuration
 
-Click any node in the graph to open the **Node Config** tab on the right panel.
+Click any workflow phase in the graph to open the **Phase Config** tab on the right panel.
+
+The top of the panel shows contract defaults generated from `dist/nunneri-runtime/`, including phase descriptions, expected outputs, classification options, approval questions, required approval context, and outgoing routes. The editable fields below are project-specific overrides.
 
 | Field | Purpose |
 |---|---|
-| System Prompt | Override the global agent system prompt for this node only. |
+| Instructions Override | Override the contract/default instructions for this phase only. |
 | Classification Labels | Comma-separated labels; the LLM is instructed to classify output into one of these. |
-| Routing Rules | Conditions that determine which node the graph routes to after this node exits. |
-| Notes | Free-text notes for your team (not sent to the LLM). |
+| Routing Overrides | Conditions that determine which node the graph routes to after this phase exits. |
+| Notes | Free-text notes for your team. |
 
 ### Routing rules
 
@@ -146,7 +150,7 @@ Each rule has a condition, a match value, and a target node ID:
 | `always` | Always routes to this target (use as a default/fallback). |
 
 Rules are evaluated in priority order (lowest number first). The first match wins.
-Click **Save** to persist. Node configs are stored in PostgreSQL and applied to every run of that agent.
+Click **Save** to persist. Phase configs are stored in PostgreSQL and applied to every run of that agent.
 
 ---
 

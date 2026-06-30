@@ -58,6 +58,24 @@
           "label": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
+          "instructions": {
+            "type": "string"
+          },
+          "expected_outputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "classification_options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "type": {
             "enum": ["agent", "command", "workflow", "work", "router", "human_approval", "terminal"]
           },
@@ -82,6 +100,27 @@
               },
               "on_reject": {
                 "enum": ["cancel"]
+              },
+              "question": {
+                "type": "string"
+              },
+              "required_context": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "allowed_before_approval": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "blocked_before_approval": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }

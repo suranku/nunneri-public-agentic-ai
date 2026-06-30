@@ -13,35 +13,82 @@
       "label": "Intake",
       "phase": 1,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Capture the reported issue, requested outcome, environment, and constraints.",
+      "instructions": "Normalize the request into a clear problem statement and list missing information without starting implementation.",
+      "expected_outputs": [
+        "problem_statement",
+        "scope",
+        "missing_context"
+      ]
     },
     {
       "id": "context_load",
       "label": "Context Load",
       "phase": 2,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Load repository context, previous decisions, relevant docs, and current workspace state.",
+      "instructions": "Read the smallest useful set of files and summarize repository conventions before choosing an approach.",
+      "expected_outputs": [
+        "relevant_files",
+        "repo_conventions",
+        "current_state"
+      ]
     },
     {
       "id": "classification",
       "label": "Classification",
       "phase": 3,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Classify the request so the workflow can dispatch the right agent, command, or runtime path.",
+      "instructions": "Identify the primary work category, risk level, affected runtime/provider, and whether human approval is needed.",
+      "classification_options": [
+        "code",
+        "configuration",
+        "data",
+        "schema",
+        "infrastructure",
+        "dependency",
+        "framework_or_runtime",
+        "documentation_or_asset_metadata",
+        "unknown"
+      ],
+      "expected_outputs": [
+        "category",
+        "risk",
+        "runtime_or_provider",
+        "approval_required"
+      ]
     },
     {
       "id": "evidence_collection",
       "label": "Evidence Collection",
       "phase": 4,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Gather concrete evidence before proposing root cause or changes.",
+      "instructions": "Use local validation, logs, generated artifacts, and source references to support the diagnosis.",
+      "expected_outputs": [
+        "evidence",
+        "commands_run",
+        "observed_failures"
+      ]
     },
     {
       "id": "root_cause_analysis",
       "label": "Root Cause Analysis",
       "phase": 5,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Explain the root cause and produce a focused implementation plan.",
+      "instructions": "Tie each proposed change to evidence and state what will not be changed.",
+      "expected_outputs": [
+        "root_cause",
+        "fix_plan",
+        "non_goals"
+      ]
     },
     {
       "id": "gate_1",
@@ -49,13 +96,35 @@
       "phase": 6,
       "type": "human_approval",
       "prompt": "",
+      "description": "Human review checkpoint before implementation changes begin.",
+      "instructions": "Pause the runtime and wait for an explicit approve or reject decision.",
+      "expected_outputs": [
+        "approval_decision",
+        "reviewer_reason"
+      ],
       "approval": {
         "required": true,
         "actions": [
           "approve",
           "reject"
         ],
-        "on_reject": "cancel"
+        "on_reject": "cancel",
+        "question": "Approve the root cause analysis and fix plan before implementation?",
+        "required_context": [
+          "root_cause",
+          "fix_plan",
+          "evidence"
+        ],
+        "allowed_before_approval": [
+          "read_context",
+          "collect_evidence",
+          "draft_plan"
+        ],
+        "blocked_before_approval": [
+          "edit_files",
+          "run_release",
+          "publish"
+        ]
       }
     },
     {
@@ -63,14 +132,28 @@
       "label": "Test-First Fix",
       "phase": 7,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Create or update focused validation before applying the implementation change.",
+      "instructions": "Add the smallest meaningful test or check, then make the implementation pass it.",
+      "expected_outputs": [
+        "test_or_check",
+        "implementation_change",
+        "files_changed"
+      ]
     },
     {
       "id": "validation",
       "label": "Validation",
       "phase": 8,
       "type": "work",
-      "prompt": ""
+      "prompt": "",
+      "description": "Run the required checks and summarize remaining risk.",
+      "instructions": "Execute repository validation commands and explain any skipped checks with reasons.",
+      "expected_outputs": [
+        "validation_commands",
+        "results",
+        "residual_risk"
+      ]
     },
     {
       "id": "gate_2",
@@ -78,13 +161,36 @@
       "phase": 9,
       "type": "human_approval",
       "prompt": "",
+      "description": "Human review checkpoint before release-impact actions.",
+      "instructions": "Pause the runtime before commit, push, pull request, tagging, or publish actions.",
+      "expected_outputs": [
+        "approval_decision",
+        "release_impact_summary"
+      ],
       "approval": {
         "required": true,
         "actions": [
           "approve",
           "reject"
         ],
-        "on_reject": "cancel"
+        "on_reject": "cancel",
+        "question": "Approve the validation summary and release-impact actions?",
+        "required_context": [
+          "validation_results",
+          "files_changed",
+          "release_impact"
+        ],
+        "allowed_before_approval": [
+          "summarize_validation",
+          "draft_release_notes"
+        ],
+        "blocked_before_approval": [
+          "commit",
+          "push",
+          "pull_request",
+          "release_tag",
+          "publish"
+        ]
       }
     }
   ],

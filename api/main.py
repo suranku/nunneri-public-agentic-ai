@@ -97,6 +97,10 @@ GENERIC_COMMAND_NODES = [
     {"id": "summarize", "label": "Summarize", "phase": 3, "type": "work"},
 ]
 
+
+def linear_edges(nodes: list[dict]) -> list[dict]:
+    return [{"from": nodes[i]["id"], "to": nodes[i + 1]["id"]} for i in range(len(nodes) - 1)]
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     import graphs.base as _base
@@ -134,15 +138,46 @@ def command_system_prompt(manifest: dict) -> str:
     return manifest.get("entrypoint", {}).get("body", "")
 
 
-def load_graph_nodes(manifest: dict, is_command: bool = False) -> list[dict]:
-    """Return the LangGraph node list appropriate for this agent/command."""
+def load_graph_definition(manifest: dict, is_command: bool = False) -> dict:
+    """Return the graph contract projection appropriate for this agent/command."""
     category = manifest.get("category", "")
     if category == "triage" and not is_command:
         graph_path = GRAPHS_DIR / "triage-nine-phase.json"
         if graph_path.exists():
             graph = json.loads(graph_path.read_text(encoding="utf-8"))
-            return graph.get("nodes", GENERIC_AGENT_NODES)
-    return GENERIC_COMMAND_NODES if is_command else GENERIC_AGENT_NODES
+            nodes = graph.get("nodes", GENERIC_AGENT_NODES)
+            return {
+                "runtime": graph.get("runtime", "langgraph"),
+                "source": graph.get("source"),
+                "contract_source": graph.get("contract_source"),
+                "nodes": nodes,
+                "edges": graph.get("edges", linear_edges(nodes)),
+                "terminology": {
+                    "asset": "Command" if is_command else "Agent",
+                    "workflow": "Workflow",
+                    "node": "Workflow Phase",
+                    "runtime_adapter": "Runtime Adapter",
+                },
+            }
+    nodes = GENERIC_COMMAND_NODES if is_command else GENERIC_AGENT_NODES
+    return {
+        "runtime": "generic",
+        "source": manifest.get("source"),
+        "contract_source": manifest.get("contract_source"),
+        "nodes": nodes,
+        "edges": linear_edges(nodes),
+        "terminology": {
+            "asset": "Command" if is_command else "Agent",
+            "workflow": "Workflow",
+            "node": "Workflow Phase",
+            "runtime_adapter": "Runtime Adapter",
+        },
+    }
+
+
+def load_graph_nodes(manifest: dict, is_command: bool = False) -> list[dict]:
+    """Return the LangGraph node list appropriate for this agent/command."""
+    return load_graph_definition(manifest, is_command).get("nodes", [])
 
 
 def resolve_manifest(agent_name: str) -> tuple[dict, bool]:
@@ -1496,6 +1531,21 @@ def list_agents():
             {"name": v["name"], "description": v["description"], "category": v.get("category")}
             for v in load_all(AGENTS_DIR).values()
         ]
+    }
+
+
+@app.get("/agents/{agent_name}/graph-definition", tags=["agents"])
+def get_agent_graph_definition(agent_name: str):
+    manifest, is_command = resolve_manifest(agent_name)
+    definition = load_graph_definition(manifest, is_command)
+    return {
+        "asset": {
+            "name": agent_name,
+            "kind": "command" if is_command else "agent",
+            "category": manifest.get("category"),
+            "description": manifest.get("description"),
+        },
+        **definition,
     }
 
 
