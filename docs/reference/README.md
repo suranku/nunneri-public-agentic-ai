@@ -2,6 +2,29 @@
 
 Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agent frameworks.
 
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+## Licensing
+
+Nunneri is distributed as an AGPLv3 Community Edition. Commercial licensing is available for organizations that need closed-source, embedded, proprietary, SaaS, OEM, managed-service, indemnity, or enterprise procurement terms.
+
+- Community Edition: see `LICENSE` for AGPLv3 terms.
+- Commercial licensing: see `COMMERCIAL_LICENSE.md`.
+- Trademark and brand usage: see `TRADEMARKS.md`.
+- Maintainers and originators: see `MAINTAINERS.md`.
+
+Commercial contact: `core@nunneri.com` (`yamini.sk@suranku.com` is the temporary fallback until Nunneri domain email is active).
+
+## Architecture and Defensive Publication
+
+Nunneri publishes implementation-level architecture and defensive-publication material to establish clear public disclosure of the runtime-neutral control plane.
+
+- Architecture reference: `ARCHITECTURE.md`
+- Defensive publication: `DEFENSIVE_PUBLICATION.md`
+- Runtime contract details: `NUNNERI_RUNTIME_CONTRACT.md`
+
+The defensive publication documents the architecture for public-disclosure purposes. Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
+
 ## What's Included
 
 | Category | Source |
@@ -116,6 +139,8 @@ See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rul
 
 For a dependency-free consumer example that reads the neutral contract and projects `triage-nine-phase` into a CrewAI-style flow shape, see `examples/runtime-contract-consumer/`.
 
+For the first runnable CrewAI-facing contract harness, see `examples/crewai-runtime-runner/`. It executes the generated CrewAI flow manifest, supports approve/reject gate paths, and proves rejection cancels downstream work without requiring the CrewAI SDK.
+
 For an interactive walkthrough of provider context, neutral workflow phases, human gates, and runtime adapter projections, open `guides/runtime-contract-demo.html`.
 
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
@@ -166,4 +191,4 @@ See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
 
 ## Contributing
 
-Use GitHub Issues first. See `CONTRIBUTING.md`.
+Use GitHub Issues first. Contributions must acknowledge the Nunneri Contributor License Agreement so the project can keep AGPLv3 Community Edition and commercial licensing available. See `CONTRIBUTING.md` and `CONTRIBUTOR_LICENSE_AGREEMENT.md`.

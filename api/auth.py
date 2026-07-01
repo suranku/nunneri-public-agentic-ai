@@ -8,6 +8,7 @@ Configure via environment variables:
   OIDC_REDIRECT_URI   — defaults to http://localhost:8000/auth/callback
   SESSION_SECRET      — used to sign internal session JWTs (change in prod)
   SESSION_TTL_S       — session lifetime in seconds (default 86400 = 24h)
+  NUNNERI_API_TOKEN   — optional local bearer token auth when OIDC is unavailable
 """
 from __future__ import annotations
 
@@ -43,6 +44,7 @@ OIDC_REDIRECT_URI: str = os.environ.get(
 )
 SESSION_SECRET: str = os.environ.get("SESSION_SECRET", "change-me-in-production")
 SESSION_TTL_S: int = int(os.environ.get("SESSION_TTL_S", "86400"))
+NUNNERI_API_TOKEN: str = os.environ.get("NUNNERI_API_TOKEN", "")
 
 # Pending OAuth states: state_token -> {"nonce": str, "created_at": float}
 _pending_states: dict[str, dict] = {}
@@ -136,6 +138,13 @@ _ANON_USER = User(
     name="Anonymous Admin",
 )
 
+_TOKEN_USER = User(
+    id="11111111-1111-1111-1111-111111111111",
+    sub="local-api-token",
+    email="local-token@localhost",
+    name="Local Token Admin",
+)
+
 
 # ---------------------------------------------------------------------------
 # FastAPI dependencies
@@ -153,6 +162,9 @@ async def get_current_user(
 
     if not credentials:
         raise HTTPException(status_code=401, detail="Authorization header required")
+
+    if NUNNERI_API_TOKEN and hmac.compare_digest(credentials.credentials, NUNNERI_API_TOKEN):
+        return _TOKEN_USER
 
     claims = _decode_session(credentials.credentials)
     user = await _db.get_user(claims["sub"])

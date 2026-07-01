@@ -49,6 +49,13 @@ body:
       label: Acceptance criteria
     validations:
       required: true
+  - type: checkboxes
+    id: license_impact
+    attributes:
+      label: License, commercial, or trademark impact
+      options:
+        - label: This request may affect license, commercial-use, ownership, trademark, brand, or homepage language.
+        - label: This request does not affect license, commercial-use, ownership, trademark, brand, or homepage language.
   - type: dropdown
     id: priority
     attributes:

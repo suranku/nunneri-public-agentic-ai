@@ -21,7 +21,7 @@ def build_triage_graph():
     for n in nodes:
         ntype = n.get("type", "work")
         if ntype == "work":
-            builder.add_node(n["id"], make_ollama_node(n["id"], n["label"]))
+            builder.add_node(n["id"], make_ollama_node(n["id"], n["label"], n))
         else:
             builder.add_node(n["id"], make_gate_node(n["id"]))
     builder.add_node("__cancelled__", cancelled_node)

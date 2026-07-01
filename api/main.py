@@ -37,6 +37,7 @@ from pydantic import BaseModel, Field
 import auth as _auth
 import db as _db
 import ollama_queue
+import llm_providers
 from graphs import get_graph
 from models import Membership, NodeConfig, Org, Project, RoutingRule, Run, RunNode, Team, Thread, User
 
@@ -336,38 +337,18 @@ def _build_messages(system: str, history: list[Message], user_message: str) -> l
 
 
 async def _ollama_invoke(model: str, system: str, history: list[Message], message: str) -> str:
-    msgs = _build_messages(system, history, message)
-    async with ollama_queue.slot():
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            r = await client.post(
-                f"{OLLAMA_BASE}/api/chat",
-                json={"model": model, "messages": msgs, "stream": False},
-            )
-            if r.status_code != 200:
-                raise HTTPException(status_code=502, detail=f"Ollama error {r.status_code}: {r.text}")
-            return r.json()["message"]["content"]
+    try:
+        return await llm_providers.invoke_plain_messages(model, system, history, message)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Model provider error: {exc}") from exc
 
 
 async def _ollama_stream(model: str, system: str, history: list[Message], message: str):
-    msgs = _build_messages(system, history, message)
-    async with ollama_queue.slot():
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            async with client.stream(
-                "POST",
-                f"{OLLAMA_BASE}/api/chat",
-                json={"model": model, "messages": msgs, "stream": True},
-            ) as r:
-                if r.status_code != 200:
-                    raise HTTPException(status_code=502, detail=f"Ollama stream error {r.status_code}")
-                async for line in r.aiter_lines():
-                    if not line:
-                        continue
-                    chunk = json.loads(line)
-                    token = chunk.get("message", {}).get("content", "")
-                    if token:
-                        yield token
-                    if chunk.get("done"):
-                        break
+    try:
+        async for token in llm_providers.stream_plain_messages(model, system, history, message):
+            yield token
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Model provider stream error: {exc}") from exc
 
 
 # ---------------------------------------------------------------------------
@@ -583,7 +564,8 @@ async def _langgraph_sse(graph, graph_input, config: dict,
     ], "run_id": run.id})
 
     try:
-        async for event in graph.astream_events(graph_input, config, version="v2"):
+        event_stream = graph.astream_events(graph_input, config, version="v2")
+        async for event in event_stream:
             ev_type = event["event"]
             ev_name = event.get("name", "")
             ev_data = event.get("data", {})
@@ -631,7 +613,8 @@ async def _langgraph_sse(graph, graph_input, config: dict,
                             last = msgs[-1]
                             node_out = last.content if hasattr(last, "content") else str(last)
 
-                if node_out:
+                is_gate = ev_name.startswith("gate_")
+                if node_out and not is_gate:
                     words = node_out.split()
                     for i in range(0, len(words), 8):
                         chunk = " ".join(words[i:i + 8])
@@ -640,7 +623,6 @@ async def _langgraph_sse(graph, graph_input, config: dict,
                         output_parts.append(chunk)
                         await asyncio.sleep(0.03)
 
-                is_gate = ev_name.startswith("gate_")
                 phase_val = output.get("phase", ev_name) if isinstance(output, dict) else ev_name
                 decision = output.get("gate_decision", {}) if isinstance(output, dict) else {}
                 route_to = output.get("route_to", "") if isinstance(output, dict) else ""
@@ -1515,8 +1497,24 @@ async def health():
         "ollama": ollama_ok,
         "ollama_url": OLLAMA_BASE,
         "available_models": models,
+        "models": llm_providers.configured_models(models),
         "agents": len(list(AGENTS_DIR.glob("*.json"))),
         "commands": len(list(COMMANDS_DIR.glob("*.json"))),
+    }
+
+
+@app.get("/models", tags=["meta"])
+async def models_endpoint():
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.get(f"{OLLAMA_BASE}/api/tags")
+            ollama_models = [m["name"] for m in r.json().get("models", [])]
+    except Exception:
+        ollama_models = []
+    models = llm_providers.configured_models(ollama_models)
+    return {
+        "models": models,
+        "configured": [m for m in models if m.get("configured")],
     }
 
 

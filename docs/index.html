@@ -68,7 +68,9 @@
     </svg>
     <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:18px;color:#f4f7fa;letter-spacing:-.01em">nunneri</span>
   </a>
-  <a href="#open-source">Open Source</a>
+  <a href="#community-edition">Community Edition</a>
+  <a href="#licensing">Commercial Licensing</a>
+  <a href="#publication">Publication</a>
   <a href="#mission">Mission</a>
   <a href="#guides">Guides</a>
   <a href="#reference">Reference</a>
@@ -81,19 +83,19 @@
   <div class="hero-top">
     <div class="hero-text">
       <div class="badge-row">
-        <span class="badge cyan">Open Source</span>
+        <span class="badge cyan">AGPLv3 Community Edition</span>
         <span class="badge">Self-Hostable</span>
-        <span class="badge">No Vendor Lock-In</span>
+        <span class="badge">Commercial License Available</span>
       </div>
       <h1>Responsible AI<br>for everyone.</h1>
       <p style="font-size:16px;margin-bottom:28px">
-        Enterprise-grade agentic workflows — open source, self-hostable, auditable.
-        Start free on your laptop. Run it anywhere.
+        Enterprise-grade agentic workflows — public source, self-hostable, auditable.
+        Start with the AGPLv3 Community Edition. Use a commercial license when your organization needs proprietary terms.
       </p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-        <a href="#open-source"
+        <a href="#community-edition"
           style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;background:var(--cyan);color:#04101a;border-radius:7px;font-weight:700;font-size:15px;text-decoration:none">
-          Start free — open source ↓
+          Start with Community Edition ↓
         </a>
         <a href="https://github.com/suranku/nunneri-public-agentic-ai" target="_blank" rel="noopener"
           style="display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border:1px solid var(--border);color:var(--text);border-radius:7px;font-weight:600;font-size:15px;text-decoration:none">
@@ -101,7 +103,7 @@
         </a>
       </div>
       <p style="margin-top:14px;font-size:12px">
-        Built on Ollama · LangGraph · PostgreSQL · FastAPI — all open source, all self-hostable.
+        Originated by Suranku and Yamini. Stewarded by the Nunneri Core Team.
       </p>
     </div>
     <div id="stats"></div>
@@ -139,13 +141,13 @@
   </div>
 </section>
 
-<!-- ── Open Source ───────────────────────────────────────────────────────── -->
-<section id="open-source">
+<!-- ── Community Edition ─────────────────────────────────────────────────── -->
+<section id="community-edition">
   <div class="grid-2">
     <div>
-      <span class="badge cyan" style="margin-bottom:16px;display:inline-block">Community Edition — Free Forever</span>
+      <span class="badge cyan" style="margin-bottom:16px;display:inline-block">Community Edition — AGPLv3</span>
       <h2>Everything you need,<br>self-hosted.</h2>
-      <p>The full Nunneri platform — Nunneri Graph Studio, agentic workflows, human oversight gates, and multi-tenant RBAC — available under an open-source license. Run it on a laptop or any cloud, no managed dependency.</p>
+      <p>The Nunneri Community Edition — Nunneri Graph Studio, agentic workflows, human oversight gates, and multi-tenant RBAC — is available under AGPLv3. Run it on a laptop or any cloud, and review AGPLv3 obligations when modifying or providing network access to the software.</p>
       <ul class="check-list" style="margin-top:20px">
         <li>Nunneri Graph Studio UI with live DAG visualisation and node streaming</li>
         <li>LangGraph stateful agentic workflows</li>
@@ -156,7 +158,7 @@
         <li>RBAC multi-tenant: org → team → project</li>
         <li>Full run audit trail with per-node state</li>
         <li>OIDC auth — Keycloak, Okta, Azure AD</li>
-        <li>All source code on GitHub — fork, extend, contribute</li>
+        <li>Public source on GitHub — fork, extend, and contribute under AGPLv3</li>
       </ul>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:22px">
         <a href="https://github.com/suranku/nunneri-public-agentic-ai" target="_blank" rel="noopener"
@@ -196,6 +198,52 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
         Full setup guide → <a href="reference/guides/api-server.md">Developer Guide</a> ·
         <a href="reference/guides/graph-studio.md">Nunneri Graph Studio User Guide</a>
       </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Licensing ─────────────────────────────────────────────────────────── -->
+<section id="licensing">
+  <h2>Commercial licensing</h2>
+  <p class="section-lede">Nunneri follows an AGPLv3 Community Edition plus commercial-license model. The public repo remains available for community use, while commercial terms are available for organizations that need proprietary distribution, SaaS, OEM, managed-service, indemnity, or procurement coverage.</p>
+  <div class="grid">
+    <div class="card" data-reveal>
+      <h3>Community Edition</h3>
+      <p>Use, modify, and distribute Nunneri under AGPLv3. Network use of modified versions may require corresponding source availability.</p>
+      <a href="reference/LICENSE">Read AGPLv3 →</a>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Commercial License</h3>
+      <p>Use Nunneri in closed-source, embedded, hosted, managed, or enterprise procurement scenarios under negotiated commercial terms.</p>
+      <a href="reference/COMMERCIAL_LICENSE.md">Commercial terms →</a>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Originators and Core Team</h3>
+      <p>Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.</p>
+      <a href="reference/MAINTAINERS.md">Maintainers →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Defensive Publication ─────────────────────────────────────────────── -->
+<section id="publication">
+  <h2>Architecture and defensive publication</h2>
+  <p class="section-lede">Nunneri publishes implementation-level architecture material to document its runtime-neutral control plane, establish public disclosure, and make the system reproducible from the public repository.</p>
+  <div class="grid">
+    <div class="card" data-reveal>
+      <h3>Architecture</h3>
+      <p>System components, canonical asset flow, runtime adapters, Graph Studio, RBAC, provider routing, and storage guidance.</p>
+      <a href="reference/ARCHITECTURE.md">Read architecture →</a>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Defensive Publication</h3>
+      <p>Implementation-level disclosure of the provider-neutral runtime contract, approval gates, state model, and tenant-scoped control plane.</p>
+      <a href="reference/DEFENSIVE_PUBLICATION.md">Read disclosure →</a>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Patent Notice</h3>
+      <p>This publication documents the architecture for public-disclosure purposes. Do not use patent-pending language unless an application has actually been filed.</p>
+      <a href="reference/nunneri-runtime-contract.md">Runtime contract →</a>
     </div>
   </div>
 </section>
@@ -267,7 +315,12 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
       <h3>Docs &amp; Templates</h3>
       <p>
         <a href="reference/AI_ASSETS.md">AI_ASSETS.md</a><br>
+        <a href="reference/ARCHITECTURE.md">Architecture</a><br>
+        <a href="reference/DEFENSIVE_PUBLICATION.md">Defensive Publication</a><br>
         <a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a><br>
+        <a href="reference/COMMERCIAL_LICENSE.md">Commercial License</a><br>
+        <a href="reference/TRADEMARKS.md">Trademark Policy</a><br>
+        <a href="reference/MAINTAINERS.md">Maintainers</a><br>
         <a href="reference/RELEASE.md">RELEASE.md</a><br>
         <a href="reference/nunneri-runtime-contract.md">Nunneri Runtime Contract</a><br>
         <a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a><br>
@@ -296,12 +349,14 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload</code></pre>
     </svg>
     <strong style="font-family:'Schibsted Grotesk',sans-serif;color:#e2e8f0">nunneri</strong>
   </span>
-  — Open source. Self-hostable. Responsible AI for everyone.<br>
+  — AGPLv3 Community Edition. Commercial license available. Responsible AI for everyone.<br>
   <span style="font-size:11px;margin-top:6px;display:inline-block">
     <a href="reference/CONTRIBUTING.md">Contribute</a> ·
+    <a href="reference/DEFENSIVE_PUBLICATION.md">Defensive Publication</a> ·
+    <a href="reference/COMMERCIAL_LICENSE.md">Commercial License</a> ·
     <a href="reference/RELEASE.md">Releases</a> ·
     <a href="reference/guides/api-server.md">Developer Docs</a> ·
-    <a href="mailto:yamini.sk@suranku.com">Contact</a>
+    <a href="mailto:core@nunneri.com">Contact</a>
   </span>
 </footer>
 

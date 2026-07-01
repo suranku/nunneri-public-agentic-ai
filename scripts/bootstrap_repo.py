@@ -497,14 +497,30 @@ def portal_html() -> str:
 <body>
   <nav>
     <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#examples">Examples</a><a href="#providers">Providers</a>
-    <a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
+    <a href="#licensing">Licensing</a><a href="#publication">Publication</a><a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
     <section id="hero" class="hero">
       <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
       <h1>{PLATFORM}</h1>
       <p>Provider-agnostic AI agents, skills, commands, workflows, repository context, guides, and adapters for {TEAM}.</p>
+      <p>AGPLv3 Community Edition with Commercial License options for proprietary, embedded, SaaS, OEM, and enterprise procurement use.</p>
       <div id="stats" class="grid"></div>
+    </section>
+    <section id="licensing">
+      <h2>Licensing</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>AGPLv3 Community Edition</h3><p>Use, modify, and distribute under AGPLv3. Review network-use source-sharing obligations before modified hosted deployments.</p></div>
+        <div class="card" data-reveal><h3>Commercial License</h3><p>Contact core@nunneri.com for proprietary, embedded, hosted, managed-service, indemnity, or enterprise procurement terms.</p></div>
+        <div class="card" data-reveal><h3>Originators</h3><p>Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.</p></div>
+      </div>
+    </section>
+    <section id="publication">
+      <h2>Architecture and Defensive Publication</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Architecture</h3><p><a href="reference/ARCHITECTURE.md">ARCHITECTURE.md</a> documents the runtime-neutral control plane, Graph Studio, RBAC, and storage boundaries.</p></div>
+        <div class="card" data-reveal><h3>Defensive Publication</h3><p><a href="reference/DEFENSIVE_PUBLICATION.md">DEFENSIVE_PUBLICATION.md</a> documents implementation-level public disclosure. Do not use patent-pending language unless an application has been filed.</p></div>
+      </div>
     </section>
     <section id="problem">
       <h2>Why This Exists</h2>
@@ -606,7 +622,7 @@ NUNNERI_TRACE_MODE=otel</code></pre>
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/guides/runtime-contract-demo.html">Runtime Contract Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/ARCHITECTURE.md">Architecture</a></p><p><a href="reference/DEFENSIVE_PUBLICATION.md">Defensive Publication</a></p><p><a href="reference/COMMERCIAL_LICENSE.md">Commercial License</a></p><p><a href="reference/TRADEMARKS.md">Trademark Policy</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/guides/runtime-contract-demo.html">Runtime Contract Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
@@ -1913,10 +1929,18 @@ CONTEXT_REFERENCE = REFERENCE / "context"
 EXAMPLES_REFERENCE = REFERENCE / "examples"
 
 ROOT_DOCS = [
+    "LICENSE",
     "README.md",
+    "ARCHITECTURE.md",
     "AI_ASSETS.md",
     "CONTRIBUTING.md",
+    "COMMERCIAL_LICENSE.md",
+    "CONTRIBUTOR_LICENSE_AGREEMENT.md",
+    "DEFENSIVE_PUBLICATION.md",
+    "MAINTAINERS.md",
+    "NOTICE.md",
     "RELEASE.md",
+    "TRADEMARKS.md",
     "CHANGELOG.md",
     "VERSION",
 ]
@@ -2331,6 +2355,14 @@ def main() -> int:
     args = parser.parse_args()
     # args.local_only reserved for future remote-only gate differentiation
     required = [
+        "LICENSE",
+        "ARCHITECTURE.md",
+        "DEFENSIVE_PUBLICATION.md",
+        "COMMERCIAL_LICENSE.md",
+        "TRADEMARKS.md",
+        "MAINTAINERS.md",
+        "NOTICE.md",
+        "CONTRIBUTOR_LICENSE_AGREEMENT.md",
         "CHANGELOG.md",
         "RELEASE.md",
         "VERSION",
@@ -2340,10 +2372,14 @@ def main() -> int:
         "examples/consumer-repo/README.md",
         "examples/runtime-contract-consumer/README.md",
         "examples/runtime-contract-consumer/consume_runtime_contract.py",
+        "examples/crewai-runtime-runner/README.md",
+        "examples/crewai-runtime-runner/run_crewai_contract.py",
         "scripts/check_consumer_install.py",
         "scripts/check_runtime_examples.py",
+        "scripts/check_crewai_runtime_runner.py",
         "scripts/check_runtime_contract_demo.py",
         "scripts/check_graph_studio_contract.py",
+        "scripts/check_graph_definition_api.py",
         "scripts/check_user_setup_docs.py",
         "scripts/check_runtime_contract.py",
         "scripts/check_human_gates.py",
@@ -2364,6 +2400,31 @@ def main() -> int:
     if "## [Unreleased]" not in changelog:
         print("CHANGELOG.md must contain ## [Unreleased]")
         return 1
+    required_text = {
+        "README.md": ["AGPLv3 Community Edition", "Commercial licensing"],
+        "AI_ASSETS.md": ["AGPLv3 Community Edition", "COMMERCIAL_LICENSE.md", "DEFENSIVE_PUBLICATION.md"],
+        "ARCHITECTURE.md": ["runtime-neutral", "Graph Studio", "MinIO"],
+        "DEFENSIVE_PUBLICATION.md": ["Publication date", "Do not describe Nunneri as \"patent pending\"", "runtime-neutral control plane"],
+        "CONTRIBUTING.md": ["Contributor License Agreement", "commercial licensing"],
+        "NUNNERI_RUNTIME_CONTRACT.md": ["ARCHITECTURE.md", "DEFENSIVE_PUBLICATION.md"],
+        "docs/index.html": ["AGPLv3 Community Edition", "Commercial License", "Defensive Publication"],
+    }
+    for rel, needles in required_text.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for needle in needles:
+            if needle not in text:
+                print(f"{rel} must mention {needle!r}")
+                return 1
+    forbidden_text = {
+        "README.md": ["free forever", "fully open source"],
+        "docs/index.html": ["Free Forever", "free forever", "fully open source"],
+    }
+    for rel, needles in forbidden_text.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for needle in needles:
+            if needle in text:
+                print(f"{rel} contains outdated licensing phrase {needle!r}")
+                return 1
     print("Release readiness local checks passed")
     return 0
 
@@ -2537,9 +2598,17 @@ ROOT_FILES = [
     "install.sh",
     "uninstall.sh",
     "VERSION",
+    "LICENSE",
     "README.md",
+    "ARCHITECTURE.md",
     "AI_ASSETS.md",
+    "COMMERCIAL_LICENSE.md",
+    "CONTRIBUTOR_LICENSE_AGREEMENT.md",
+    "DEFENSIVE_PUBLICATION.md",
+    "MAINTAINERS.md",
+    "NOTICE.md",
     "RELEASE.md",
+    "TRADEMARKS.md",
     "CHANGELOG.md",
 ]
 
@@ -2715,9 +2784,17 @@ REQUIRED_PATHS = [
     "install.sh",
     "uninstall.sh",
     "VERSION",
+    "LICENSE",
     "README.md",
+    "ARCHITECTURE.md",
     "AI_ASSETS.md",
+    "COMMERCIAL_LICENSE.md",
+    "CONTRIBUTOR_LICENSE_AGREEMENT.md",
+    "DEFENSIVE_PUBLICATION.md",
+    "MAINTAINERS.md",
+    "NOTICE.md",
     "RELEASE.md",
+    "TRADEMARKS.md",
     "CHANGELOG.md",
     "dist/claude/CLAUDE.md",
     "dist/codex/AGENTS.md",
@@ -2725,6 +2802,8 @@ REQUIRED_PATHS = [
     "dist/langgraph/LANGGRAPH.md",
     "dist/open-source/AGENT_MANIFEST.md",
     "docs/reference/README.md",
+    "docs/reference/ARCHITECTURE.md",
+    "docs/reference/DEFENSIVE_PUBLICATION.md",
     "docs/reference/guides/end-user-langgraph-setup.md",
     "docs/reference/guides/end-user-setup-demo.html",
     "docs/reference/examples/consumer-repo/README.md",
@@ -3288,6 +3367,159 @@ if __name__ == "__main__":
     sys.exit(main())
 ''', True)
 
+    write("scripts/check_graph_definition_api.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def require(condition: bool, message: str, failures: list[str]) -> None:
+    if not condition:
+        failures.append(message)
+
+
+def main() -> int:
+    failures: list[str] = []
+    api_path = ROOT / "api/main.py"
+    graph_path = ROOT / "dist/langgraph/graphs/triage-nine-phase.json"
+    contract_path = ROOT / "dist/nunneri-runtime/workflows/triage-nine-phase.json"
+
+    api = api_path.read_text(encoding="utf-8")
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+
+    require('@app.get("/agents/{agent_name}/graph-definition"' in api, "graph-definition GET route is missing", failures)
+    require("def get_agent_graph_definition" in api, "graph-definition handler is missing", failures)
+    require("resolve_manifest(agent_name)" in api, "graph-definition handler must resolve agents and commands", failures)
+    require("load_graph_definition(manifest, is_command)" in api, "graph-definition handler must use load_graph_definition", failures)
+    require('"nodes": nodes' in api, "load_graph_definition must return nodes", failures)
+    require('"edges": graph.get("edges", linear_edges(nodes))' in api, "load_graph_definition must return graph edges", failures)
+    require('"terminology"' in api, "graph-definition response must include terminology", failures)
+
+    require(graph.get("runtime") == "langgraph", "triage graph-definition source must be LangGraph", failures)
+    require(graph.get("contract_source") == "dist/nunneri-runtime/workflows/triage-nine-phase.json", "triage graph must reference the neutral contract", failures)
+    require(len(graph.get("nodes", [])) == 9, "triage graph must expose exactly 9 nodes", failures)
+    require(len(graph.get("edges", [])) == 8, "triage graph must expose exactly 8 edges", failures)
+
+    by_id = {node.get("id"): node for node in graph.get("nodes", [])}
+    require(by_id.get("classification", {}).get("classification_options"), "classification options must be API-visible in graph nodes", failures)
+    for gate_id in ("gate_1", "gate_2"):
+        gate = by_id.get(gate_id, {})
+        approval = gate.get("approval", {})
+        require(gate.get("type") == "human_approval", f"{gate_id} must be a human_approval node", failures)
+        require(gate.get("approval_checkpoint") is True, f"{gate_id} must be marked as an approval checkpoint", failures)
+        require(approval.get("question"), f"{gate_id} must expose an approval question", failures)
+        require(approval.get("required_context"), f"{gate_id} must expose required approval context", failures)
+
+    approved_edges = [
+        edge for edge in graph.get("edges", [])
+        if edge.get("from") == "gate_1" and edge.get("to") == "test_first_fix"
+    ]
+    require(approved_edges and approved_edges[0].get("condition") == "approved", "gate_1 edge must expose approved condition", failures)
+    contract_ids = [node.get("id") for node in contract.get("nodes", [])]
+    graph_ids = [node.get("id") for node in graph.get("nodes", [])]
+    require(contract_ids == graph_ids, "LangGraph graph-definition nodes must preserve neutral contract order", failures)
+    contract_classification = next((node for node in contract.get("nodes", []) if node.get("id") == "classification"), {})
+    require(
+        by_id.get("classification", {}).get("classification_options") == contract_classification.get("classification_options"),
+        "graph-definition classification options must match the neutral contract",
+        failures,
+    )
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+    print("Graph-definition API contract checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+''', True)
+
+    write("scripts/check_crewai_runtime_runner.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+RUNNER = ROOT / "examples/crewai-runtime-runner/run_crewai_contract.py"
+
+
+def run_runner(*args: str) -> tuple[int, dict | None, str]:
+    completed = subprocess.run(
+        [sys.executable, str(RUNNER), "--repo-root", str(ROOT), *args],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=False,
+    )
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError:
+        payload = None
+    return completed.returncode, payload, completed.stdout
+
+
+def main() -> int:
+    failures: list[str] = []
+
+    if not RUNNER.exists():
+        failures.append("examples/crewai-runtime-runner/run_crewai_contract.py is missing")
+    else:
+        code, payload, output = run_runner("--auto-approve")
+        if code != 0 or payload is None:
+            failures.append(f"CrewAI contract runner approve path failed:\n{output}")
+        else:
+            if payload.get("runtime") != "crewai":
+                failures.append("CrewAI contract runner must report runtime=crewai")
+            if payload.get("status") != "completed":
+                failures.append(f"approve path must complete, found {payload.get('status')}")
+            if payload.get("step_count") != 9:
+                failures.append(f"approve path must expose 9 steps, found {payload.get('step_count')}")
+            if payload.get("completed_steps", [])[-1:] != ["gate_2"]:
+                failures.append("approve path must complete through gate_2")
+            decisions = payload.get("gate_decisions", {})
+            if decisions.get("gate_1", {}).get("approved") is not True:
+                failures.append("approve path must approve gate_1")
+            if decisions.get("gate_2", {}).get("approved") is not True:
+                failures.append("approve path must approve gate_2")
+
+        code, payload, output = run_runner("--reject-gate", "gate_1")
+        if code != 0 or payload is None:
+            failures.append(f"CrewAI contract runner reject path failed:\n{output}")
+        else:
+            if payload.get("status") != "cancelled":
+                failures.append(f"reject path must cancel, found {payload.get('status')}")
+            if payload.get("cancelled_at") != "gate_1":
+                failures.append(f"reject path must cancel at gate_1, found {payload.get('cancelled_at')}")
+            if "test_first_fix" in payload.get("completed_steps", []):
+                failures.append("reject path must not continue to test_first_fix")
+            if payload.get("gate_decisions", {}).get("gate_1", {}).get("approved") is not False:
+                failures.append("reject path must record gate_1 approval=false")
+
+    if failures:
+        for failure in failures:
+            print(failure)
+        return 1
+
+    print("CrewAI runtime runner checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
+
 
 def create_installers() -> None:
     write("install.sh", r'''#!/usr/bin/env bash
@@ -3620,6 +3852,27 @@ def create_docs() -> None:
 
 Nunneri AI Assets is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for Nunneri Engineering.
 
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+## Licensing Model
+
+Nunneri AI Assets are published as an AGPLv3 Community Edition with commercial licensing available.
+
+- AGPLv3 Community Edition: `LICENSE`
+- Commercial license path: `COMMERCIAL_LICENSE.md`
+- Trademark policy: `TRADEMARKS.md`
+- Maintainers and originators: `MAINTAINERS.md`
+
+Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com` as the temporary fallback until Nunneri domain email is active.
+
+## Architecture and Defensive Publication
+
+- `ARCHITECTURE.md` documents the product and engineering architecture.
+- `DEFENSIVE_PUBLICATION.md` documents the runtime-neutral control plane for defensive-publication and public-disclosure purposes.
+- `NUNNERI_RUNTIME_CONTRACT.md` documents the neutral runtime contract and adapter mapping rules.
+
+Do not use "patent pending" language unless a provisional or nonprovisional patent application has actually been filed.
+
 ## Provider-Neutral Source of Truth
 
 Canonical assets live under `assets/`. Provider-specific files are generated into `dist/`.
@@ -3707,6 +3960,29 @@ N/A. This is a Markdown, HTML, and script repository.
     write("README.md", r'''# Nunneri AI Assets
 
 Provider-agnostic AI assets for Claude Code, Codex, Gemini, and open-source agent frameworks.
+
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+## Licensing
+
+Nunneri is distributed as an AGPLv3 Community Edition. Commercial licensing is available for organizations that need closed-source, embedded, proprietary, SaaS, OEM, managed-service, indemnity, or enterprise procurement terms.
+
+- Community Edition: see `LICENSE` for AGPLv3 terms.
+- Commercial licensing: see `COMMERCIAL_LICENSE.md`.
+- Trademark and brand usage: see `TRADEMARKS.md`.
+- Maintainers and originators: see `MAINTAINERS.md`.
+
+Commercial contact: `core@nunneri.com` (`yamini.sk@suranku.com` is the temporary fallback until Nunneri domain email is active).
+
+## Architecture and Defensive Publication
+
+Nunneri publishes implementation-level architecture and defensive-publication material to establish clear public disclosure of the runtime-neutral control plane.
+
+- Architecture reference: `ARCHITECTURE.md`
+- Defensive publication: `DEFENSIVE_PUBLICATION.md`
+- Runtime contract details: `NUNNERI_RUNTIME_CONTRACT.md`
+
+The defensive publication documents the architecture for public-disclosure purposes. Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
 
 ## What's Included
 
@@ -3822,6 +4098,8 @@ See `NUNNERI_RUNTIME_CONTRACT.md` for the contract shape and runtime mapping rul
 
 For a dependency-free consumer example that reads the neutral contract and projects `triage-nine-phase` into a CrewAI-style flow shape, see `examples/runtime-contract-consumer/`.
 
+For the first runnable CrewAI-facing contract harness, see `examples/crewai-runtime-runner/`. It executes the generated CrewAI flow manifest, supports approve/reject gate paths, and proves rejection cancels downstream work without requiring the CrewAI SDK.
+
 For an interactive walkthrough of provider context, neutral workflow phases, human gates, and runtime adapter projections, open `guides/runtime-contract-demo.html`.
 
 For an end-user setup path with durable state and tracing choices, see `guides/end-user-langgraph-setup.md` or open `guides/end-user-setup-demo.html`.
@@ -3872,7 +4150,7 @@ See `assets/commands/` and the GitHub Pages portal at `docs/index.html`.
 
 ## Contributing
 
-Use GitHub Issues first. See `CONTRIBUTING.md`.
+Use GitHub Issues first. Contributions must acknowledge the Nunneri Contributor License Agreement so the project can keep AGPLv3 Community Edition and commercial licensing available. See `CONTRIBUTING.md` and `CONTRIBUTOR_LICENSE_AGREEMENT.md`.
 ''')
 
     write("LANGGRAPH_RUNTIME.md", r'''# LangGraph Runtime Adapter
@@ -4007,6 +4285,8 @@ This verifies that the neutral contract exists, the LangGraph export was generat
 
 Contributions to {PLATFORM} start with GitHub Issues.
 
+Nunneri uses an AGPLv3 Community Edition plus commercial licensing model. Contributions must acknowledge the Nunneri Contributor License Agreement in `CONTRIBUTOR_LICENSE_AGREEMENT.md` so the project can continue distributing accepted contributions under both AGPLv3 and commercial terms.
+
 ## Feedback and Enhancement Workflow
 
 ```text
@@ -4027,11 +4307,13 @@ Use `feature/<issue-number>-short-description` or `fix/<issue-number>-short-desc
 
 ## Step 4 - Open Pull Request and CI
 
-Every PR must link the accepted issue, include validation output, and declare provider impact.
+Every PR must link the accepted issue, include validation output, declare provider impact, and confirm CLA acceptance.
 
 ## Step 5 - CODEOWNERS Approval, Merge, and Distribute
 
 CODEOWNERS approval is required before merge.
+
+License, trademark, commercial-license, homepage, release, and generated-reference changes require Nunneri Core Team review.
 
 ## Issue Labels and Triage States
 
@@ -4043,7 +4325,19 @@ Accepted issues are assigned a release target and must be referenced in `CHANGEL
 
 ## Release Participation
 
-Release owner: {RELEASE_OWNER}.
+Release owner: `core@nunneri.com`.
+
+Temporary fallback until Nunneri domain email is active: `{RELEASE_OWNER}`.
+
+## Contributor License Agreement
+
+Every pull request must include this acknowledgment:
+
+```text
+I agree that my contribution is submitted under the Nunneri Contributor License Agreement.
+```
+
+Do not merge PRs that change license, trademark, commercial-use, or ownership language without CODEOWNERS approval.
 
 ## Provider Adapter Guidelines
 
@@ -4078,7 +4372,11 @@ Monthly by default, with ad hoc patch releases for urgent fixes.
 
 ## Release Roles
 
-Release owner: {RELEASE_OWNER}.
+Release owner: `core@nunneri.com`.
+
+Temporary fallback until Nunneri domain email is active: `{RELEASE_OWNER}`.
+
+Commercial license and trademark-impacting release decisions require Nunneri Core Team approval.
 
 ## Branch Strategy
 
@@ -4110,11 +4408,12 @@ Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the sa
 2. Cut `release/vX.Y.Z` from `main`.
 3. Update `VERSION` and `CHANGELOG.md`.
 4. Run validation, adapter builds, docs sync, consumer install checks, and package checks.
-5. Create a release PR from `release/vX.Y.Z` back to `main`.
-6. After approval, tag the release branch with `vX.Y.Z`.
-7. Push the release branch and tag.
-8. Confirm GitHub Actions publishes the internal prerelease with dist archives.
-9. Merge release branch changes back to `main` if the branch contains release-only commits.
+5. Confirm `ARCHITECTURE.md`, `DEFENSIVE_PUBLICATION.md`, `LICENSE`, `COMMERCIAL_LICENSE.md`, `TRADEMARKS.md`, `MAINTAINERS.md`, `NOTICE.md`, and `CONTRIBUTOR_LICENSE_AGREEMENT.md` are present and synced to reference docs.
+6. Create a release PR from `release/vX.Y.Z` back to `main`.
+7. After approval, tag the release branch with `vX.Y.Z`.
+8. Push the release branch and tag.
+9. Confirm GitHub Actions publishes the internal prerelease with dist archives.
+10. Merge release branch changes back to `main` if the branch contains release-only commits.
 
 ## Internal Dist Release Flow
 
@@ -4167,6 +4466,133 @@ Revert the release commit or publish a patch release that restores the previous 
 Mark deprecated assets in canonical metadata for one minor release before removal.
 """)
 
+    write("ARCHITECTURE.md", """# Nunneri Architecture
+
+Nunneri is a provider- and runtime-neutral control plane for AI assets, agentic workflows, human approval gates, and auditable execution.
+
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+## System Components
+
+- `assets/`: canonical agents, skills, commands, workflows, and repository context
+- `dist/nunneri-runtime/`: runtime-neutral contract generated from canonical assets
+- provider adapters: Claude, Codex, Gemini, and open-source exports
+- runtime adapters: LangGraph, CrewAI, AutoGen, and Semantic Kernel exports
+- `api/`: FastAPI server, provider routing, RBAC checks, run persistence, and graph execution
+- Graph Studio: browser UI for workflow phases, approvals, traces, outputs, and reruns
+
+## Runtime-Neutral Flow
+
+Canonical assets are generated into the Nunneri Runtime Contract. Runtime adapters consume that contract rather than provider-specific files. Human approval semantics, rejection cancellation, context injection, and observability hints must be preserved across adapter projections.
+
+## Tenant and RBAC Model
+
+Nunneri scopes execution through organization -> team -> project -> thread -> run -> node output. RBAC applies to dispatch, gate approval or rejection, run history, phase configuration, and release-impacting actions.
+
+## Graph Studio
+
+Graph Studio consumes the same runtime contract as the API server. It presents technical nodes as workflow phases and binds phase output, approval cards, errors, and final summaries to persisted run records.
+
+## Object Storage Guidance
+
+Object storage is optional. Use a pluggable storage boundary for filesystem, cloud object storage, or S3-compatible storage. MinIO can be supported as an optional deployment choice, but it should not be a required bundled dependency because it has independent licensing considerations.
+""")
+
+    write("DEFENSIVE_PUBLICATION.md", """# Defensive Publication: Nunneri Runtime-Neutral Agentic Control Plane
+
+Publication date: 2026-07-01
+
+Originators: Suranku and Yamini
+
+Steward: Nunneri Core Team
+
+## Patent and Defensive Publication Notice
+
+This document publicly discloses the Nunneri architecture and implementation concepts for defensive-publication purposes. It is not legal advice and is not a patent application.
+
+Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
+
+## Disclosed Runtime-Neutral Control Plane
+
+Nunneri stores canonical provider-neutral assets in `assets/`, generates `dist/nunneri-runtime/` as the neutral contract, and then derives provider and runtime adapters for Claude, Codex, Gemini, open-source exports, LangGraph, CrewAI, AutoGen, and Semantic Kernel.
+
+The runtime-neutral control plane preserves:
+
+- provider-neutral assets compiled into a neutral runtime contract
+- generated runtime adapters with SDK-specific details outside canonical assets
+- Graph Studio consumption of the same contract for phases, traces, node outputs, and approvals
+- human-blocking approval gates with approve/reject decisions and downstream cancellation on rejection
+- durable state outside LLM context through threads, runs, checkpoints, and per-phase outputs
+- RBAC and multi-tenant scoping across org, team, project, thread, run, and approval actions
+- provider-specific context overrides without canonical-source drift
+
+## Reproducibility
+
+Representative validation:
+
+```bash
+python3 scripts/build_adapters.py
+python3 scripts/check_runtime_contract.py
+python3 scripts/check_langgraph_exports.py
+python3 scripts/check_human_gates.py
+python3 scripts/check_release_ready.py --local-only
+```
+""")
+
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8") if (ROOT / "LICENSE").exists() else """GNU Affero General Public License v3.0
+
+This bootstrapped repository uses the AGPLv3 Community Edition licensing posture. Replace this fallback with the full standard AGPLv3 license text before public release.
+"""
+    write("LICENSE", license_text)
+    write("COMMERCIAL_LICENSE.md", """# Commercial License
+
+Nunneri is publicly available under the GNU Affero General Public License version 3.0 (AGPLv3). A commercial license is available for organizations that need rights outside the AGPLv3 Community Edition.
+
+Contact `core@nunneri.com` for closed-source, embedded, hosted, SaaS, OEM, managed-service, indemnity, or enterprise procurement terms.
+
+Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`.
+""")
+    write("TRADEMARKS.md", """# Trademark Policy
+
+Nunneri, the Nunneri name, and Nunneri logos are project trademarks associated with the Nunneri Core Team.
+
+Use the Nunneri name truthfully to refer to the project, describe compatibility, or link to official releases. Do not imply endorsement, certification, partnership, or official status for forks, hosted services, or commercial packages without written permission.
+
+Contact `core@nunneri.com` for trademark permission. Temporary fallback: `yamini.sk@suranku.com`.
+""")
+    write("MAINTAINERS.md", """# Maintainers
+
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+The core team owns repository direction, release readiness, licensing, commercial-use decisions, trademark decisions, CODEOWNERS review, and release-impact escalation.
+
+Preferred contact: `core@nunneri.com`
+
+Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`
+""")
+    write("NOTICE.md", """# Notices
+
+Nunneri AI Assets
+
+Copyright (c) 2026 Suranku, Yamini, and the Nunneri Core Team.
+
+Nunneri is distributed under the GNU Affero General Public License version 3.0 for the Community Edition. Commercial licensing is available from the Nunneri Core Team.
+
+The Nunneri name and logos are project trademarks. See `TRADEMARKS.md` for brand usage guidance.
+""")
+    write("CONTRIBUTOR_LICENSE_AGREEMENT.md", """# Contributor License Agreement
+
+This Contributor License Agreement (CLA) applies to contributions submitted to Nunneri AI Assets.
+
+By submitting a contribution, you confirm that you have the right to submit it and grant Suranku, Yamini, and the Nunneri Core Team a perpetual, worldwide, non-exclusive, royalty-free license to use, reproduce, modify, distribute, sublicense, and relicense your contribution as part of Nunneri under AGPLv3 and separate commercial license terms.
+
+Pull requests must confirm:
+
+```text
+I agree that my contribution is submitted under the Nunneri Contributor License Agreement.
+```
+""")
+
     write("CHANGELOG.md", """# Changelog
 
 All notable changes to this project are documented here.
@@ -4188,7 +4614,20 @@ All notable changes to this project are documented here.
 ### Security
 """)
     write("VERSION", VERSION)
-    write("CODEOWNERS", "* " + " ".join(CODEOWNERS))
+    write("CODEOWNERS", """* @Yamini-Suranku @suranku
+
+# Licensing, ownership, trademark, homepage, and release-sensitive changes require core review.
+/LICENSE @Yamini-Suranku @suranku
+/COMMERCIAL_LICENSE.md @Yamini-Suranku @suranku
+/TRADEMARKS.md @Yamini-Suranku @suranku
+/MAINTAINERS.md @Yamini-Suranku @suranku
+/NOTICE.md @Yamini-Suranku @suranku
+/CONTRIBUTOR_LICENSE_AGREEMENT.md @Yamini-Suranku @suranku
+/docs/index.html @Yamini-Suranku @suranku
+/RELEASE.md @Yamini-Suranku @suranku
+/.github/PULL_REQUEST_TEMPLATE.md @Yamini-Suranku @suranku
+/.github/ISSUE_TEMPLATE/ @Yamini-Suranku @suranku
+""")
     write("docs/_config.yml", f"title: {PLATFORM}\n")
     write(".gitignore", """.claude/
 .codex/
@@ -4210,6 +4649,10 @@ __pycache__/
 The Nunneri Runtime Contract is the provider- and framework-neutral export layer between canonical assets and runtime adapters.
 
 Authors edit `assets/`. The build step generates `dist/nunneri-runtime/` first, then derives runtime-specific exports for LangGraph, CrewAI, Microsoft AutoGen, and Microsoft Semantic Kernel.
+
+For the broader system architecture and public-disclosure record, see `ARCHITECTURE.md` and `DEFENSIVE_PUBLICATION.md`.
+
+Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
 
 ## Generated Contract
 
@@ -4272,10 +4715,13 @@ No runtime SDK dependencies are installed by this repository.
 
 `examples/runtime-contract-consumer/` contains a dependency-free Python example that reads `dist/nunneri-runtime/contract.json`, loads `triage-nine-phase`, and projects it into a CrewAI-style flow shape while preserving approval gates.
 
+`examples/crewai-runtime-runner/` contains the first runnable CrewAI-facing contract harness. It reads `dist/crewai/flows/triage-nine-phase.json`, runs the generated steps, supports approve/reject gate paths, and verifies rejection cancels downstream implementation work. It does not require the CrewAI SDK.
+
 Validate it with:
 
 ```bash
 python3 scripts/check_runtime_examples.py
+python3 scripts/check_crewai_runtime_runner.py
 ```
 
 ## Interactive Demo
@@ -5454,6 +5900,13 @@ body:
       label: Acceptance criteria
     validations:
       required: true
+  - type: checkboxes
+    id: license_impact
+    attributes:
+      label: License, commercial, or trademark impact
+      options:
+        - label: This request may affect license, commercial-use, ownership, trademark, brand, or homepage language.
+        - label: This request does not affect license, commercial-use, ownership, trademark, brand, or homepage language.
   - type: dropdown
     id: priority
     attributes:
@@ -5477,6 +5930,116 @@ body:
     validations:
       required: true
 """
+
+    write("examples/crewai-runtime-runner/README.md", r'''# CrewAI Runtime Runner Example
+
+This example is the first runnable CrewAI-facing adapter harness for the Nunneri Runtime Contract.
+
+It reads generated files from:
+
+```text
+dist/nunneri-runtime/workflows/triage-nine-phase.json
+dist/crewai/flows/triage-nine-phase.json
+```
+
+Then it executes the flow shape deterministically without installing the CrewAI SDK. This keeps the repository dependency-free while proving that the CrewAI export preserves:
+
+- ordered workflow steps
+- `human_input` approval gates
+- approve/reject actions
+- cancellation on rejection
+- no downstream implementation work after rejection
+
+Run an all-approved flow:
+
+```bash
+python3 examples/crewai-runtime-runner/run_crewai_contract.py --auto-approve
+```
+
+Run a rejection path:
+
+```bash
+python3 examples/crewai-runtime-runner/run_crewai_contract.py --reject-gate gate_1
+```
+
+This is not a CrewAI SDK application yet. It is the contract runner that a later SDK-backed implementation should match.
+''')
+
+    write("examples/crewai-runtime-runner/run_crewai_contract.py", r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def index_by_id(items: list[dict]) -> dict[str, dict]:
+    return {item["id"]: item for item in items}
+
+
+def run_contract(repo_root: Path, workflow_name: str, auto_approve: bool, reject_gate: str | None) -> dict:
+    neutral = load_json(repo_root / "dist/nunneri-runtime/workflows" / f"{workflow_name}.json")
+    crewai = load_json(repo_root / "dist/crewai/flows" / f"{workflow_name}.json")
+    flow = crewai["flow"]
+    steps = flow["steps"]
+    neutral_nodes = index_by_id(neutral["nodes"])
+
+    completed: list[str] = []
+    gate_decisions: dict[str, dict] = {}
+    status = "completed"
+    cancelled_at = None
+
+    for step in steps:
+        step_id = step["id"]
+        node = neutral_nodes.get(step_id, {})
+        if step.get("kind") == "human_input" or node.get("type") == "human_approval":
+            if reject_gate == step_id:
+                gate_decisions[step_id] = {"approved": False, "action": "reject", "on_reject": "cancel"}
+                status = "cancelled"
+                cancelled_at = step_id
+                break
+            if not auto_approve:
+                gate_decisions[step_id] = {"approved": None, "action": "waiting"}
+                status = "waiting_approval"
+                cancelled_at = step_id
+                break
+            gate_decisions[step_id] = {"approved": True, "action": "approve"}
+        completed.append(step_id)
+
+    return {
+        "runtime": "crewai",
+        "mode": "contract_runner",
+        "workflow_name": neutral["name"],
+        "contract_source": crewai["contract_source"],
+        "status": status,
+        "completed_steps": completed,
+        "cancelled_at": cancelled_at,
+        "gate_decisions": gate_decisions,
+        "human_in_loop": flow.get("human_in_loop", []),
+        "step_count": len(steps),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run a generated CrewAI flow manifest from the Nunneri neutral runtime contract.")
+    parser.add_argument("--repo-root", default=Path(__file__).resolve().parents[2], type=Path)
+    parser.add_argument("--workflow", default="triage-nine-phase")
+    parser.add_argument("--auto-approve", action="store_true", help="Approve all human_input gates and complete the flow.")
+    parser.add_argument("--reject-gate", help="Reject a specific gate id and cancel downstream execution.")
+    args = parser.parse_args()
+
+    payload = run_contract(args.repo_root.resolve(), args.workflow, args.auto_approve, args.reject_gate)
+    print(json.dumps(payload, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', True)
 
 
 def create_github() -> None:
@@ -5562,6 +6125,17 @@ Fixes #
 - [ ] Portal
 - [ ] Provider adapter
 
+## License and Trademark Impact
+
+- [ ] No license, commercial-use, ownership, or trademark impact
+- [ ] Changes licensing or commercial-use language
+- [ ] Changes trademark, brand, logo, or ownership language
+- [ ] Changes homepage, release, or generated-reference docs that mention license/commercial terms
+
+## Contributor License Agreement
+
+- [ ] I agree that my contribution is submitted under the Nunneri Contributor License Agreement.
+
 ## Validation Commands
 
 ```bash
@@ -5616,10 +6190,14 @@ jobs:
         run: python3 scripts/check_langgraph_exports.py
       - name: Check runtime examples
         run: python3 scripts/check_runtime_examples.py
+      - name: Check CrewAI runtime runner
+        run: python3 scripts/check_crewai_runtime_runner.py
       - name: Check runtime contract demo
         run: python3 scripts/check_runtime_contract_demo.py
       - name: Check Graph Studio contract wiring
         run: python3 scripts/check_graph_studio_contract.py
+      - name: Check graph-definition API contract
+        run: python3 scripts/check_graph_definition_api.py
       - name: Check human-blocking gates
         run: python3 scripts/check_human_gates.py
       - name: Check consumer install

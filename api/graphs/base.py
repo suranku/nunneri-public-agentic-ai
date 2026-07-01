@@ -12,6 +12,7 @@ from langgraph.graph.message import add_messages
 from langgraph.types import interrupt
 
 import ollama_queue
+from llm_providers import invoke_langchain_messages
 
 OLLAMA_BASE = "http://localhost:11434"
 
@@ -118,33 +119,64 @@ def evaluate_routing_rules(text: str, rules: list[dict]) -> str | None:
 # Ollama call — queue-aware, context-trimmed
 # ---------------------------------------------------------------------------
 
-async def _call_ollama(
+async def _call_model(
     model: str, system: str, messages: list[BaseMessage]
 ) -> tuple[str, int]:
-    """Call Ollama. Returns (response_text, messages_dropped_count)."""
+    """Call the configured model provider. Returns (response_text, messages_dropped_count)."""
     trimmed, dropped = trim_messages(messages)
-
-    ollama_msgs = [{"role": "system", "content": system}]
-    for m in trimmed:
-        role = "user" if isinstance(m, HumanMessage) else "assistant"
-        ollama_msgs.append({"role": role, "content": str(m.content)})
-
-    async with ollama_queue.slot():
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            r = await client.post(
-                f"{OLLAMA_BASE}/api/chat",
-                json={"model": model, "messages": ollama_msgs, "stream": False},
-            )
-            r.raise_for_status()
-            return r.json()["message"]["content"], dropped
+    return await invoke_langchain_messages(model, system, trimmed), dropped
 
 
 # ---------------------------------------------------------------------------
 # Node factories
 # ---------------------------------------------------------------------------
 
-def make_ollama_node(node_id: str, phase_label: str):
+def _fallback_phase_output(
+    node_id: str,
+    phase_label: str,
+    node_meta: dict[str, Any],
+    previous_phase: str,
+    previous_output: str,
+) -> str:
+    """Return a deterministic non-empty phase output when the model is silent."""
+    expected_outputs = node_meta.get("expected_outputs") or []
+    lines = [
+        f"### {phase_label}",
+        "The model returned an empty response for this phase, so Nunneri recorded a deterministic fallback.",
+    ]
+    if previous_phase:
+        lines.extend([
+            "",
+            "### Previous Phase Context",
+            f"- Previous phase: {previous_phase}",
+            f"- Previous output available: {'yes' if previous_output else 'no'}",
+        ])
+    if expected_outputs:
+        lines.extend(["", "### Required Outputs"])
+        for item in expected_outputs:
+            lines.append(f"- **{item}**: Not determined from available evidence.")
+    else:
+        lines.extend(["", "### Output", "- Not determined from available evidence."])
+    if node_id == "context_load":
+        lines.extend([
+            "",
+            "### Context Load Result",
+            "- No project path, repository files, logs, or external context were provided to this run.",
+        ])
+    elif node_id == "root_cause_analysis":
+        lines.extend([
+            "",
+            "### Root Cause Position",
+            "- Root cause is not confirmed because concrete logs, stack traces, changed files, and reproduction evidence are missing.",
+            "- Safe next step: collect runtime logs, deployment diff, dependency/config changes, and a failing request trace before implementation.",
+        ])
+    return "\n".join(lines)
+
+
+def make_ollama_node(node_id: str, phase_label: str, node_meta: dict[str, Any] | None = None):
     """Return an async node function that calls Ollama for the given phase."""
+    node_meta = node_meta or {}
+
     async def _node(state: AgentState, config: RunnableConfig) -> dict:
         cfg = config.get("configurable", {})
         model = cfg.get("model", "mistral")
@@ -158,7 +190,42 @@ def make_ollama_node(node_id: str, phase_label: str):
             base_system = node_cfg["system_prompt"]
 
         system = (f"{ctx}\n\n---\n\n{base_system}" if ctx else base_system)
-        system += f"\n\n## Current Phase: {phase_label}"
+        instructions = node_meta.get("instructions") or ""
+        description = node_meta.get("description") or ""
+        expected_outputs = node_meta.get("expected_outputs") or []
+        classification_options = node_meta.get("classification_options") or []
+        previous_phase = state.get("phase", "")
+        previous_output = state.get("node_output", "")
+
+        system += (
+            "\n\n## Runtime Phase Contract"
+            f"\nCurrent node id: {node_id}"
+            f"\nCurrent phase: {phase_label}"
+            f"\nPhase description: {description or 'No description provided.'}"
+            f"\nPhase instructions: {instructions or 'Perform only this phase.'}"
+            "\n\nHard rules:"
+            "\n- Perform only the current phase. Do not complete the full workflow in this node."
+            "\n- Do not ask the user for approval; human approval is handled only by gate nodes."
+            "\n- Do not invent logs, commits, files, tests, or validation results."
+            "\n- If evidence is missing, name the exact missing evidence and continue with assumptions clearly marked."
+            "\n- Keep output concise and structured for this phase."
+        )
+        if expected_outputs:
+            system += (
+                "\n\nRequired output fields for this phase:\n- "
+                + "\n- ".join(str(x) for x in expected_outputs)
+            )
+        if classification_options:
+            system += (
+                "\n\nAllowed classification labels:\n- "
+                + "\n- ".join(str(x) for x in classification_options)
+            )
+        if previous_phase or previous_output:
+            system += (
+                "\n\nPrevious phase context:"
+                f"\nPrevious phase: {previous_phase or 'none'}"
+                f"\nPrevious output:\n{previous_output[:2000] or 'none'}"
+            )
 
         labels: list = node_cfg.get("classification_labels", [])
         if labels:
@@ -167,7 +234,15 @@ def make_ollama_node(node_id: str, phase_label: str):
                 "Your response must classify into one of: " + ", ".join(labels)
             )
 
-        text, dropped = await _call_ollama(model, system, state["messages"])
+        text, dropped = await _call_model(model, system, state["messages"])
+        if not text.strip():
+            text = _fallback_phase_output(
+                node_id,
+                phase_label,
+                node_meta,
+                previous_phase,
+                previous_output,
+            )
 
         # Evaluate routing rules against this node's output.
         rules: list = node_cfg.get("routing_rules", [])

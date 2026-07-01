@@ -3,6 +3,12 @@
 The Nunneri API server (`api/`) is a FastAPI application that serves the Graph Studio UI, runs
 LangGraph agent workflows, and persists all state to PostgreSQL.
 
+## License Context
+
+The API server is part of the Nunneri AGPLv3 Community Edition. Commercial licensing is available for organizations that need proprietary, embedded, hosted, managed-service, OEM, indemnity, or enterprise procurement terms.
+
+Review `LICENSE`, `COMMERCIAL_LICENSE.md`, and `TRADEMARKS.md` before exposing modified deployments over a network or packaging Nunneri into a commercial product.
+
 ## Architecture
 
 ```
@@ -93,8 +99,10 @@ Open `http://localhost:8000` for the portal or `http://localhost:8000/ui` for th
 | `OIDC_REDIRECT_URI` | `http://localhost:8000/auth/callback` | OAuth2 callback URL |
 | `SESSION_SECRET` | `change-me-in-production` | HS256 secret for internal session JWTs |
 | `SESSION_TTL_S` | `86400` | Session JWT lifetime in seconds |
+| `NUNNERI_API_TOKEN` | — | Optional local bearer token when OIDC is unavailable |
 | `GEMINI_API_KEY` | — | Google AI Studio key (enables `gemini:*` models) |
 | `ANTHROPIC_API_KEY` | — | Anthropic key (enables `claude:*` models) |
+| `OPENAI_API_KEY` | — | OpenAI key (enables `openai:*` models) |
 
 ### Minimal dev `.env`
 
@@ -115,6 +123,33 @@ Azure AD) with:
 - Scopes: `openid profile email`
 
 Users log in via `GET /auth/login` → provider → `GET /auth/callback` → session JWT → `/ui`.
+Graph Studio stores the returned session token in browser local storage and sends it as a Bearer
+token on API requests.
+
+For local development without an OIDC provider, set `AUTH_ENABLED=true` and `NUNNERI_API_TOKEN`.
+Then open Graph Studio once with the token in the URL hash:
+
+```bash
+AUTH_ENABLED=true NUNNERI_API_TOKEN="$(openssl rand -hex 32)" \
+  uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+```text
+http://localhost:8000/ui#token=<the NUNNERI_API_TOKEN value>
+```
+
+The token is stored in browser local storage and used as the Bearer token for API calls.
+
+Auth-enabled local startup:
+
+```bash
+cp .env.example .env
+# Edit .env and set OIDC_* plus SESSION_SECRET.
+set -a
+source .env
+set +a
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 ## Multi-Tenant Hierarchy
 
@@ -139,6 +174,7 @@ With `AUTH_ENABLED=false` the hierarchy still exists in the DB but all access ch
 | `ollama:mistral` | Local Ollama | — |
 | `gemini:gemini-2.0-flash` | Google Generative AI | `GEMINI_API_KEY` |
 | `claude:claude-sonnet-4-6` | Anthropic | `ANTHROPIC_API_KEY` |
+| `openai:gpt-4.1-mini` | OpenAI Responses API | `OPENAI_API_KEY` |
 
 Ollama calls are throttled through the concurrency queue. Cloud provider calls bypass the queue
 (rate limiting is handled by their APIs).

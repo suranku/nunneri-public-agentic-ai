@@ -16,9 +16,17 @@ ROOT_FILES = [
     "install.sh",
     "uninstall.sh",
     "VERSION",
+    "LICENSE",
     "README.md",
+    "ARCHITECTURE.md",
     "AI_ASSETS.md",
+    "COMMERCIAL_LICENSE.md",
+    "CONTRIBUTOR_LICENSE_AGREEMENT.md",
+    "DEFENSIVE_PUBLICATION.md",
+    "MAINTAINERS.md",
+    "NOTICE.md",
     "RELEASE.md",
+    "TRADEMARKS.md",
     "CHANGELOG.md",
 ]
 

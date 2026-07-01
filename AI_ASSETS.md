@@ -4,6 +4,27 @@
 
 Nunneri AI Assets is a provider-neutral library of AI agents, skills, commands, workflows, guides, and adapter outputs for Nunneri Engineering.
 
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+## Licensing Model
+
+Nunneri AI Assets are published as an AGPLv3 Community Edition with commercial licensing available.
+
+- AGPLv3 Community Edition: `LICENSE`
+- Commercial license path: `COMMERCIAL_LICENSE.md`
+- Trademark policy: `TRADEMARKS.md`
+- Maintainers and originators: `MAINTAINERS.md`
+
+Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com` as the temporary fallback until Nunneri domain email is active.
+
+## Architecture and Defensive Publication
+
+- `ARCHITECTURE.md` documents the product and engineering architecture.
+- `DEFENSIVE_PUBLICATION.md` documents the runtime-neutral control plane for defensive-publication and public-disclosure purposes.
+- `NUNNERI_RUNTIME_CONTRACT.md` documents the neutral runtime contract and adapter mapping rules.
+
+Do not use "patent pending" language unless a provisional or nonprovisional patent application has actually been filed.
+
 ## Provider-Neutral Source of Truth
 
 Canonical assets live under `assets/`. Provider-specific files are generated into `dist/`.

@@ -11,10 +11,18 @@ CONTEXT_REFERENCE = REFERENCE / "context"
 EXAMPLES_REFERENCE = REFERENCE / "examples"
 
 ROOT_DOCS = [
+    "LICENSE",
     "README.md",
+    "ARCHITECTURE.md",
     "AI_ASSETS.md",
     "CONTRIBUTING.md",
+    "COMMERCIAL_LICENSE.md",
+    "CONTRIBUTOR_LICENSE_AGREEMENT.md",
+    "DEFENSIVE_PUBLICATION.md",
+    "MAINTAINERS.md",
+    "NOTICE.md",
     "RELEASE.md",
+    "TRADEMARKS.md",
     "CHANGELOG.md",
     "VERSION",
 ]

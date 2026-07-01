@@ -7,6 +7,17 @@ python3 scripts/build_adapters.py
 ./install.sh --provider all --project --force
 ```
 
+## License and Commercial Use
+
+Nunneri is published as an AGPLv3 Community Edition with commercial licensing available.
+
+- Use `LICENSE` for AGPLv3 Community Edition terms.
+- Use `COMMERCIAL_LICENSE.md` when a team needs proprietary, embedded, SaaS, OEM, managed-service, indemnity, or enterprise procurement terms.
+- Use `TRADEMARKS.md` for Nunneri name and logo usage.
+- Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com` as the temporary fallback until Nunneri domain email is active.
+
+Before installing Nunneri into a customer, enterprise, or closed-source repository, confirm whether AGPLv3 obligations are acceptable or whether a commercial license is required.
+
 ## Supported Providers
 
 Claude Code, Codex, Gemini, and open-source agent frameworks.

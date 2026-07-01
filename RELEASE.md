@@ -16,7 +16,11 @@ Monthly by default, with ad hoc patch releases for urgent fixes.
 
 ## Release Roles
 
-Release owner: yamini.sk@suranku.com.
+Release owner: `core@nunneri.com`.
+
+Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`.
+
+Commercial license and trademark-impacting release decisions require Nunneri Core Team approval.
 
 ## Branch Strategy
 
@@ -48,11 +52,12 @@ Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the sa
 2. Cut `release/vX.Y.Z` from `main`.
 3. Update `VERSION` and `CHANGELOG.md`.
 4. Run validation, adapter builds, docs sync, consumer install checks, and package checks.
-5. Create a release PR from `release/vX.Y.Z` back to `main`.
-6. After approval, tag the release branch with `vX.Y.Z`.
-7. Push the release branch and tag.
-8. Confirm GitHub Actions publishes the internal prerelease with dist archives.
-9. Merge release branch changes back to `main` if the branch contains release-only commits.
+5. Confirm `ARCHITECTURE.md`, `DEFENSIVE_PUBLICATION.md`, `LICENSE`, `COMMERCIAL_LICENSE.md`, `TRADEMARKS.md`, `MAINTAINERS.md`, `NOTICE.md`, and `CONTRIBUTOR_LICENSE_AGREEMENT.md` are present and synced to reference docs.
+6. Create a release PR from `release/vX.Y.Z` back to `main`.
+7. After approval, tag the release branch with `vX.Y.Z`.
+8. Push the release branch and tag.
+9. Confirm GitHub Actions publishes the internal prerelease with dist archives.
+10. Merge release branch changes back to `main` if the branch contains release-only commits.
 
 ## Internal Dist Release Flow
 

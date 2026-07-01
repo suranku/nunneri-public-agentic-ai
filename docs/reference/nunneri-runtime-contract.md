@@ -4,6 +4,10 @@ The Nunneri Runtime Contract is the provider- and framework-neutral export layer
 
 Authors edit `assets/`. The build step generates `dist/nunneri-runtime/` first, then derives runtime-specific exports for LangGraph, CrewAI, Microsoft AutoGen, and Microsoft Semantic Kernel.
 
+For the broader system architecture and public-disclosure record, see `ARCHITECTURE.md` and `DEFENSIVE_PUBLICATION.md`.
+
+Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
+
 ## Generated Contract
 
 ```text
@@ -65,10 +69,13 @@ No runtime SDK dependencies are installed by this repository.
 
 `examples/runtime-contract-consumer/` contains a dependency-free Python example that reads `dist/nunneri-runtime/contract.json`, loads `triage-nine-phase`, and projects it into a CrewAI-style flow shape while preserving approval gates.
 
+`examples/crewai-runtime-runner/` contains the first runnable CrewAI-facing contract harness. It reads `dist/crewai/flows/triage-nine-phase.json`, runs the generated steps, supports approve/reject gate paths, and verifies rejection cancels downstream implementation work. It does not require the CrewAI SDK.
+
 Validate it with:
 
 ```bash
 python3 scripts/check_runtime_examples.py
+python3 scripts/check_crewai_runtime_runner.py
 ```
 
 ## Interactive Demo

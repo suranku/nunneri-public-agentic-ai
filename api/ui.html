@@ -121,11 +121,14 @@ body.resizing-y{user-select:none;cursor:row-resize}
 .gate-card h4{margin:0 0 4px;font-size:12px;color:var(--yellow)}
 .gate-card p{margin:0 0 8px;font-size:11px;color:var(--muted);line-height:1.45}
 .gate-card .actions{display:flex;gap:8px;flex-wrap:wrap}
+.gate-card .decision-state{font-size:11px;font-weight:700;color:var(--yellow)}
 .gate-card button{border:1px solid var(--border);border-radius:6px;padding:5px 9px;
   color:var(--text);background:var(--surface2);cursor:pointer;font-size:11px;font-weight:700}
 .gate-card button.approve{border-color:#22c55e66;color:var(--green)}
 .gate-card button.reject{border-color:#ef444466;color:var(--red)}
 .gate-card.simulated button{display:none}
+.gate-card.compact{margin:0 0 10px;padding:9px 10px}
+.gate-card button:disabled{opacity:.45;cursor:not-allowed}
 
 /* ── Right panel ─────────────────────────────────────────────── */
 #right{width:272px;min-width:220px;max-width:560px;background:var(--surface);
@@ -205,6 +208,23 @@ body.resizing-y{user-select:none;cursor:row-resize}
   color:var(--text);word-break:break-word;max-height:130px;overflow-y:auto;line-height:1.5}
 .si-value.phase-val{font-size:12px;font-weight:600;color:var(--accent);background:var(--surface3)}
 .si-empty{color:var(--muted);font-style:italic}
+.run-summary{margin:8px 0 10px;padding:10px 12px;border:1px solid #22c55e44;
+  border-left:3px solid var(--green);border-radius:8px;background:#07190f}
+.run-summary h4{font-size:12px;color:var(--green);margin-bottom:6px}
+.run-summary pre{white-space:pre-wrap;font-family:var(--font);font-size:12px;line-height:1.45;color:var(--text)}
+.stage-report{margin:10px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface2)}
+.stage-report summary{cursor:pointer;list-style:none;padding:8px 10px;display:flex;gap:8px;align-items:center;
+  font-size:12px;font-weight:700;color:var(--text);background:var(--surface3)}
+.stage-report summary::-webkit-details-marker{display:none}
+.stage-report summary::before{content:"+";color:var(--muted);font-family:monospace}
+.stage-report[open] summary::before{content:"-"}
+.stage-report .stage-status{margin-left:auto;font-size:10px;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--border);border-radius:999px;padding:1px 7px}
+.stage-report .stage-status.done,.stage-report .stage-status.approved{color:var(--green);border-color:#22c55e55}
+.stage-report .stage-status.waiting_approval{color:var(--yellow);border-color:#f59e0b55}
+.stage-report .stage-status.rejected,.stage-report .stage-status.cancelled{color:var(--red);border-color:#ef444455}
+.stage-report pre{white-space:pre-wrap;font-family:var(--font);font-size:12px;line-height:1.5;
+  padding:9px 10px;color:var(--text)}
 
 .cp-item{display:flex;align-items:center;gap:8px;padding:5px 0;
   cursor:pointer;border-bottom:1px solid var(--border)}
@@ -324,6 +344,7 @@ body.resizing-y{user-select:none;cursor:row-resize}
   <div class="spacer"></div>
   <a class="hl" href="/">&#8592; Nunneri Home</a>
   <a class="hl" href="/docs" target="_blank">API Docs</a>
+  <a class="hl" id="auth-link" href="/auth/login">Login</a>
   <div id="queue-badge"><span class="q-dot"></span><span id="queue-badge-txt"></span><button onclick="resetQueue(event)" title="Reset stale queue counter">Reset</button></div>
   <div id="health-badge">Checking&#8230;</div>
 </div>
@@ -410,6 +431,7 @@ body.resizing-y{user-select:none;cursor:row-resize}
       </div>
       <div class="nc-section">Contract Default</div>
       <div class="nc-contract" id="nc-contract"><span class="muted">Select a workflow phase.</span></div>
+      <div id="nc-gate-actions"></div>
       <div class="nc-section">Instructions Override</div>
       <textarea class="nc-textarea" id="nc-prompt"
         placeholder="Override what this workflow phase should do. Leave blank to use the contract default."></textarea>
@@ -453,6 +475,43 @@ body.resizing-y{user-select:none;cursor:row-resize}
 </div>
 
 <script>
+// ── Auth/session fetch wrapper ────────────────────────────────────────────
+const _rawFetch = window.fetch.bind(window);
+let authToken = localStorage.getItem('nunneri:sessionToken') || '';
+const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+if (hashParams.get('token')) {
+  authToken = hashParams.get('token');
+  localStorage.setItem('nunneri:sessionToken', authToken);
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+window.fetch = (input, init = {}) => {
+  const headers = new Headers(init.headers || {});
+  if (authToken && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + authToken);
+  return _rawFetch(input, {...init, headers});
+};
+
+async function checkAuthState() {
+  const link = document.getElementById('auth-link');
+  if (!link) return;
+  try {
+    const r = await fetch('/auth/me');
+    if (!r.ok) throw new Error('not authenticated');
+    const user = await r.json();
+    link.textContent = user.email || user.name || 'Signed in';
+    link.href = '#';
+    link.onclick = (ev) => {
+      ev.preventDefault();
+      localStorage.removeItem('nunneri:sessionToken');
+      authToken = '';
+      location.href = '/auth/login';
+    };
+  } catch (_) {
+    link.textContent = 'Login';
+    link.href = '/auth/login';
+    link.onclick = null;
+  }
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 const NODE_W = 160, NODE_H = 40, GAP_Y = 72, PADDING = 50;
 
@@ -475,6 +534,7 @@ let currentLoadedRun = null;
 // ── Init ───────────────────────────────────────────────────────────────────
 window.onload = async () => {
   setupPaneResizers();
+  await checkAuthState();
   await checkHealth();
   await loadAgents();
 };
@@ -546,15 +606,16 @@ async function checkHealth() {
   try {
     const d = await fetch('/health').then(r => r.json());
     const b = document.getElementById('health-badge');
-    if (d.ollama) {
-      b.textContent = 'Ollama ✓ · ' + d.available_models.length + ' models';
+    if (d.ollama || (d.models || []).some(m => m.configured)) {
+      const configuredCount = (d.models || []).filter(m => m.configured).length || d.available_models.length;
+      b.textContent = 'Models ✓ · ' + configuredCount + ' configured';
       b.className = 'ok';
-      populateModels(d.available_models);
+      populateModels(d.models || d.available_models || []);
     } else {
-      b.textContent = 'Ollama offline';
+      b.textContent = 'No models configured';
       b.className = 'err';
     }
-  } catch { document.getElementById('health-badge').textContent = 'Ollama offline'; }
+  } catch { document.getElementById('health-badge').textContent = 'Model check failed'; }
 }
 
 // ── Ollama queue badge (polls every 4s) ────────────────────────────────────
@@ -614,21 +675,31 @@ function stopQueuePoll() {
 function populateModels(models) {
   const sel = document.getElementById('model-sel');
   sel.innerHTML = '';
+  const normalized = models.map(m => typeof m === 'string'
+    ? {id:m, provider:'ollama', configured:true}
+    : m
+  );
   const pref = ['mistral','phi3:mini','llama3','qwen2','phi3','codellama','gemma'];
-  const sorted = [...models].sort((a,b) => {
-    const ai = pref.findIndex(p => a.startsWith(p));
-    const bi = pref.findIndex(p => b.startsWith(p));
-    if (ai < 0 && bi < 0) return a.localeCompare(b);
+  const sorted = [...normalized].sort((a,b) => {
+    if (!!a.configured !== !!b.configured) return a.configured ? -1 : 1;
+    const ai = pref.findIndex(p => a.id.startsWith(p));
+    const bi = pref.findIndex(p => b.id.startsWith(p));
+    if (ai < 0 && bi < 0) return a.id.localeCompare(b.id);
     if (ai < 0) return 1; if (bi < 0) return -1;
     return ai - bi;
   });
   for (const m of sorted) {
     const o = document.createElement('option');
-    o.value = m; o.textContent = m.length > 14 ? m.slice(0,13)+'…' : m;
-    o.title = m;
+    o.value = m.id;
+    const label = m.configured ? m.id : m.id + ' (key missing)';
+    o.textContent = label.length > 24 ? label.slice(0,23)+'…' : label;
+    o.title = label;
+    o.disabled = !m.configured;
     sel.appendChild(o);
   }
-  selModel = sorted[0] || 'mistral';
+  const first = sorted.find(m => m.configured);
+  selModel = first ? first.id : 'mistral';
+  if (first) sel.value = first.id;
   sel.onchange = () => { selModel = sel.value; };
 }
 
@@ -707,6 +778,13 @@ function makeItem(it) {
   return d;
 }
 
+function normalizeNodeDef(node) {
+  return {
+    ...node,
+    type: node.type || node.node_type || 'work',
+  };
+}
+
 async function selectAgent(name, category, isCmd) {
   selAgent = {name, category, isCmd};
   // Refresh list to update active highlight without losing search state
@@ -727,13 +805,13 @@ async function loadGraphDefinition(name, category, isCmd) {
     const d = await r.json();
     graphDefinition = {
       ...d,
-      nodes: d.nodes && d.nodes.length ? d.nodes : getNodeDefs(category, isCmd),
+      nodes: (d.nodes && d.nodes.length ? d.nodes : getNodeDefs(category, isCmd)).map(normalizeNodeDef),
       edges: d.edges || [],
     };
     if (!graphDefinition.edges.length) graphDefinition.edges = linearEdges(graphDefinition.nodes);
     return graphDefinition;
   } catch (e) {
-    const nodes = getNodeDefs(category, isCmd);
+    const nodes = getNodeDefs(category, isCmd).map(normalizeNodeDef);
     graphDefinition = {
       asset: {name, kind: isCmd ? 'command' : 'agent', category},
       runtime: 'fallback',
@@ -809,9 +887,13 @@ async function createThread() {
   const r = await fetch('/threads', {method:'POST'});
   const t = await r.json();
   selThreadId = t.id;
+  currentRunId = null;
+  currentLoadedRun = null;
+  pendingGate = null;
   updateSiThread(t.id);
   switchLt('threads');
   await loadThreads();
+  showNewThreadReady(t);
 }
 
 function updateSiThread(id) {
@@ -822,10 +904,29 @@ function updateSiThread(id) {
   el.onclick = id ? () => copyText(null, id, el) : null;
 }
 
+function showNewThreadReady(thread) {
+  clearTranscript({placeholder:false});
+  appendTranscript('phase', 'New thread ready');
+  const tc = document.getElementById('transcript');
+  const info = document.createElement('div');
+  info.style.cssText = 'font-size:12px;color:var(--muted);line-height:1.55;margin-top:6px';
+  info.innerHTML =
+    'Thread <span style="font-family:monospace;color:var(--text)">' + esc(thread.id) + '</span> is selected. ' +
+    'Choose an asset if needed, enter a prompt, then click Run. The next run will use this thread and keep its checkpoint/history.';
+  tc.appendChild(info);
+  document.getElementById('si-phase').textContent = 'New thread';
+  document.getElementById('si-output').innerHTML = '<span class="si-empty">No run yet</span>';
+  renderCheckpoints([]);
+}
+
 async function loadRunForThread(thread) {
   try {
+    pendingGate = null;
     const d = await fetch('/threads/' + thread.id + '/runs').then(r => r.json());
-    if (!d.runs || !d.runs.length) return;
+    if (!d.runs || !d.runs.length) {
+      showNewThreadReady(thread);
+      return;
+    }
     const lastRun = d.runs[0];
     currentLoadedRun = lastRun;
     currentRunId = lastRun.id;
@@ -845,7 +946,7 @@ async function loadRunForThread(thread) {
     const definition = selAgent
       ? await loadGraphDefinition(selAgent.name, category, isCmd)
       : {nodes: getNodeDefs(category, isCmd), edges: linearEdges(getNodeDefs(category, isCmd))};
-    const nodes = definition.nodes;
+    const nodes = (definition.nodes || []).map(normalizeNodeDef);
     const edges = definition.edges;
     liveNodes = nodes; liveEdges = edges;
     nodeState = {}; nodePos = {};
@@ -867,7 +968,7 @@ async function loadRunForThread(thread) {
     }
 
     // Build transcript
-    clearTranscript();
+    clearTranscript({placeholder:false});
     const tc = document.getElementById('transcript');
 
     // Status banner — error / stuck / done
@@ -912,25 +1013,135 @@ async function loadRunForThread(thread) {
       '<button style="font-size:11px;padding:5px 9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:6px;cursor:pointer" onclick="rerunLoadedRun()">Rerun as new thread</button>';
     tc.appendChild(actionRow);
 
-    if (run.output) {
+    const waitingNode = (run.nodes || []).find(n => n.status === 'waiting_approval');
+    if (waitingNode) {
+      const def = liveNodes.find(n => n.id === waitingNode.node_id) || {};
+      const storedPayload = gatePayloadFromNode(waitingNode);
+      pendingGate = {
+        id: waitingNode.node_id,
+        thread_id: thread.id,
+        run_id: lastRun.id,
+      };
+      renderGateCard({
+        id: waitingNode.node_id,
+        thread_id: thread.id,
+        run_id: lastRun.id,
+        payload: {
+          gate_id: waitingNode.node_id,
+          question: storedPayload.question || (def.approval && def.approval.question) || ('Approve ' + waitingNode.label + ' and continue?'),
+          phase: waitingNode.label,
+          node_output: storedPayload.node_output || run.output || '',
+          allowed_actions: storedPayload.allowed_actions || ['approve', 'reject'],
+        },
+      });
+    } else {
+      pendingGate = null;
+    }
+
+    if (isMeaningfulOutput(run.output)) {
       const span = document.createElement('span');
-      span.style.cssText = 'white-space:pre-wrap;display:block;margin-top:4px;color:var(--text)';
+      span.style.cssText = 'white-space:pre-wrap;display:block;margin-top:10px;color:var(--text)';
       span.textContent = run.output;
       tc.appendChild(span);
     }
 
+    renderRunReport(run, waitingNode);
+
     // Update state inspector
     document.getElementById('si-phase').textContent =
+      waitingNode ? 'Waiting for approval' :
       lastRun.status === 'done' ? 'Complete' :
       lastRun.status === 'error' ? 'Error' :
       isStuck ? 'Stuck' : lastRun.status || '—';
-    if (run.output) {
-      const tail = run.output.length > 300 ? run.output.slice(-300) : run.output;
+    const inspectorOutput = finalSummaryForRun(run);
+    if (inspectorOutput) {
+      const tail = inspectorOutput.length > 300 ? inspectorOutput.slice(-300) : inspectorOutput;
       document.getElementById('si-output').textContent = tail;
     }
   } catch(e) {
     console.error('loadRunForThread failed', e);
   }
+}
+
+function outputText(value) {
+  if (value == null || value === '') return '';
+  return String(value);
+}
+
+function isMeaningfulOutput(value) {
+  const text = outputText(value).trim();
+  if (!text) return false;
+  if (text === '[approved]' || text === '[rejected]' || text === '[cancelled]') return false;
+  if (text.startsWith('{') && text.includes('"approval_gate"')) return false;
+  return true;
+}
+
+function isSummaryCandidate(value) {
+  if (!isMeaningfulOutput(value)) return false;
+  const text = outputText(value).trim();
+  const compact = text.replace(/[-_\s]+/g, ' ').trim().toLowerCase();
+  if (compact === 'proceed?' || compact === 'proceed') return false;
+  if (compact.startsWith('do you want to proceed')) return false;
+  if (compact.includes('placeholder for your approval')) return false;
+  if (compact.includes('please replace it with the actual decision')) return false;
+  return true;
+}
+
+function gatePayloadSummary(node) {
+  const payload = gatePayloadFromNode(node);
+  const context = isMeaningfulOutput(payload.node_output) ? payload.node_output : '';
+  if (!payload.question && !context) return '';
+  return [
+    payload.question ? 'Question: ' + payload.question : '',
+    context ? 'Context: ' + context : '',
+  ].filter(Boolean).join('\n\n');
+}
+
+function finalSummaryForRun(run) {
+  if (isSummaryCandidate(run.output)) return outputText(run.output);
+  const nodes = run.nodes || [];
+  const preferred = ['validation', 'root_cause_analysis', 'classification', 'intake'];
+  for (const nodeId of preferred) {
+    const node = [...nodes].reverse().find(n => n.node_id === nodeId && isSummaryCandidate(n.output));
+    if (node) return outputText(node.output);
+  }
+  const useful = [...nodes].reverse().find(n => isSummaryCandidate(n.output));
+  return useful ? outputText(useful.output) : '';
+}
+
+function renderRunReport(run, waitingNode) {
+  const tc = document.getElementById('transcript');
+  const old = document.getElementById('run-report');
+  if (old) old.remove();
+
+  const wrap = document.createElement('div');
+  wrap.id = 'run-report';
+
+  const summaryText = finalSummaryForRun(run);
+  if (run.status === 'done' && summaryText) {
+    const summary = document.createElement('div');
+    summary.className = 'run-summary';
+    summary.innerHTML = '<h4>Final summary</h4><pre>' + esc(summaryText) + '</pre>';
+    wrap.appendChild(summary);
+  }
+
+  for (const node of run.nodes || []) {
+    const details = document.createElement('details');
+    details.className = 'stage-report';
+    if (waitingNode && node.node_id === waitingNode.node_id) details.open = true;
+    const status = node.status || 'pending';
+    const label = 'Phase ' + node.phase + ': ' + (node.label || node.node_id);
+    const duration = node.entered_at && node.exited_at ? ' · ' + Math.max(0, node.exited_at - node.entered_at).toFixed(1) + 's' : '';
+    const body = node.node_type === 'human_approval'
+      ? (gatePayloadSummary(node) || 'Decision recorded: ' + (node.status || 'unknown'))
+      : (isMeaningfulOutput(node.output) ? outputText(node.output) : 'No output recorded for this stage.');
+    details.innerHTML =
+      '<summary><span>' + esc(label) + duration + '</span><span class="stage-status ' + esc(status) + '">' + esc(status) + '</span></summary>' +
+      '<pre>' + esc(body) + '</pre>';
+    wrap.appendChild(details);
+  }
+
+  if (wrap.children.length) tc.appendChild(wrap);
 }
 
 async function cancelRunById(runId) {
@@ -1265,6 +1476,7 @@ async function openNodeConfig(nodeId) {
 
   // Clear form
   renderContractDefaults(node);
+  renderNodeGateActions(node);
   document.getElementById('nc-prompt').value = node.instructions || node.prompt || '';
   document.getElementById('nc-labels').value = (node.classification_options || []).join(', ');
   document.getElementById('nc-notes').value = '';
@@ -1351,6 +1563,43 @@ function ncReset() {
   renderRules();
 }
 
+function gatePayloadFromNode(node) {
+  if (!node || !node.output) return {};
+  try {
+    const parsed = JSON.parse(node.output);
+    if (parsed && parsed.type === 'approval_gate') return parsed;
+  } catch (_) {}
+  return {};
+}
+
+function renderNodeGateActions(node) {
+  const target = document.getElementById('nc-gate-actions');
+  if (!target) return;
+  target.innerHTML = '';
+  if (!node || node.type !== 'human_approval') return;
+
+  const status = nodeState[node.id];
+  if (status !== 'waiting_approval') {
+    const idle = document.createElement('div');
+    idle.className = 'nc-contract';
+    idle.innerHTML = '<span class="muted">No approval is currently waiting for this gate.</span>';
+    target.appendChild(idle);
+    return;
+  }
+
+  const question = (node.approval && node.approval.question) || ('Approve ' + (node.label || node.id) + ' and continue?');
+  const card = document.createElement('div');
+  card.className = 'gate-card compact';
+  card.innerHTML =
+    '<h4>Approval pending</h4>' +
+    '<p>' + esc(question) + '</p>' +
+    '<div class="actions">' +
+      '<button class="approve" onclick="decideGate(&quot;' + esc(node.id) + '&quot;, true, &quot;' + esc(pendingGate ? pendingGate.thread_id : '') + '&quot;, &quot;' + esc(pendingGate ? pendingGate.run_id || '' : '') + '&quot;)">Approve and resume</button>' +
+      '<button class="reject" onclick="decideGate(&quot;' + esc(node.id) + '&quot;, false, &quot;' + esc(pendingGate ? pendingGate.thread_id : '') + '&quot;, &quot;' + esc(pendingGate ? pendingGate.run_id || '' : '') + '&quot;)">Reject and stop</button>' +
+    '</div>';
+  target.appendChild(card);
+}
+
 // ── Run ────────────────────────────────────────────────────────────────────
 async function handleRun() {
   const msg = document.getElementById('msg-input').value.trim();
@@ -1382,7 +1631,7 @@ async function handleRun() {
   const definition = graphDefinition && graphDefinition.asset && graphDefinition.asset.name === selAgent.name
     ? graphDefinition
     : await loadGraphDefinition(selAgent.name, selAgent.category, selAgent.isCmd);
-  liveNodes = definition.nodes; liveEdges = definition.edges;
+  liveNodes = (definition.nodes || []).map(normalizeNodeDef); liveEdges = definition.edges;
   nodeState = {}; nodePos = {};
   liveNodes.forEach(n => { nodeState[n.id]='pending'; });
   renderDAG(liveNodes, liveEdges);
@@ -1473,25 +1722,66 @@ function renderGateCard(ev) {
   card.id = 'gate-card-' + ev.id;
   const question = payload.question || ('Approval required for ' + ev.id);
   const prior = payload.node_output ? String(payload.node_output).slice(0, 260) : '';
+  const threadId = ev.thread_id || (pendingGate && pendingGate.thread_id) || '';
+  const runId = ev.run_id || (pendingGate && pendingGate.run_id) || '';
   card.innerHTML =
     '<h4>Approval required: ' + esc(ev.id.replace(/_/g,' ')) + '</h4>' +
     '<p>' + esc(question) + (prior ? '<br><br>Last output: ' + esc(prior) : '') + '</p>' +
     '<div class="actions">' +
-      '<button class="approve" onclick="decideGate(&quot;' + esc(ev.id) + '&quot;, true)">Approve and resume</button>' +
-      '<button class="reject" onclick="decideGate(&quot;' + esc(ev.id) + '&quot;, false)">Reject and stop</button>' +
+      '<button class="approve" onclick="decideGate(&quot;' + esc(ev.id) + '&quot;, true, &quot;' + esc(threadId) + '&quot;, &quot;' + esc(runId) + '&quot;)">Approve and resume</button>' +
+      '<button class="reject" onclick="decideGate(&quot;' + esc(ev.id) + '&quot;, false, &quot;' + esc(threadId) + '&quot;, &quot;' + esc(runId) + '&quot;)">Reject and stop</button>' +
     '</div>';
   tc.appendChild(card);
   scrollTranscript();
+  const activeNode = liveNodes.find(n => n.id === ev.id);
+  if (_ncNodeId === ev.id && activeNode) renderNodeGateActions(activeNode);
 }
 
-async function decideGate(gateId, approved) {
-  if (!pendingGate || pendingGate.id !== gateId || !pendingGate.thread_id) return;
+function removeGateCard(gateId) {
   const card = document.getElementById('gate-card-' + gateId);
-  if (card) {
-    card.querySelectorAll('button').forEach(b => b.disabled = true);
+  if (card) card.remove();
+  const activeNode = liveNodes.find(n => n.id === gateId);
+  if (_ncNodeId === gateId && activeNode) renderNodeGateActions(activeNode);
+}
+
+function setGateCardSubmitted(gateId, approved) {
+  const label = approved ? 'Approval submitted. Resuming…' : 'Rejection submitted. Stopping…';
+  const transcriptActions = document.querySelector('#gate-card-' + CSS.escape(gateId) + ' .actions');
+  const configActions = document.querySelector('#nc-gate-actions .actions');
+  [transcriptActions, configActions].forEach(actions => {
+    if (!actions) return;
+    actions.innerHTML = '<span class="decision-state">' + esc(label) + '</span>';
+  });
+}
+
+function restoreGateCardActions(gateId, approved, threadId, runId) {
+  const actionsHtml =
+    '<button class="approve" onclick="decideGate(&quot;' + esc(gateId) + '&quot;, true, &quot;' + esc(threadId) + '&quot;, &quot;' + esc(runId || '') + '&quot;)">Approve and resume</button>' +
+    '<button class="reject" onclick="decideGate(&quot;' + esc(gateId) + '&quot;, false, &quot;' + esc(threadId) + '&quot;, &quot;' + esc(runId || '') + '&quot;)">Reject and stop</button>';
+  const transcriptActions = document.querySelector('#gate-card-' + CSS.escape(gateId) + ' .actions');
+  const configActions = document.querySelector('#nc-gate-actions .actions');
+  [transcriptActions, configActions].forEach(actions => {
+    if (!actions) return;
+    actions.innerHTML = actionsHtml;
+  });
+}
+
+async function decideGate(gateId, approved, threadId, runId) {
+  const gateRef = {
+    id: gateId,
+    thread_id: threadId || (pendingGate && pendingGate.id === gateId ? pendingGate.thread_id : ''),
+    run_id: runId || (pendingGate && pendingGate.id === gateId ? pendingGate.run_id : ''),
+  };
+  if (!gateRef.thread_id) {
+    appendTranscript('error', 'Approval action failed: no thread is attached to ' + gateId);
+    return;
   }
+  pendingGate = gateRef;
+  document.querySelectorAll('#gate-card-' + CSS.escape(gateId) + ' button, #nc-gate-actions button')
+    .forEach(b => b.disabled = true);
+  setGateCardSubmitted(gateId, approved);
   appendTranscript('gate', (approved ? 'Approving ' : 'Rejecting ') + gateId.replace(/_/g,' ') + '…');
-  const url = `/threads/${encodeURIComponent(pendingGate.thread_id)}/gates/${encodeURIComponent(gateId)}/${approved ? 'approve' : 'reject'}`;
+  const url = `/threads/${encodeURIComponent(gateRef.thread_id)}/gates/${encodeURIComponent(gateId)}/${approved ? 'approve' : 'reject'}`;
   try {
     const resp = await fetch(url, {
       method:'POST',
@@ -1502,7 +1792,7 @@ async function decideGate(gateId, approved) {
     await streamSSE(resp);
   } catch (e) {
     appendTranscript('error', 'Approval action failed: ' + e.message);
-    if (card) card.querySelectorAll('button').forEach(b => b.disabled = false);
+    restoreGateCardActions(gateId, approved, gateRef.thread_id, gateRef.run_id);
   } finally {
     await loadThreads();
   }
@@ -1528,12 +1818,12 @@ function handleEvent(ev) {
 
     case 'graph_start':
       if (ev.nodes) {
-        liveNodes = ev.nodes;
-        liveEdges = linearEdges(ev.nodes);
+        liveNodes = ev.nodes.map(normalizeNodeDef);
+        liveEdges = linearEdges(liveNodes);
         nodeState = {};
         // nodePos already reset in handleRun() before this event arrives
-        ev.nodes.forEach(n => { nodeState[n.id]='pending'; });
-        renderDAG(ev.nodes, liveEdges);
+        liveNodes.forEach(n => { nodeState[n.id]='pending'; });
+        renderDAG(liveNodes, liveEdges);
       }
       if (ev.thread_id) { selThreadId=ev.thread_id; updateSiThread(ev.thread_id); }
       if (ev.run_id) currentRunId = ev.run_id;
@@ -1627,6 +1917,7 @@ function handleEvent(ev) {
       appendTranscript('gate', '✓ Gate approved: ' + ev.id.replace(/_/g,' '));
       nodeState[ev.id]='approved';
       setNodeVisual(ev.id,'approved');
+      removeGateCard(ev.id);
       pendingGate = null;
       break;
 
@@ -1634,6 +1925,7 @@ function handleEvent(ev) {
       appendTranscript('gate', '✕ Gate rejected: ' + ev.id.replace(/_/g,' '));
       nodeState[ev.id]='rejected';
       setNodeVisual(ev.id,'rejected');
+      removeGateCard(ev.id);
       pendingGate = null;
       break;
 
@@ -1702,9 +1994,11 @@ function scrollTranscript() {
   const tc = document.getElementById('transcript');
   tc.scrollTop = tc.scrollHeight;
 }
-function clearTranscript() {
-  document.getElementById('transcript').innerHTML =
-    '<span class="si-empty">Run an asset to see output…</span>';
+function clearTranscript(opts) {
+  const showPlaceholder = !opts || opts.placeholder !== false;
+  document.getElementById('transcript').innerHTML = showPlaceholder
+    ? '<span class="si-empty">Run an asset to see output…</span>'
+    : '';
 }
 
 // ── Checkpoints ────────────────────────────────────────────────────────────

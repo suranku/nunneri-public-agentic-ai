@@ -13,6 +13,14 @@ def main() -> int:
     args = parser.parse_args()
     # args.local_only reserved for future remote-only gate differentiation
     required = [
+        "LICENSE",
+        "ARCHITECTURE.md",
+        "DEFENSIVE_PUBLICATION.md",
+        "COMMERCIAL_LICENSE.md",
+        "TRADEMARKS.md",
+        "MAINTAINERS.md",
+        "NOTICE.md",
+        "CONTRIBUTOR_LICENSE_AGREEMENT.md",
         "CHANGELOG.md",
         "RELEASE.md",
         "VERSION",
@@ -22,10 +30,14 @@ def main() -> int:
         "examples/consumer-repo/README.md",
         "examples/runtime-contract-consumer/README.md",
         "examples/runtime-contract-consumer/consume_runtime_contract.py",
+        "examples/crewai-runtime-runner/README.md",
+        "examples/crewai-runtime-runner/run_crewai_contract.py",
         "scripts/check_consumer_install.py",
         "scripts/check_runtime_examples.py",
+        "scripts/check_crewai_runtime_runner.py",
         "scripts/check_runtime_contract_demo.py",
         "scripts/check_graph_studio_contract.py",
+        "scripts/check_graph_definition_api.py",
         "scripts/check_user_setup_docs.py",
         "scripts/check_runtime_contract.py",
         "scripts/check_human_gates.py",
@@ -46,6 +58,31 @@ def main() -> int:
     if "## [Unreleased]" not in changelog:
         print("CHANGELOG.md must contain ## [Unreleased]")
         return 1
+    required_text = {
+        "README.md": ["AGPLv3 Community Edition", "Commercial licensing"],
+        "AI_ASSETS.md": ["AGPLv3 Community Edition", "COMMERCIAL_LICENSE.md", "DEFENSIVE_PUBLICATION.md"],
+        "ARCHITECTURE.md": ["runtime-neutral", "Graph Studio", "MinIO"],
+        "DEFENSIVE_PUBLICATION.md": ["Publication date", "Do not describe Nunneri as \"patent pending\"", "runtime-neutral control plane"],
+        "CONTRIBUTING.md": ["Contributor License Agreement", "commercial licensing"],
+        "NUNNERI_RUNTIME_CONTRACT.md": ["ARCHITECTURE.md", "DEFENSIVE_PUBLICATION.md"],
+        "docs/index.html": ["AGPLv3 Community Edition", "Commercial License", "Defensive Publication"],
+    }
+    for rel, needles in required_text.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for needle in needles:
+            if needle not in text:
+                print(f"{rel} must mention {needle!r}")
+                return 1
+    forbidden_text = {
+        "README.md": ["free forever", "fully open source"],
+        "docs/index.html": ["Free Forever", "free forever", "fully open source"],
+    }
+    for rel, needles in forbidden_text.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for needle in needles:
+            if needle in text:
+                print(f"{rel} contains outdated licensing phrase {needle!r}")
+                return 1
     print("Release readiness local checks passed")
     return 0
 

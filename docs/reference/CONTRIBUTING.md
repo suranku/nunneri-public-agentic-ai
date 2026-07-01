@@ -2,6 +2,8 @@
 
 Contributions to Nunneri AI Assets start with GitHub Issues.
 
+Nunneri uses an AGPLv3 Community Edition plus commercial licensing model. Contributions must acknowledge the Nunneri Contributor License Agreement in `CONTRIBUTOR_LICENSE_AGREEMENT.md` so the project can continue distributing accepted contributions under both AGPLv3 and commercial terms.
+
 ## Feedback and Enhancement Workflow
 
 ```text
@@ -22,11 +24,13 @@ Use `feature/<issue-number>-short-description` or `fix/<issue-number>-short-desc
 
 ## Step 4 - Open Pull Request and CI
 
-Every PR must link the accepted issue, include validation output, and declare provider impact.
+Every PR must link the accepted issue, include validation output, declare provider impact, and confirm CLA acceptance.
 
 ## Step 5 - CODEOWNERS Approval, Merge, and Distribute
 
 CODEOWNERS approval is required before merge.
+
+License, trademark, commercial-license, homepage, release, and generated-reference changes require Nunneri Core Team review.
 
 ## Issue Labels and Triage States
 
@@ -38,7 +42,19 @@ Accepted issues are assigned a release target and must be referenced in `CHANGEL
 
 ## Release Participation
 
-Release owner: yamini.sk@suranku.com.
+Release owner: `core@nunneri.com`.
+
+Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`.
+
+## Contributor License Agreement
+
+Every pull request must include this acknowledgment:
+
+```text
+I agree that my contribution is submitted under the Nunneri Contributor License Agreement.
+```
+
+Do not merge PRs that change license, trademark, commercial-use, or ownership language without CODEOWNERS approval.
 
 ## Provider Adapter Guidelines
 
