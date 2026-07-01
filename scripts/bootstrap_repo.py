@@ -497,15 +497,26 @@ def portal_html() -> str:
 <body>
   <nav>
     <a href="#hero">Home</a><a href="#problem">Problem</a><a href="#quick-start">Quick Start</a><a href="#examples">Examples</a><a href="#providers">Providers</a>
-    <a href="#licensing">Licensing</a><a href="#publication">Publication</a><a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
+    <a href="#licensing">Licensing</a><a href="#why-different">Why Different</a><a href="#publication">Publication</a><a href="#commands">Commands</a><a href="#agents">Agents</a><a href="#skills">Skills</a><a href="#context">Context</a><a href="#guides">Guides</a><a href="#reference">Reference</a>
   </nav>
   <main>
     <section id="hero" class="hero">
-      <span class="badge">Claude | Codex | Gemini | open-source | LangGraph runtime</span>
+      <span class="badge">AGPLv3 Community Edition | Commercial License Available | Security | Governance | Defensive Publication</span>
       <h1>{PLATFORM}</h1>
-      <p>Provider-agnostic AI agents, skills, commands, workflows, repository context, guides, and adapters for {TEAM}.</p>
+      <p>Runtime-neutral agentic AI control plane for provider adapters, runtime contracts, human-blocking gates, durable state, and Graph Studio execution.</p>
       <p>AGPLv3 Community Edition with Commercial License options for proprietary, embedded, SaaS, OEM, and enterprise procurement use.</p>
       <div id="stats" class="grid"></div>
+    </section>
+    <section id="architecture">
+      <h2>Runtime-Neutral Architecture</h2>
+      <p class="section-lede">Canonical assets generate one neutral contract, then project into providers, runtimes, Graph Studio, and release evidence.</p>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Canonical Assets</h3><p>Agents, skills, commands, workflows, and repo context under <code>assets/</code>.</p></div>
+        <div class="card" data-reveal><h3>Nunneri Runtime Contract</h3><p>Generated neutral JSON for phases, edges, approvals, context, and observability hints.</p></div>
+        <div class="card" data-reveal><h3>Providers and Runtimes</h3><p>Claude, Codex, Gemini, open-source exports, LangGraph, CrewAI, AutoGen, and Semantic Kernel.</p></div>
+        <div class="card" data-reveal><h3>Graph Studio and State</h3><p>FastAPI, provider routing, PostgreSQL-backed runs, RBAC, approvals, traces, and final summaries.</p></div>
+        <div class="card" data-reveal><h3>Trust Layer</h3><p>Security, governance, roadmap, citation, release packaging, licensing, and defensive publication stay aligned.</p></div>
+      </div>
     </section>
     <section id="licensing">
       <h2>Licensing</h2>
@@ -520,6 +531,16 @@ def portal_html() -> str:
       <div class="grid">
         <div class="card" data-reveal><h3>Architecture</h3><p><a href="reference/ARCHITECTURE.md">ARCHITECTURE.md</a> documents the runtime-neutral control plane, Graph Studio, RBAC, and storage boundaries.</p></div>
         <div class="card" data-reveal><h3>Defensive Publication</h3><p><a href="reference/DEFENSIVE_PUBLICATION.md">DEFENSIVE_PUBLICATION.md</a> documents implementation-level public disclosure. Do not use patent-pending language unless an application has been filed.</p></div>
+        <div class="card" data-reveal><h3>Project Trust</h3><p><a href="reference/SECURITY.md">Security</a>, <a href="reference/GOVERNANCE.md">governance</a>, <a href="reference/ROADMAP.md">roadmap</a>, and <a href="reference/CITATION.cff">citation</a> records are part of the release posture.</p></div>
+      </div>
+    </section>
+    <section id="why-different">
+      <h2>Why Nunneri is different</h2>
+      <div class="grid">
+        <div class="card" data-reveal><h3>Neutral source of truth</h3><p>Canonical assets generate provider files, runtime exports, and Graph Studio metadata from the same contract.</p></div>
+        <div class="card" data-reveal><h3>Human gates are control flow</h3><p>Approval phases pause execution and resume only through explicit approve or reject actions.</p></div>
+        <div class="card" data-reveal><h3>State outside the model</h3><p>Threads, runs, node outputs, approvals, errors, timing, and summaries are persisted outside the LLM context window.</p></div>
+        <div class="card" data-reveal><h3>Tenant-aware execution</h3><p>RBAC scopes dispatch, history, phase configuration, and approvals across organization, team, project, thread, and run boundaries.</p></div>
       </div>
     </section>
     <section id="problem">
@@ -622,7 +643,7 @@ NUNNERI_TRACE_MODE=otel</code></pre>
       <h2>Reference Documents</h2>
       <div class="grid">
         <div class="card"><h3>Executive Summaries</h3><p><a href="reference/guides/triage-executive-summary.md">Triage</a></p><p><a href="reference/guides/compliance-executive-summary.md">Compliance</a></p><p><a href="reference/guides/schema-lineage-executive-summary.md">Schema and Lineage</a></p></div>
-        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/ARCHITECTURE.md">Architecture</a></p><p><a href="reference/DEFENSIVE_PUBLICATION.md">Defensive Publication</a></p><p><a href="reference/COMMERCIAL_LICENSE.md">Commercial License</a></p><p><a href="reference/TRADEMARKS.md">Trademark Policy</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/guides/runtime-contract-demo.html">Runtime Contract Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
+        <div class="card"><h3>Templates and References</h3><p><a href="reference/AI_ASSETS.md">AI_ASSETS.md</a></p><p><a href="reference/ARCHITECTURE.md">Architecture</a></p><p><a href="reference/DEFENSIVE_PUBLICATION.md">Defensive Publication</a></p><p><a href="reference/COMMERCIAL_LICENSE.md">Commercial License</a></p><p><a href="reference/TRADEMARKS.md">Trademark Policy</a></p><p><a href="reference/SECURITY.md">Security Policy</a></p><p><a href="reference/GOVERNANCE.md">Governance</a></p><p><a href="reference/ROADMAP.md">Roadmap</a></p><p><a href="reference/CITATION.cff">Citation</a></p><p><a href="reference/context/repo-agent-instructions.md">Repo Agent Instructions</a></p><p><a href="reference/guides/end-user-langgraph-setup.md">End-User LangGraph Setup</a></p><p><a href="reference/guides/end-user-setup-demo.html">End-User Setup Demo</a></p><p><a href="reference/guides/runtime-contract-demo.html">Runtime Contract Demo</a></p><p><a href="reference/examples/consumer-repo/README.md">Consumer Repo Example</a></p><p><a href="reference/examples/runtime-contract-consumer/README.md">Runtime Contract Consumer</a></p><p><a href="reference/CONTRIBUTING.md">CONTRIBUTING.md</a></p><p><a href="reference/RELEASE.md">RELEASE.md</a></p><p><a href="reference/langgraph-runtime.md">LangGraph Runtime</a></p></div>
       </div>
     </section>
   </main>
@@ -1934,11 +1955,15 @@ ROOT_DOCS = [
     "ARCHITECTURE.md",
     "AI_ASSETS.md",
     "CONTRIBUTING.md",
+    "CITATION.cff",
     "COMMERCIAL_LICENSE.md",
     "CONTRIBUTOR_LICENSE_AGREEMENT.md",
     "DEFENSIVE_PUBLICATION.md",
+    "GOVERNANCE.md",
     "MAINTAINERS.md",
     "NOTICE.md",
+    "ROADMAP.md",
+    "SECURITY.md",
     "RELEASE.md",
     "TRADEMARKS.md",
     "CHANGELOG.md",
@@ -2358,10 +2383,14 @@ def main() -> int:
         "LICENSE",
         "ARCHITECTURE.md",
         "DEFENSIVE_PUBLICATION.md",
+        "CITATION.cff",
         "COMMERCIAL_LICENSE.md",
         "TRADEMARKS.md",
+        "GOVERNANCE.md",
         "MAINTAINERS.md",
         "NOTICE.md",
+        "ROADMAP.md",
+        "SECURITY.md",
         "CONTRIBUTOR_LICENSE_AGREEMENT.md",
         "CHANGELOG.md",
         "RELEASE.md",
@@ -2403,11 +2432,15 @@ def main() -> int:
     required_text = {
         "README.md": ["AGPLv3 Community Edition", "Commercial licensing"],
         "AI_ASSETS.md": ["AGPLv3 Community Edition", "COMMERCIAL_LICENSE.md", "DEFENSIVE_PUBLICATION.md"],
-        "ARCHITECTURE.md": ["runtime-neutral", "Graph Studio", "MinIO"],
+        "ARCHITECTURE.md": ["runtime-neutral", "Graph Studio", "MinIO", "Trust, Governance"],
         "DEFENSIVE_PUBLICATION.md": ["Publication date", "Do not describe Nunneri as \"patent pending\"", "runtime-neutral control plane"],
+        "CITATION.cff": ["Nunneri Public Agentic AI", "AGPL-3.0-only", "runtime contract"],
         "CONTRIBUTING.md": ["Contributor License Agreement", "commercial licensing"],
+        "GOVERNANCE.md": ["Nunneri Core Team", "Runtime Contract Stewardship"],
+        "ROADMAP.md": ["Community Edition", "Commercial and Enterprise Options"],
+        "SECURITY.md": ["Reporting a Vulnerability", "provider keys"],
         "NUNNERI_RUNTIME_CONTRACT.md": ["ARCHITECTURE.md", "DEFENSIVE_PUBLICATION.md"],
-        "docs/index.html": ["AGPLv3 Community Edition", "Commercial License", "Defensive Publication"],
+        "docs/index.html": ["AGPLv3 Community Edition", "Commercial License", "Defensive Publication", "Why Nunneri is different"],
     }
     for rel, needles in required_text.items():
         text = (ROOT / rel).read_text(encoding="utf-8")
@@ -2602,11 +2635,15 @@ ROOT_FILES = [
     "README.md",
     "ARCHITECTURE.md",
     "AI_ASSETS.md",
+    "CITATION.cff",
     "COMMERCIAL_LICENSE.md",
     "CONTRIBUTOR_LICENSE_AGREEMENT.md",
     "DEFENSIVE_PUBLICATION.md",
+    "GOVERNANCE.md",
     "MAINTAINERS.md",
     "NOTICE.md",
+    "ROADMAP.md",
+    "SECURITY.md",
     "RELEASE.md",
     "TRADEMARKS.md",
     "CHANGELOG.md",
@@ -2788,11 +2825,15 @@ REQUIRED_PATHS = [
     "README.md",
     "ARCHITECTURE.md",
     "AI_ASSETS.md",
+    "CITATION.cff",
     "COMMERCIAL_LICENSE.md",
     "CONTRIBUTOR_LICENSE_AGREEMENT.md",
     "DEFENSIVE_PUBLICATION.md",
+    "GOVERNANCE.md",
     "MAINTAINERS.md",
     "NOTICE.md",
+    "ROADMAP.md",
+    "SECURITY.md",
     "RELEASE.md",
     "TRADEMARKS.md",
     "CHANGELOG.md",
@@ -2803,7 +2844,11 @@ REQUIRED_PATHS = [
     "dist/open-source/AGENT_MANIFEST.md",
     "docs/reference/README.md",
     "docs/reference/ARCHITECTURE.md",
+    "docs/reference/CITATION.cff",
     "docs/reference/DEFENSIVE_PUBLICATION.md",
+    "docs/reference/GOVERNANCE.md",
+    "docs/reference/ROADMAP.md",
+    "docs/reference/SECURITY.md",
     "docs/reference/guides/end-user-langgraph-setup.md",
     "docs/reference/guides/end-user-setup-demo.html",
     "docs/reference/examples/consumer-repo/README.md",
@@ -3862,6 +3907,10 @@ Nunneri AI Assets are published as an AGPLv3 Community Edition with commercial l
 - Commercial license path: `COMMERCIAL_LICENSE.md`
 - Trademark policy: `TRADEMARKS.md`
 - Maintainers and originators: `MAINTAINERS.md`
+- Security reporting: `SECURITY.md`
+- Governance: `GOVERNANCE.md`
+- Roadmap: `ROADMAP.md`
+- Citation metadata: `CITATION.cff`
 
 Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com` as the temporary fallback until Nunneri domain email is active.
 
@@ -3870,6 +3919,7 @@ Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com`
 - `ARCHITECTURE.md` documents the product and engineering architecture.
 - `DEFENSIVE_PUBLICATION.md` documents the runtime-neutral control plane for defensive-publication and public-disclosure purposes.
 - `NUNNERI_RUNTIME_CONTRACT.md` documents the neutral runtime contract and adapter mapping rules.
+- `SECURITY.md`, `GOVERNANCE.md`, `ROADMAP.md`, and `CITATION.cff` document the trust, stewardship, release, and citation layer.
 
 Do not use "patent pending" language unless a provisional or nonprovisional patent application has actually been filed.
 
@@ -3971,6 +4021,10 @@ Nunneri is distributed as an AGPLv3 Community Edition. Commercial licensing is a
 - Commercial licensing: see `COMMERCIAL_LICENSE.md`.
 - Trademark and brand usage: see `TRADEMARKS.md`.
 - Maintainers and originators: see `MAINTAINERS.md`.
+- Governance: see `GOVERNANCE.md`.
+- Security reporting: see `SECURITY.md`.
+- Roadmap: see `ROADMAP.md`.
+- Citation metadata: see `CITATION.cff`.
 
 Commercial contact: `core@nunneri.com` (`yamini.sk@suranku.com` is the temporary fallback until Nunneri domain email is active).
 
@@ -3981,6 +4035,7 @@ Nunneri publishes implementation-level architecture and defensive-publication ma
 - Architecture reference: `ARCHITECTURE.md`
 - Defensive publication: `DEFENSIVE_PUBLICATION.md`
 - Runtime contract details: `NUNNERI_RUNTIME_CONTRACT.md`
+- Citation and archival metadata: `CITATION.cff`
 
 The defensive publication documents the architecture for public-disclosure purposes. Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
 
@@ -4143,6 +4198,13 @@ git push origin v0.1.0
 ```
 
 See `RELEASE.md` for the full branch strategy and release checklist.
+
+## Project Trust and Governance
+
+- Security reports are handled privately through `SECURITY.md`.
+- Project decisions, sensitive-change rules, and runtime contract stewardship are documented in `GOVERNANCE.md`.
+- Near-term Community Edition priorities and commercial/enterprise options are documented in `ROADMAP.md`.
+- Cite public releases using `CITATION.cff`; optionally archive GitHub releases with Zenodo for a DOI.
 
 ## Command Reference
 
@@ -4480,6 +4542,7 @@ Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Cor
 - runtime adapters: LangGraph, CrewAI, AutoGen, and Semantic Kernel exports
 - `api/`: FastAPI server, provider routing, RBAC checks, run persistence, and graph execution
 - Graph Studio: browser UI for workflow phases, approvals, traces, outputs, and reruns
+- trust layer: `SECURITY.md`, `GOVERNANCE.md`, `ROADMAP.md`, `CITATION.cff`, release evidence, defensive publication, licensing, and trademark records
 
 ## Runtime-Neutral Flow
 
@@ -4492,6 +4555,14 @@ Nunneri scopes execution through organization -> team -> project -> thread -> ru
 ## Graph Studio
 
 Graph Studio consumes the same runtime contract as the API server. It presents technical nodes as workflow phases and binds phase output, approval cards, errors, and final summaries to persisted run records.
+
+## Trust, Governance, and Release Evidence
+
+Nunneri treats project trust artifacts as part of the architecture, not detached paperwork.
+
+The trust layer includes `SECURITY.md` for vulnerability reporting, `GOVERNANCE.md` for decision authority and runtime contract stewardship, `ROADMAP.md` for Community Edition and commercial/enterprise priorities, `CITATION.cff` for public release citation metadata, `DEFENSIVE_PUBLICATION.md` for implementation-level public disclosure, and license/trademark/notice/CLA documents for ownership and contribution boundaries.
+
+Release packaging and release readiness checks require these documents, sync them into `docs/reference/`, and include them in generated release archives.
 
 ## Object Storage Guidance
 
@@ -4570,6 +4641,75 @@ Preferred contact: `core@nunneri.com`
 
 Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`
 """)
+    write("SECURITY.md", """# Security Policy
+
+Nunneri is public source under the AGPLv3 Community Edition with commercial licensing available. Security reports should be handled privately before public disclosure.
+
+## Reporting a Vulnerability
+
+Email `core@nunneri.com` with the subject `Nunneri Security Report`.
+
+Temporary fallback until Nunneri domain email is active: `yamini.sk@suranku.com`.
+
+Include the affected version or commit, affected component, reproduction steps, expected and actual impact, and any safe private proof-of-concept details.
+
+Do not open a public GitHub issue for a suspected vulnerability until the Nunneri Core Team has reviewed it.
+
+## Security Scope
+
+In scope: authentication and authorization bypass, multi-tenant isolation failures, approval-gate bypass, provider key leakage, thread or run state leakage, unsafe installer behavior, and release validation bypass.
+
+Never commit `.env`, API keys, OIDC client secrets, LangSmith keys, cloud credentials, or local database credentials.
+""")
+    write("GOVERNANCE.md", """# Governance
+
+Nunneri was originated by Suranku and Yamini and is stewarded by the Nunneri Core Team.
+
+This document defines how the public project makes decisions while preserving the AGPLv3 Community Edition plus commercial licensing model.
+
+## Runtime Contract Stewardship
+
+The neutral Nunneri Runtime Contract is the project control plane. Runtime adapters must consume the neutral contract rather than provider-specific files.
+
+Sensitive changes require Nunneri Core Team review: license, commercial-license, CLA, notice, ownership text, trademark usage, security policy, release process, defensive publication, architecture, runtime contract compatibility, authentication, RBAC, tenant isolation, approval gates, and provider key handling.
+
+## Community and Commercial Boundaries
+
+The public repository is the AGPLv3 Community Edition. Commercial licensing is available for organizations that need closed-source, embedded, proprietary, SaaS, OEM, managed-service, indemnity, or enterprise procurement terms.
+""")
+    write("ROADMAP.md", """# Roadmap
+
+Nunneri is focused on a provider- and runtime-neutral control plane for agentic workflows.
+
+## Community Edition Priorities
+
+- improve Graph Studio run inspection and per-stage output quality
+- strengthen human approval UX for pending, approved, rejected, cancelled, and completed runs
+- improve provider-key model routing and local development auth
+- expand runtime contract validation and adapter smoke tests
+- keep MinIO and other object storage optional through S3-compatible adapters
+
+## Commercial and Enterprise Options
+
+Commercial licensing is available for teams that need proprietary usage or enterprise terms. Potential commercial-facing work may include enterprise support, deployment hardening, managed-service packaging, indemnity, private adapter support, identity integrations, and compliance reporting.
+""")
+    write("CITATION.cff", """cff-version: 1.2.0
+message: "If you use Nunneri in research, publications, demos, or derivative systems, please cite the public repository and release."
+title: "Nunneri Public Agentic AI"
+version: "0.1.0"
+date-released: "2026-07-01"
+repository-code: "https://github.com/suranku/nunneri-public-agentic-ai"
+url: "https://github.com/suranku/nunneri-public-agentic-ai/releases/tag/v0.1.0"
+license: "AGPL-3.0-only"
+abstract: "Nunneri is a provider- and runtime-neutral control plane for agentic AI assets, runtime contracts, human-blocking approval gates, durable run state, and multi-tenant Graph Studio execution."
+authors:
+  - name: "Suranku"
+  - name: "Yamini"
+keywords:
+  - "agentic-ai"
+  - "runtime-contract"
+  - "human-in-the-loop"
+""")
     write("NOTICE.md", """# Notices
 
 Nunneri AI Assets
@@ -4621,8 +4761,14 @@ All notable changes to this project are documented here.
 /COMMERCIAL_LICENSE.md @Yamini-Suranku @suranku
 /TRADEMARKS.md @Yamini-Suranku @suranku
 /MAINTAINERS.md @Yamini-Suranku @suranku
+/GOVERNANCE.md @Yamini-Suranku @suranku
+/SECURITY.md @Yamini-Suranku @suranku
+/ROADMAP.md @Yamini-Suranku @suranku
+/CITATION.cff @Yamini-Suranku @suranku
 /NOTICE.md @Yamini-Suranku @suranku
 /CONTRIBUTOR_LICENSE_AGREEMENT.md @Yamini-Suranku @suranku
+/ARCHITECTURE.md @Yamini-Suranku @suranku
+/DEFENSIVE_PUBLICATION.md @Yamini-Suranku @suranku
 /docs/index.html @Yamini-Suranku @suranku
 /RELEASE.md @Yamini-Suranku @suranku
 /.github/PULL_REQUEST_TEMPLATE.md @Yamini-Suranku @suranku

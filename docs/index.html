@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nunneri — Responsible AI for Everyone</title>
+  <title>Nunneri - Runtime-Neutral Agentic AI Control Plane</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:#0a0e1a; --bg2:#111827; --border:#1e2d45; --cyan:#22d3ee;
-      --green:#10b981; --orange:#f59e0b; --purple:#8b5cf6; --text:#e2e8f0; --muted:#64748b;
+      --green:#10b981; --orange:#f59e0b; --purple:#8b5cf6; --amber:#f59e0b; --text:#e2e8f0; --muted:#64748b;
     }
     * { box-sizing:border-box; }
     body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
@@ -19,10 +19,10 @@
     main { max-width:1180px; margin:0 auto; padding:84px 20px 44px; }
     section { padding:52px 0; border-top:1px solid var(--border); }
     section:first-child { border-top:none; }
-    h1 { font-size:clamp(42px,7vw,82px); line-height:1.04; margin:0 0 20px; letter-spacing:-.5px; }
-    h2 { font-size:30px; margin:0 0 14px; }
-    h3 { font-size:17px; margin:0 0 8px; }
-    p { color:var(--muted); line-height:1.7; margin:0 0 12px; }
+    h1 { font-size:clamp(42px,7vw,82px); line-height:1.04; margin:0 0 20px; letter-spacing:-.5px; overflow-wrap:break-word; }
+    h2 { font-size:30px; margin:0 0 14px; overflow-wrap:break-word; }
+    h3 { font-size:17px; margin:0 0 8px; overflow-wrap:break-word; }
+    p { color:var(--muted); line-height:1.7; margin:0 0 12px; overflow-wrap:break-word; }
     a { color:var(--cyan); }
     code { background:#070b14; border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:.92em; color:var(--text); }
     pre { background:#070b14; border:1px solid var(--border); border-radius:8px; padding:18px; overflow:auto; font-size:13px; line-height:1.65; color:var(--text); }
@@ -30,12 +30,28 @@
     .hero-top { display:grid; grid-template-columns:1fr 256px; gap:36px; align-items:center; margin-bottom:40px; }
     .hero-text { /* width set by hero-top grid */ }
     #stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .arch-wrap { position:relative; width:100vw; margin-left:calc(-50vw + 50%); aspect-ratio:1240/1000; overflow:hidden; border-radius:0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#07090c; }
-    .arch-wrap iframe { position:absolute; top:0; left:0; width:1240px; height:1000px; border:none; transform-origin:top left; }
+    .arch-band { width:100vw; margin-left:calc(-50vw + 50%); border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#07090c; padding:34px max(20px,calc((100vw - 1180px) / 2)); overflow:hidden; }
+    .arch-head { display:flex; align-items:flex-end; justify-content:space-between; gap:22px; margin-bottom:24px; }
+    .arch-head p { max-width:680px; }
+    .arch-stage { display:grid; grid-template-columns:1fr 1.1fr 1fr; gap:18px; position:relative; }
+    .arch-column { display:flex; flex-direction:column; gap:12px; min-width:0; }
+    .arch-column-title { font-size:11px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; margin-bottom:2px; }
+    .arch-node { border:1px solid var(--border); background:#0d1424; border-radius:8px; padding:14px; position:relative; min-height:78px; }
+    .arch-node strong { display:block; color:var(--text); font-size:14px; margin-bottom:6px; }
+    .arch-node span { display:block; color:var(--muted); font-size:12px; line-height:1.45; }
+    .arch-node.core { border-color:#22d3ee66; background:#071827; box-shadow:0 0 0 1px #22d3ee18,0 20px 50px #22d3ee0d; }
+    .arch-node.gate { border-color:#f59e0b66; background:#191307; }
+    .arch-node.trust { border-color:#10b98155; background:#081912; }
+    .arch-arrow { display:flex; align-items:center; justify-content:center; color:var(--cyan); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:22px; min-height:78px; position:relative; }
+    .arch-arrow::after { content:""; width:8px; height:8px; border-radius:999px; background:var(--cyan); box-shadow:0 0 14px var(--cyan); animation:pulseFlow 2.4s ease-in-out infinite; position:absolute; }
+    .arch-lane { display:grid; grid-template-columns:1fr 40px 1fr 40px 1fr; gap:8px; margin:20px 0; align-items:stretch; }
+    .arch-trust-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:18px; }
+    .trust-pill { border:1px solid #10b98144; background:#081912; border-radius:8px; padding:12px; color:var(--text); font-size:13px; }
     .badge-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
     .badge { display:inline-block; border:1px solid var(--border); border-radius:999px; padding:4px 12px; color:var(--muted); font-size:12px; }
     .badge.cyan { border-color:#22d3ee44; color:var(--cyan); }
     .badge.orange { border-color:#f59e0b44; color:var(--orange); }
+    .badge.green { border-color:#10b98144; color:var(--green); }
     .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
     .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
     .card { border:1px solid var(--border); background:var(--bg2); border-radius:10px; padding:22px; }
@@ -49,8 +65,19 @@
     .check-list.dim li::before { content:"◦"; color:var(--muted); }
     .step-num { width:34px; height:34px; border-radius:50%; background:#0d1a2e; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:14px; font-weight:700; flex-shrink:0; margin-bottom:12px; }
     footer { border-top:1px solid var(--border); padding:28px 20px; text-align:center; color:var(--muted); font-size:13px; }
-    @media (max-width:760px) {
+    @keyframes pulseFlow {
+      0%, 100% { transform:scale(.65); opacity:.35; }
+      50% { transform:scale(1); opacity:1; }
+    }
+    @media (max-width:900px) {
       .grid-2 { grid-template-columns:1fr; }
+      .hero-top { grid-template-columns:1fr; }
+      .hero-top > *, .hero-text, .arch-band, .arch-band * { min-width:0; }
+      #stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .arch-band { width:100vw; margin-left:calc(-1 * 16px); padding:34px 16px; }
+      .arch-head { display:block; }
+      .arch-stage, .arch-lane { grid-template-columns:1fr; }
+      .arch-arrow { min-height:28px; transform:rotate(90deg); }
       main { padding-left:16px; padding-right:16px; }
     }
   </style>
@@ -69,6 +96,7 @@
     <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:18px;color:#f4f7fa;letter-spacing:-.01em">nunneri</span>
   </a>
   <a href="#community-edition">Community Edition</a>
+  <a href="#why-different">Why Different</a>
   <a href="#licensing">Commercial Licensing</a>
   <a href="#publication">Publication</a>
   <a href="#mission">Mission</a>
@@ -84,13 +112,17 @@
     <div class="hero-text">
       <div class="badge-row">
         <span class="badge cyan">AGPLv3 Community Edition</span>
-        <span class="badge">Self-Hostable</span>
         <span class="badge">Commercial License Available</span>
+        <span class="badge green">Security Policy</span>
+        <span class="badge green">Governance</span>
+        <span class="badge">Roadmap</span>
+        <span class="badge">Citation</span>
+        <span class="badge orange">Defensive Publication</span>
       </div>
       <h1>Responsible AI<br>for everyone.</h1>
       <p style="font-size:16px;margin-bottom:28px">
-        Enterprise-grade agentic workflows — public source, self-hostable, auditable.
-        Start with the AGPLv3 Community Edition. Use a commercial license when your organization needs proprietary terms.
+        Nunneri is a runtime-neutral agentic AI control plane: canonical assets compile into provider adapters,
+        runtime contracts, human-blocking gates, durable state, and Graph Studio execution.
       </p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
         <a href="#community-edition"
@@ -108,13 +140,83 @@
     </div>
     <div id="stats"></div>
   </div>
-  <div class="arch-wrap">
-    <iframe
-      src="reference/Nunneri%20Architecture.html"
-      scrolling="no"
-      title="Nunneri Architecture"
-      loading="lazy">
-    </iframe>
+  <div class="arch-band" aria-label="Nunneri architecture">
+    <div class="arch-head">
+      <div>
+        <span class="badge cyan">Runtime-neutral architecture</span>
+        <h2 style="margin-top:14px">One contract. Many providers. Many runtimes.</h2>
+      </div>
+      <p>Nunneri keeps prompts, workflows, approvals, tenant policy, and run evidence in one neutral control plane, then projects that contract into assistants, runtimes, and Graph Studio.</p>
+    </div>
+
+    <div class="arch-lane">
+      <div class="arch-node">
+        <strong>Canonical assets</strong>
+        <span>Agents, skills, commands, workflows, and repo context under <code>assets/</code>.</span>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node core">
+        <strong>Nunneri Runtime Contract</strong>
+        <span>Generated neutral JSON for phases, edges, approvals, context, and observability hints.</span>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <strong>Execution surfaces</strong>
+        <span>Provider files, runtime exports, API graph definitions, and Graph Studio metadata.</span>
+      </div>
+    </div>
+
+    <div class="arch-stage">
+      <div class="arch-column">
+        <div class="arch-column-title">Providers</div>
+        <div class="arch-node"><strong>Claude Code</strong><span><code>CLAUDE.md</code> and <code>.claude/</code> assets.</span></div>
+        <div class="arch-node"><strong>Codex</strong><span><code>AGENTS.md</code> and <code>.codex/</code> assets.</span></div>
+        <div class="arch-node"><strong>Gemini + open source</strong><span><code>GEMINI.md</code>, portable prompts, and manifests.</span></div>
+      </div>
+      <div class="arch-column">
+        <div class="arch-column-title">Runtime and state</div>
+        <div class="arch-node core"><strong>LangGraph, CrewAI, AutoGen, Semantic Kernel</strong><span>Runtime adapters consume the neutral contract rather than provider-specific files.</span></div>
+        <div class="arch-node gate"><strong>Human-blocking gates</strong><span><code>gate_waiting</code>, approve/reject resume, and rejection cancellation before downstream work.</span></div>
+        <div class="arch-node"><strong>PostgreSQL-backed state</strong><span>Organizations, teams, projects, threads, runs, node outputs, approvals, errors, and final summaries.</span></div>
+      </div>
+      <div class="arch-column">
+        <div class="arch-column-title">Operations</div>
+        <div class="arch-node"><strong>FastAPI + provider routing</strong><span>Model prefixes route to Ollama, Gemini, Claude, or OpenAI without changing workflows.</span></div>
+        <div class="arch-node"><strong>Nunneri Graph Studio</strong><span>Workflow phase config, traces, approvals, per-stage output, reruns, and cancellation.</span></div>
+        <div class="arch-node trust"><strong>RBAC and trust layer</strong><span>OIDC/local token auth, tenant-scoped permissions, security policy, governance, roadmap, citation, releases.</span></div>
+      </div>
+    </div>
+
+    <div class="arch-trust-row">
+      <div class="trust-pill">Object storage is optional; MinIO is never required core infrastructure.</div>
+      <div class="trust-pill">AGPLv3 Community Edition with commercial licensing available.</div>
+      <div class="trust-pill">Architecture and defensive publication are public-disclosure records.</div>
+      <div class="trust-pill">Generated release artifacts keep docs, contracts, and adapters aligned.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why Different ─────────────────────────────────────────────────────── -->
+<section id="why-different">
+  <h2>Why Nunneri is different</h2>
+  <p class="section-lede">Nunneri is not a single assistant prompt pack or a single orchestration framework. It is a neutral control plane that keeps intent, runtime behavior, approval rules, and evidence aligned across providers and runtimes.</p>
+  <div class="grid">
+    <div class="card" data-reveal>
+      <h3>Neutral source of truth</h3>
+      <p>Canonical assets generate provider files, open-source manifests, runtime exports, and Graph Studio metadata from the same contract.</p>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Human gates are real control flow</h3>
+      <p>Approval phases pause execution and resume only through explicit approve or reject actions. Rejection cancels downstream implementation work.</p>
+    </div>
+    <div class="card" data-reveal>
+      <h3>State outside the model</h3>
+      <p>Threads, runs, node outputs, approval decisions, errors, timing, and final summaries are persisted outside the LLM context window.</p>
+    </div>
+    <div class="card" data-reveal>
+      <h3>Tenant-aware execution</h3>
+      <p>RBAC scopes dispatch, run history, phase configuration, and approvals across organization, team, project, thread, and run boundaries.</p>
+    </div>
   </div>
 </section>
 
@@ -392,18 +494,6 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
 }, {threshold:0.12});
 document.querySelectorAll("[data-reveal]").forEach(el => obs.observe(el));
-
-function scaleArch() {
-  const wrap = document.querySelector('.arch-wrap');
-  if (!wrap) return;
-  const frame = wrap.querySelector('iframe');
-  if (!frame) return;
-  const s = wrap.offsetWidth / 1240;
-  frame.style.transform = 'scale(' + s + ')';
-  frame.style.height = Math.ceil(wrap.offsetHeight / s) + 'px';
-}
-window.addEventListener('resize', scaleArch);
-scaleArch();
 
 fetch("assets/manifest.json").then(r => r.json()).then(render).catch(() => render(fallback));
 </script>

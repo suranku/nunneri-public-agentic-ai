@@ -33,6 +33,11 @@ api/
         v
 Graph Studio
   browser UI for workflow phases, approvals, traces, outputs, reruns
+        |
+        v
+trust layer
+  security policy, governance, roadmap, citation, release evidence,
+  defensive publication, licensing, and trademark records
 ```
 
 ## Canonical Assets
@@ -114,6 +119,21 @@ It supports:
 - rerunning as a new thread
 - inspecting per-phase outputs and final summaries
 - saving project-specific node configuration overrides
+
+## Trust, Governance, and Release Evidence
+
+Nunneri treats project trust artifacts as part of the architecture, not as detached paperwork.
+
+The trust layer includes:
+
+- `SECURITY.md` for private vulnerability reporting, provider-key handling expectations, and supported-version guidance
+- `GOVERNANCE.md` for decision authority, sensitive-change review, runtime contract stewardship, and community/commercial boundaries
+- `ROADMAP.md` for Community Edition priorities, commercial and enterprise options, and intentionally deferred work
+- `CITATION.cff` for repository and release citation metadata
+- `DEFENSIVE_PUBLICATION.md` for implementation-level public disclosure of the runtime-neutral control plane
+- `COMMERCIAL_LICENSE.md`, `TRADEMARKS.md`, `NOTICE.md`, `MAINTAINERS.md`, and the contributor license agreement for ownership, licensing, and contribution boundaries
+
+Release packaging and release readiness checks require these documents, sync them into `docs/reference/`, and include them in generated release archives. This makes public project posture, legal posture, release evidence, and implementation architecture travel together.
 
 ## Human Approval Flow
 
