@@ -21,7 +21,7 @@ JIRA_PREFIX = "NUN"
 VERSION = "0.1.0"
 RELEASE_OWNER = "yamini.sk@suranku.com"
 DEFAULT_BRANCH = "main"
-COMPANION_REPO = "Not configured"
+COMPANION_REPO = "https://github.com/suranku/nunneri-public-agentic-ai"
 
 
 def write(path: str, content: str, executable: bool = False) -> None:

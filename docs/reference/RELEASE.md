@@ -52,7 +52,7 @@ Claude, Codex, Gemini, open-source, and LangGraph outputs must build from the sa
 2. Cut `release/vX.Y.Z` from `main`.
 3. Update `VERSION` and `CHANGELOG.md`.
 4. Run validation, adapter builds, docs sync, consumer install checks, and package checks.
-5. Confirm `ARCHITECTURE.md`, `DEFENSIVE_PUBLICATION.md`, `LICENSE`, `COMMERCIAL_LICENSE.md`, `TRADEMARKS.md`, `MAINTAINERS.md`, `NOTICE.md`, and `CONTRIBUTOR_LICENSE_AGREEMENT.md` are present and synced to reference docs.
+5. Confirm `ARCHITECTURE.md`, `DEFENSIVE_PUBLICATION.md`, `LICENSE`, `COMMERCIAL_LICENSE.md`, `TRADEMARKS.md`, `MAINTAINERS.md`, `GOVERNANCE.md`, `SECURITY.md`, `ROADMAP.md`, `CITATION.cff`, `NOTICE.md`, and `CONTRIBUTOR_LICENSE_AGREEMENT.md` are present and synced to reference docs.
 6. Create a release PR from `release/vX.Y.Z` back to `main`.
 7. After approval, tag the release branch with `vX.Y.Z`.
 8. Push the release branch and tag.
@@ -82,6 +82,8 @@ python3 scripts/package_release.py
 python3 scripts/check_release_package.py
 python3 scripts/check_release_ready.py --local-only
 ```
+
+Optional archival step after the GitHub prerelease is published: archive the release with Zenodo or another durable archive and update `CITATION.cff` with the DOI in the next patch release.
 
 After review and approval:
 

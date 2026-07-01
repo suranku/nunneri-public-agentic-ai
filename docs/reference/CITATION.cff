@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use Nunneri in research, publications, demos, or derivative systems, please cite the public repository and release."
+title: "Nunneri Public Agentic AI"
+version: "0.1.0"
+date-released: "2026-07-01"
+repository-code: "https://github.com/suranku/nunneri-public-agentic-ai"
+url: "https://github.com/suranku/nunneri-public-agentic-ai/releases/tag/v0.1.0"
+license: "AGPL-3.0-only"
+abstract: "Nunneri is a provider- and runtime-neutral control plane for agentic AI assets, runtime contracts, human-blocking approval gates, durable run state, and multi-tenant Graph Studio execution."
+authors:
+  - name: "Suranku"
+  - name: "Yamini"
+keywords:
+  - "agentic-ai"
+  - "runtime-contract"
+  - "langgraph"
+  - "human-in-the-loop"
+  - "rbac"
+  - "defensive-publication"

@@ -22,6 +22,10 @@ Contact `core@nunneri.com` for commercial licensing. Use `yamini.sk@suranku.com`
 - `ARCHITECTURE.md` documents the product and engineering architecture.
 - `DEFENSIVE_PUBLICATION.md` documents the runtime-neutral control plane for defensive-publication and public-disclosure purposes.
 - `NUNNERI_RUNTIME_CONTRACT.md` documents the neutral runtime contract and adapter mapping rules.
+- `SECURITY.md` documents private security reporting and supported-version expectations.
+- `GOVERNANCE.md` documents sensitive-change review, runtime contract stewardship, and project decision rules.
+- `ROADMAP.md` documents Community Edition priorities and commercial/enterprise options.
+- `CITATION.cff` provides repository citation metadata for public releases.
 
 Do not use "patent pending" language unless a provisional or nonprovisional patent application has actually been filed.
 

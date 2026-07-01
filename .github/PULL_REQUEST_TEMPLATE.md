@@ -30,7 +30,13 @@ Fixes #
 - [ ] No license, commercial-use, ownership, or trademark impact
 - [ ] Changes licensing or commercial-use language
 - [ ] Changes trademark, brand, logo, or ownership language
-- [ ] Changes homepage, release, or generated-reference docs that mention license/commercial terms
+- [ ] Changes homepage, release, governance, security, roadmap, citation, or generated-reference docs that mention license/commercial terms
+
+## Security and Governance Impact
+
+- [ ] No security, auth, RBAC, tenant isolation, provider-key, approval-gate, or governance impact
+- [ ] Changes security-sensitive runtime behavior
+- [ ] Changes `SECURITY.md`, `GOVERNANCE.md`, `ROADMAP.md`, `CITATION.cff`, `ARCHITECTURE.md`, or `DEFENSIVE_PUBLICATION.md`
 
 ## Contributor License Agreement
 
@@ -42,6 +48,7 @@ Fixes #
 python3 scripts/validate.py
 python3 scripts/build_adapters.py
 python3 scripts/build_portal_manifest.py
+python3 scripts/check_release_ready.py --local-only
 ```
 
 ## Screenshots

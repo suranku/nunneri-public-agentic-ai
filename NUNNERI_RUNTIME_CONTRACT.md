@@ -4,7 +4,7 @@ The Nunneri Runtime Contract is the provider- and framework-neutral export layer
 
 Authors edit `assets/`. The build step generates `dist/nunneri-runtime/` first, then derives runtime-specific exports for LangGraph, CrewAI, Microsoft AutoGen, and Microsoft Semantic Kernel.
 
-For the broader system architecture and public-disclosure record, see `ARCHITECTURE.md` and `DEFENSIVE_PUBLICATION.md`.
+For the broader system architecture, public-disclosure record, governance, roadmap, and citation metadata, see `ARCHITECTURE.md`, `DEFENSIVE_PUBLICATION.md`, `GOVERNANCE.md`, `ROADMAP.md`, and `CITATION.cff`.
 
 Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
 

@@ -12,6 +12,10 @@ Nunneri is distributed as an AGPLv3 Community Edition. Commercial licensing is a
 - Commercial licensing: see `COMMERCIAL_LICENSE.md`.
 - Trademark and brand usage: see `TRADEMARKS.md`.
 - Maintainers and originators: see `MAINTAINERS.md`.
+- Governance: see `GOVERNANCE.md`.
+- Security reporting: see `SECURITY.md`.
+- Roadmap: see `ROADMAP.md`.
+- Citation metadata: see `CITATION.cff`.
 
 Commercial contact: `core@nunneri.com` (`yamini.sk@suranku.com` is the temporary fallback until Nunneri domain email is active).
 
@@ -22,6 +26,7 @@ Nunneri publishes implementation-level architecture and defensive-publication ma
 - Architecture reference: `ARCHITECTURE.md`
 - Defensive publication: `DEFENSIVE_PUBLICATION.md`
 - Runtime contract details: `NUNNERI_RUNTIME_CONTRACT.md`
+- Citation and archival metadata: `CITATION.cff`
 
 The defensive publication documents the architecture for public-disclosure purposes. Do not describe Nunneri as "patent pending" unless a provisional or nonprovisional patent application has actually been filed.
 
@@ -184,6 +189,13 @@ git push origin v0.1.0
 ```
 
 See `RELEASE.md` for the full branch strategy and release checklist.
+
+## Project Trust and Governance
+
+- Security reports are handled privately through `SECURITY.md`.
+- Project decisions, sensitive-change rules, and runtime contract stewardship are documented in `GOVERNANCE.md`.
+- Near-term Community Edition priorities and commercial/enterprise options are documented in `ROADMAP.md`.
+- Cite public releases using `CITATION.cff`; optionally archive GitHub releases with Zenodo for a DOI.
 
 ## Command Reference
 
