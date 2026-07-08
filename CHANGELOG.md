@@ -7,14 +7,24 @@ All notable changes to this project are documented here.
 ### Added
 
 - Security, governance, roadmap, and citation metadata for public project trust.
+- Multi-provider LLM dispatch (`llm_providers.py`) with Gemini, Claude, and OpenAI support alongside Ollama; model prefix routing (`gemini:`, `claude:`, `openai:`, or unprefixed for Ollama).
+- `GET /models` API endpoint listing all configured and unconfigured providers with live Ollama model enumeration.
+- All 10 interactive demo guides now linked from the portal Guides section.
 
 ### Changed
+
+- Portal architecture section replaced iframe-embedded animation with an inline CSS/HTML architecture diagram.
+- Portal repositioned to OSS-only (Community Edition + commercial licensing); managed SaaS offering section removed.
+- Nunneri Graph Studio branding applied throughout portal and guides (was "Graph Studio").
+- GitHub Actions CI upgraded from `actions/checkout@v4` (Node.js 20) to `actions/checkout@v5` (Node.js 24).
 
 ### Fixed
 
 ### Deprecated
 
 ### Removed
+
+- Bundled architecture animation files (`docs/reference/Nunneri Architecture.html`, `Architecture design with animation/`) replaced by inline diagram.
 
 ### Security
 
